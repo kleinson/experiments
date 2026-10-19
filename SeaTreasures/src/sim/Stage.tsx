@@ -624,16 +624,6 @@ export default function Stage({
     }
     rebuild()
     request()
-    if (import.meta.env.DEV)
-      (window as unknown as { __sim?: unknown }).__sim = {
-        camera,
-        controls,
-        scene,
-        get built() {
-          return built
-        },
-      }
-
     return () => {
       disposed = true
       cancelAnimationFrame(frameId)
