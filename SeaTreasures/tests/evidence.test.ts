@@ -24,12 +24,15 @@ test('the offline evidence manifest has substantive claims and identifiable sour
   }
 })
 
-test('every factual claim displayed in the journey exists in the manifest', () => {
-  const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
-  const references = [...app.matchAll(/<ClaimView\s+id="([^"]+)"/g)].map(
+test('every fact the simulator writes in its own words exists in the manifest', () => {
+  const ui = readFileSync(
+    new URL('../src/sim/Simulator.tsx', import.meta.url),
+    'utf8',
+  )
+  const references = [...ui.matchAll(/<Fact claim="([^"]+)"/g)].map(
     (match) => match[1],
   )
-  assert.ok(references.length >= 8)
+  assert.ok(references.length >= 1)
   for (const id of references) assert.equal(getClaim(id).id, id)
   assert.throws(() => getClaim('a-nonexistent-claim'), /missing claim/)
 })

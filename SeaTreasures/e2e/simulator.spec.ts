@@ -1,0 +1,306 @@
+import { expect, test } from '@playwright/test'
+import type { Page } from '@playwright/test'
+
+const species = [
+  ['tiger-cowrie', 'Tiger cowrie'],
+  ['money-cowrie', 'Money cowrie'],
+  ['textile-cone', 'Textile cone'],
+  ['queen-conch', 'Queen conch'],
+  ['chambered-nautilus', 'Chambered nautilus'],
+] as const
+
+const phase = (page: Page, name: string) =>
+  page.locator('.phase-ticks button', { hasText: name }).click()
+const announced = (page: Page) => page.locator('.sim > [role="status"]')
+
+/** Fraction of the stage's pixels that differ clearly from its corner: something is drawn. */
+async function drawn(page: Page) {
+  const png = (await page.locator('[data-sim-canvas]').screenshot()).toString(
+    'base64',
+  )
+  return page.evaluate(async (data) => {
+    const image = new Image()
+    image.src = `data:image/png;base64,${data}`
+    await image.decode()
+    const canvas = document.createElement('canvas')
+    canvas.width = image.naturalWidth
+    canvas.height = image.naturalHeight
+    const context = canvas.getContext('2d')
+    if (!context) throw new Error('No 2D context.')
+    context.drawImage(image, 0, 0)
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data
+    let different = 0
+    for (let i = 0; i < pixels.length; i += 4) {
+      const delta =
+        Math.abs(pixels[i]! - pixels[0]!) +
+        Math.abs(pixels[i + 1]! - pixels[1]!) +
+        Math.abs(pixels[i + 2]! - pixels[2]!)
+      if (delta > 60) different++
+    }
+    return different / (pixels.length / 4)
+  }, png)
+}
+
+const mmOf = (label: string | null) =>
+  Number(label?.match(/(\d+(?:\.\d+)?)\s*mm/)?.[1])
+
+test.use({ reducedMotion: 'reduce' })
+
+test('every species can be chosen and is drawn with its sourced name', async ({
+  page,
+}) => {
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  await page.goto('./')
+  for (const [id, name] of species) {
+    await page.getByRole('button', { name: new RegExp(name) }).click()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(name)
+    await expect(page).toHaveURL(new RegExp(`species=${id}`))
+    await expect.poll(() => drawn(page)).toBeGreaterThan(0.02)
+    await expect(page.locator('#origin option').first()).toBeAttached()
+  }
+  expect(errors).toEqual([])
+})
+
+test('a whole life plays from egg to a shell in your hand', async ({
+  page,
+}) => {
+  await page.goto('./?species=textile-cone')
+  await phase(page, 'Egg')
+  await expect(page.locator('#phase-title')).toHaveText('Egg')
+  await page.getByRole('button', { name: 'Hatch them all' }).click()
+  await expect(page.locator('#phase-title')).toHaveText('Larva')
+  await expect(announced(page)).toContainText('All hatched')
+  await page.getByRole('button', { name: 'Let it settle' }).click()
+  await expect(page.locator('#phase-title')).toHaveText('Growing')
+  await page.getByRole('button', { name: 'Grow', exact: true }).click()
+  await expect(page.locator('#phase-title')).toHaveText('Adult', {
+    timeout: 20000,
+  })
+  await page.getByRole('button', { name: 'Poke it' }).click()
+  await expect(announced(page)).toContainText('pulls back into its shell')
+  await phase(page, 'Death')
+  await expect(page.locator('.choices input')).not.toHaveCount(0)
+  await phase(page, 'Empty shell')
+  await page.getByRole('button', { name: 'Call a hermit crab' }).click()
+  await expect(announced(page)).toContainText('hermit crab')
+  await phase(page, 'Beach')
+  await page.getByRole('button', { name: 'Send a wave' }).click()
+  await expect(announced(page)).toContainText('wave')
+  await phase(page, 'Found')
+  await page.getByRole('button', { name: 'Pick it up' }).click()
+  await expect(announced(page)).toContainText('added to your shelf')
+  const shelf = page.getByRole('list', { name: 'Your shelf' })
+  await expect(shelf.locator('li')).toHaveCount(1)
+  await page.reload()
+  await phase(page, 'Found')
+  await expect(shelf.locator('li')).toHaveCount(1)
+  await page
+    .getByRole('button', { name: 'Remove Textile cone from your shelf' })
+    .click()
+  await expect(shelf).toHaveCount(0)
+})
+
+test('tapping eggs on the stage hatches them one by one', async ({ page }) => {
+  await page.goto('./?species=chambered-nautilus')
+  await phase(page, 'Egg')
+  const box = await page.locator('[data-sim-canvas]').boundingBox()
+  if (!box) throw new Error('No stage.')
+  for (let x = 0.2; x <= 0.8; x += 0.05) {
+    await page.mouse.click(box.x + box.width * x, box.y + box.height * 0.6)
+    if ((await announced(page).textContent())?.match(/eggs left|All hatched/))
+      break
+  }
+  await expect(announced(page)).toContainText(/eggs left|All hatched/)
+})
+
+test('see through, cut open and take apart all change the drawing', async ({
+  page,
+}) => {
+  await page.goto('./?species=queen-conch')
+  await phase(page, 'Adult')
+  const canvas = page.locator('[data-sim-canvas]')
+  const plain = await canvas.screenshot()
+  const changed = () =>
+    expect
+      .poll(async () => (await canvas.screenshot()).equals(plain))
+      .toBe(false)
+  await page.getByRole('button', { name: 'X-ray' }).click()
+  await changed()
+  await page.getByRole('button', { name: 'X-ray' }).click()
+  await page.getByRole('button', { name: 'Cut open' }).click()
+  await changed()
+  await page.getByRole('button', { name: 'Cut open' }).click()
+  await page.getByRole('slider', { name: 'Take apart' }).fill('100')
+  await changed()
+  await phase(page, 'Egg')
+  await expect(page.getByRole('button', { name: 'X-ray' })).toBeDisabled()
+})
+
+test('actual size draws the shell at a millimetre scale and can be calibrated', async ({
+  page,
+}) => {
+  await page.goto('./?species=money-cowrie')
+  await page.getByRole('button', { name: 'Actual size' }).click()
+  await expect(page.locator('.view-badge')).toHaveText('Actual size · estimate')
+  const bar = page.locator('.scale-bar span')
+  const label = page.locator('.scale-bar')
+  const ratio = async () =>
+    Math.round(
+      ((await bar.boundingBox())!.width / mmOf(await label.textContent())) *
+        100,
+    ) / 100
+  expect(Math.abs((await ratio()) - 96 / 25.4)).toBeLessThan(0.05)
+  await page.getByRole('button', { name: 'Calibrate' }).click()
+  await page.getByRole('slider', { name: 'Card width on screen' }).fill('5')
+  await page.getByRole('button', { name: 'Use this size' }).click()
+  await expect(page.locator('.view-badge')).toHaveText('Actual size')
+  await expect.poll(ratio).toBe(5)
+  await page.reload()
+  await page.getByRole('button', { name: 'Actual size' }).click()
+  await expect(page.locator('.view-badge')).toHaveText('Actual size')
+})
+
+test('durations are sourced or plainly marked as not established', async ({
+  page,
+}) => {
+  await page.goto('./?species=queen-conch')
+  await expect(page.locator('.durations')).toContainText('21–30 days')
+  await expect(page.locator('.durations')).toContainText('25–30 years')
+  await page.getByRole('button', { name: /Money cowrie/ }).click()
+  await expect(page.locator('.durations')).toContainText('Not established')
+  await phase(page, 'Adult')
+  await expect(page.locator('.clock')).toContainText('not established')
+  const evidence = page.locator('.life-panel .fact details').first()
+  await evidence.locator('summary').click()
+  await expect(evidence.locator('a').first()).toHaveAttribute(
+    'href',
+    /^https:\/\//,
+  )
+})
+
+test('sources dialog opens, lists HTTPS sources and closes from the keyboard', async ({
+  page,
+}) => {
+  await page.goto('./')
+  await page.getByRole('button', { name: 'Sources' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Sources and uncertainty' })
+  await expect(dialog).toBeVisible()
+  await expect(dialog).toContainText('NOAA Fisheries')
+  await expect(dialog).toContainText('WoRMS')
+  const links = await dialog
+    .locator('a')
+    .evaluateAll((items) => items.map((item) => item.getAttribute('href')))
+  for (const href of links) expect(href).toMatch(/^https:\/\//)
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+})
+
+test('the stage turns from the keyboard and the timeline is keyboard operable', async ({
+  page,
+}) => {
+  await page.goto('./?species=tiger-cowrie')
+  const canvas = page.locator('[data-sim-canvas]')
+  await page.locator('.sim-stage').focus()
+  const before = await canvas.screenshot()
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  await expect
+    .poll(async () => (await canvas.screenshot()).equals(before))
+    .toBe(false)
+  await page.getByRole('slider', { name: 'Life timeline' }).focus()
+  await page.keyboard.press('Home')
+  await expect(page.locator('#phase-title')).toHaveText('Egg')
+  await page.keyboard.press('End')
+  await expect(page.locator('#phase-title')).toHaveText('Found')
+})
+
+test('light and dark appearance both keep text readable', async ({ page }) => {
+  for (const scheme of ['light', 'dark'] as const) {
+    await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' })
+    await page.goto(`./?scoutTheme=${scheme}`)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', scheme)
+    for (const selector of ['.life-panel h2', '.fact p', '.durations dt']) {
+      const ratio = await page
+        .locator(selector)
+        .first()
+        .evaluate((element) => {
+          const rgb = (value: string) =>
+            value
+              .match(/\d+(\.\d+)?/g)!
+              .slice(0, 3)
+              .map(Number)
+          const lum = (value: string) => {
+            const [r, g, b] = rgb(value).map((c) => {
+              const v = c / 255
+              return v <= 0.03928
+                ? v / 12.92
+                : Math.pow((v + 0.055) / 1.055, 2.4)
+            })
+            return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!
+          }
+          const fg = lum(getComputedStyle(element).color)
+          const bg = lum(getComputedStyle(document.body).backgroundColor)
+          return (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05)
+        })
+      expect(ratio, `${scheme} ${selector}`).toBeGreaterThan(4.5)
+    }
+  }
+})
+
+for (const width of [320, 390]) {
+  test(`the simulator fits a ${width} CSS pixel phone`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 })
+    await page.goto('./?species=queen-conch')
+    await expect(page.locator('[data-sim-canvas]')).toBeVisible()
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true)
+    await expect(page.locator('.action-button')).toBeVisible()
+  })
+}
+
+test('WebGL failure keeps the timeline, facts and sources working', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext
+    HTMLCanvasElement.prototype.getContext = function (
+      type: string,
+      ...args: unknown[]
+    ) {
+      if (type === 'webgl' || type === 'webgl2') return null
+      return Reflect.apply(original, this, [type, ...args])
+    }
+  })
+  await page.goto('./?species=queen-conch')
+  await expect(page.getByText(/3D is unavailable/)).toBeVisible()
+  await phase(page, 'Found')
+  await expect(page.locator('#phase-title')).toHaveText('Found')
+  await page.getByRole('button', { name: 'Sources' }).click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+})
+
+test('the production build works offline after its first visit', async ({
+  page,
+  context,
+}) => {
+  await page.goto('./')
+  await expect(page.getByText('Offline ready', { exact: true })).toBeVisible({
+    timeout: 15000,
+  })
+  await page.evaluate(() => navigator.serviceWorker.ready)
+  await context.setOffline(true)
+  try {
+    await page.reload()
+    await expect(page.locator('[data-sim-canvas]')).toBeVisible()
+    await page.getByRole('button', { name: /Chambered nautilus/ }).click()
+    await phase(page, 'Empty shell')
+    await page.getByRole('button', { name: 'Let it drift' }).click()
+    await expect(announced(page)).toContainText('float')
+  } finally {
+    if (!page.isClosed()) await context.setOffline(false)
+  }
+})

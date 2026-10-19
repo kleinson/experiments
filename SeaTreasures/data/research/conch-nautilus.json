@@ -1,0 +1,396 @@
+{
+  "sources": [
+    {
+      "id": "worms-aliger-gigas",
+      "title": "Aliger gigas (Linnaeus, 1758) (AphiaID 1429769)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=1429769",
+      "accessedAt": "2026-10-19",
+      "kind": "taxonomic",
+      "accessNote": "Verified via the WoRMS REST endpoint AphiaRecordsByName: Aliger gigas is accepted (AphiaID 1429769); Strombus gigas (AphiaID 458661) is a superseded combination pointing to it."
+    },
+    {
+      "id": "worms-nautilus-pompilius",
+      "title": "Nautilus pompilius Linnaeus, 1758 (AphiaID 216384)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=216384",
+      "accessedAt": "2026-10-19",
+      "kind": "taxonomic",
+      "accessNote": "Verified via the WoRMS REST endpoints AphiaRecordsByName (status accepted) and AphiaDistributionsByAphiaID/216384 (records include Madagascar, Chagos, Ambon and the Central Indo-Pacific)."
+    },
+    {
+      "id": "noaa-queen-conch",
+      "title": "Queen Conch",
+      "publisher": "NOAA Fisheries",
+      "url": "https://www.fisheries.noaa.gov/species/queen-conch",
+      "accessedAt": "2026-10-19",
+      "kind": "government",
+      "accessNote": "Species profile read directly: appearance, biology (age, maturity, spawning, egg incubation, larval period), range, habitat and Endangered Species Act status."
+    },
+    {
+      "id": "noaa-chambered-nautilus",
+      "title": "Chambered Nautilus",
+      "publisher": "NOAA Fisheries",
+      "url": "https://www.fisheries.noaa.gov/species/chambered-nautilus",
+      "accessedAt": "2026-10-19",
+      "kind": "government",
+      "accessNote": "Species profile read directly: appearance, behaviour and buoyancy, range, lifespan, maturity, egg incubation, predators, shell trade and Endangered Species Act status."
+    },
+    {
+      "id": "yacobucci-2018-postmortem",
+      "title": "Postmortem transport in fossil and modern shelled cephalopods",
+      "publisher": "PeerJ (Yacobucci, 2018)",
+      "url": "https://doi.org/10.7717/peerj.5909",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Open-access full text read via Europe PMC (PMC6266924). Combines buoyancy experiments with locality data for living nautilids and drift shells."
+    },
+    {
+      "id": "kubicka-2017-pierced-shells",
+      "title": "A systematic review of animal predation creating pierced shells: implications for the archaeological record of the Old World",
+      "publisher": "PeerJ (Kubicka, Rosin, Tryjanowski & Nelson, 2017)",
+      "url": "https://doi.org/10.7717/peerj.2903",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Open-access full text read via Europe PMC (PMC5244880): abstract, introduction on hole-boring predators, and discussion of abrasion experiments."
+    },
+    {
+      "id": "wikipedia-chambered-nautilus",
+      "title": "Chambered nautilus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Chambered_nautilus",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Article source read directly. The size figure is cited there to Pisor (2008), Registry of World Record Size Shells (ConchBooks), which was not read directly, so it is marked limited."
+    }
+  ],
+  "claims": [
+    {
+      "id": "queen-conch-taxonomy",
+      "text": "The queen conch is now named Aliger gigas (Linnaeus, 1758) in the World Register of Marine Species; the older name Strombus gigas is a superseded combination.",
+      "sourceIds": ["worms-aliger-gigas", "noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "WoRMS REST records read directly; NOAA's classification also lists genus Aliger, species gigas, family Strombidae."
+    },
+    {
+      "id": "queen-conch-size",
+      "text": "Queen conch grow up to about 12 inches (about 300 mm) long and up to about 5 pounds. Females on average grow faster and larger than males.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Stated directly by NOAA Fisheries. 12 inches converted to about 300 mm. NOAA gives a maximum, not a typical range."
+    },
+    {
+      "id": "queen-conch-appearance",
+      "text": "A large, heavy shell with short spines around the spire and a pink interior to the shell lip. The animal has long eye stalks that move independently, a brown, rough operculum, and a tube-like mouth (proboscis).",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's appearance section."
+    },
+    {
+      "id": "queen-conch-range-habitat",
+      "text": "Queen conch live throughout the Caribbean Sea, the Florida Keys and around Bermuda. Adults favour sandy algal flats, gravel, coral rubble and beach rock; juveniles live mostly in seagrass beds; they are most common in water less than about 30 m (100 ft) deep where unfished.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Range and habitat read directly from NOAA. 100 feet converted to about 30 m."
+    },
+    {
+      "id": "queen-conch-eggs",
+      "text": "After internal fertilisation, a female lays an egg mass over 24 to 36 hours containing on average 500,000 to 750,000 eggs, which hatch after about 5 days.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's biology section. Incubation is given as about 5 days."
+    },
+    {
+      "id": "queen-conch-larva",
+      "text": "The larvae drift in the water for 21 to 30 days, feeding on phytoplankton, before settling to the bottom and changing into the shelled form.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's biology section."
+    },
+    {
+      "id": "queen-conch-maturity",
+      "text": "Queen conch are thought to mature at around 3.5 to 4 years old. Once mature they stop growing in length: the shell lip only grows thicker.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "NOAA says conch are 'believed to reach sexual maturity around 3.5 to 4 years of age' and notes size at maturity varies with environment; hence moderate confidence. The flared, thickening lip is drawn from this."
+    },
+    {
+      "id": "queen-conch-lifespan",
+      "text": "Queen conch are long-lived, generally reaching 25 to 30 years old.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's biology section."
+    },
+    {
+      "id": "queen-conch-protection",
+      "text": "Queen conch are heavily fished for their meat, and in 2024 NOAA Fisheries listed them as threatened under the US Endangered Species Act. Check local rules before taking any conch shell, and never take a live animal.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Listing status read directly from NOAA. The advice to check local rules is a responsible-collecting inference, not a statement of any specific law."
+    },
+    {
+      "id": "nautilus-taxonomy",
+      "text": "The chambered nautilus, Nautilus pompilius Linnaeus, 1758, is a cephalopod: a relative of squid and octopus that keeps an external, coiled, chambered shell.",
+      "sourceIds": ["worms-nautilus-pompilius", "noaa-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "WoRMS status accepted; NOAA describes nautiluses as cephalopods related to squids and octopuses, set apart by their coiled shells."
+    },
+    {
+      "id": "nautilus-appearance",
+      "text": "Its coiled shell ranges from white to orange and even purple, with its own pattern of colour; more than 90 tentacles without suckers protrude from the opening.",
+      "sourceIds": ["noaa-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's appearance section. Adult shell length is not given in this source, so the simulator draws it at an illustrative size and says so."
+    },
+    {
+      "id": "nautilus-buoyancy",
+      "text": "The nautilus lives in the newest, largest chamber. It uses the older chambers and a tube running through them to control its buoyancy, and swims backwards by jet propulsion.",
+      "sourceIds": ["noaa-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "NOAA describes buoyancy control with the chambers and a tube running the length of the shell, and backwards jet propulsion. NOAA calls the tube a 'hyponome'; anatomical texts usually call the chamber tube the siphuncle and the jet funnel the hyponome, so the simulator says 'tube' rather than naming it."
+    },
+    {
+      "id": "nautilus-range",
+      "text": "Chambered nautilus live mainly in the western Pacific Ocean and coastal areas of the Indian Ocean, in small, isolated populations limited by depth and temperature.",
+      "sourceIds": ["noaa-chambered-nautilus", "worms-nautilus-pompilius"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Range read directly from NOAA; WoRMS distribution records include Madagascar, Chagos, Ambon and the Central Indo-Pacific. Depth values are not given in these sources."
+    },
+    {
+      "id": "nautilus-life-history",
+      "text": "Unlike other cephalopods, nautiluses live 15 to 20 years or more. They grow slowly, mature at around 10 to 15 years, and lay a small number of eggs that take at least a year to hatch.",
+      "sourceIds": ["noaa-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's lifespan and reproduction section. 'At least a year' is used as a minimum incubation of 365 days."
+    },
+    {
+      "id": "nautilus-predators",
+      "text": "Chambered nautilus have several predators, including sharks, bony fish and octopuses.",
+      "sourceIds": ["noaa-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's species overview."
+    },
+    {
+      "id": "nautilus-drift",
+      "text": "Chambered shells can float after the animal dies. Most nautilus species drift only a little, but Nautilus pompilius shells are found far from known living populations.",
+      "sourceIds": ["yacobucci-2018-postmortem"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "From the abstract of Yacobucci (2018), read in full text: drift shells of N. pompilius are found far from living populations, while most nautilid species show limited drift."
+    },
+    {
+      "id": "nautilus-protection",
+      "text": "Nautilus shells are the main reason the animals are fished: they are traded worldwide for souvenirs, jewellery and decor. In 2018 NOAA listed the chambered nautilus as threatened under the US Endangered Species Act. Avoid buying nautilus shells.",
+      "sourceIds": ["noaa-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Trade as the primary threat and the 2018 listing are read directly from NOAA. The advice not to buy shells is a conservation inference from that threat."
+    },
+    {
+      "id": "predator-drill-holes",
+      "text": "Predators such as moon snails (naticids), murex snails (muricids), octopuses, crabs and birds can leave holes in mollusc shells.",
+      "sourceIds": ["kubicka-2017-pierced-shells"],
+      "scope": "mollusks",
+      "confidence": "high",
+      "evidenceNote": "From the introduction of the systematic review (Kubicka et al., 2017), which lists hole-boring predators and reviews 54 publications on holes made by non-human predators."
+    },
+    {
+      "id": "wave-abrasion-holes",
+      "text": "Rolling in waves and tides wears shells down; experiments show abrasion alone can make holes that look like a predator's.",
+      "sourceIds": ["kubicka-2017-pierced-shells"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Kubicka et al. (2017) summarise shell-rolling experiments by Gorzelak and co-workers (2013) that imitate waves and tides. Read as a secondary account of that experiment."
+    },
+    {
+      "id": "nautilus-size-record",
+      "text": "Exceptionally large Nautilus pompilius shells reach about 254 mm across, recorded from Indonesia and northern Australia; most are smaller.",
+      "sourceIds": ["wikipedia-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "limited",
+      "evidenceNote": "A record size, cited by Wikipedia to a shell-record registry not read directly. The simulator draws the nautilus at an illustrative size well below this record and labels it as such."
+    }
+  ],
+  "species": {
+    "queen-conch": {
+      "scientificName": "Aliger gigas",
+      "authority": "(Linnaeus, 1758)",
+      "aphiaId": 1429769,
+      "taxonClaim": "queen-conch-taxonomy",
+      "lengthMm": {
+        "typical": null,
+        "max": 300,
+        "claim": "queen-conch-size"
+      },
+      "origins": [
+        {
+          "id": "bahamas",
+          "name": "The Bahamas",
+          "habitat": "Seagrass beds for juveniles; sandy algal flats and rubble for adults",
+          "depthM": [0, 30],
+          "claim": "queen-conch-range-habitat"
+        },
+        {
+          "id": "florida-keys",
+          "name": "Florida Keys",
+          "habitat": "Seagrass beds and sandy algal flats",
+          "depthM": [0, 30],
+          "claim": "queen-conch-range-habitat"
+        },
+        {
+          "id": "bermuda",
+          "name": "Bermuda",
+          "habitat": "Sand flats, algal beds and coral rubble",
+          "depthM": [0, 30],
+          "claim": "queen-conch-range-habitat"
+        }
+      ],
+      "pattern": {
+        "description": "A large, heavy shell with short spines around the spire and a glossy pink lip inside the opening.",
+        "claim": "queen-conch-appearance"
+      },
+      "life": {
+        "egg": {
+          "text": "An egg mass of 500,000 to 750,000 eggs hatches after about 5 days.",
+          "durationDays": [5, 5],
+          "claim": "queen-conch-eggs"
+        },
+        "larva": {
+          "text": "Larvae drift for 21 to 30 days, eating phytoplankton, then settle and grow a shell.",
+          "durationDays": [21, 30],
+          "claim": "queen-conch-larva"
+        },
+        "maturity": {
+          "text": "Mature at about 3.5 to 4 years. Then it stops growing longer: only the lip thickens.",
+          "durationYears": [3.5, 4],
+          "claim": "queen-conch-maturity"
+        },
+        "lifespan": {
+          "text": "Generally lives 25 to 30 years.",
+          "durationYears": [25, 30],
+          "claim": "queen-conch-lifespan"
+        }
+      },
+      "deaths": [],
+      "remains": [],
+      "collecting": [
+        {
+          "text": "Threatened under the US Endangered Species Act since 2024. Check local rules before taking a conch shell; never take a live one.",
+          "claim": "queen-conch-protection"
+        }
+      ]
+    },
+    "chambered-nautilus": {
+      "scientificName": "Nautilus pompilius",
+      "authority": "Linnaeus, 1758",
+      "aphiaId": 216384,
+      "taxonClaim": "nautilus-taxonomy",
+      "lengthMm": {
+        "typical": null,
+        "max": 254,
+        "claim": "nautilus-size-record"
+      },
+      "origins": [
+        {
+          "id": "western-pacific",
+          "name": "Western Pacific",
+          "habitat": "Small, isolated deep-water populations limited by depth and temperature",
+          "depthM": null,
+          "claim": "nautilus-range"
+        },
+        {
+          "id": "ambon",
+          "name": "Ambon, Indonesia",
+          "habitat": "Deep reef slopes in the Central Indo-Pacific",
+          "depthM": null,
+          "claim": "nautilus-range"
+        },
+        {
+          "id": "madagascar",
+          "name": "Madagascar",
+          "habitat": "Recorded in the western Indian Ocean",
+          "depthM": null,
+          "claim": "nautilus-range"
+        }
+      ],
+      "pattern": {
+        "description": "A smooth coiled shell, white to orange and even purple, with flame-like stripes; a pearly inside and walls dividing the old chambers.",
+        "claim": "nautilus-appearance"
+      },
+      "life": {
+        "egg": {
+          "text": "A few large eggs take at least a year to hatch.",
+          "durationDays": [365, 365],
+          "claim": "nautilus-life-history"
+        },
+        "larva": {
+          "text": "No swimming larva: a small nautilus hatches already shelled.",
+          "durationDays": null,
+          "claim": "nautilus-life-history"
+        },
+        "maturity": {
+          "text": "Grows slowly and matures at around 10 to 15 years.",
+          "durationYears": [10, 15],
+          "claim": "nautilus-life-history"
+        },
+        "lifespan": {
+          "text": "Lives 15 to 20 years or more, unusually long for a cephalopod.",
+          "durationYears": [15, 20],
+          "claim": "nautilus-life-history"
+        }
+      },
+      "deaths": [
+        {
+          "cause": "Eaten by an octopus",
+          "claim": "nautilus-predators"
+        },
+        {
+          "cause": "Eaten by a shark or bony fish",
+          "claim": "nautilus-predators"
+        }
+      ],
+      "remains": [
+        {
+          "text": "The empty chambers can float the shell away; Nautilus pompilius shells drift far from where they lived.",
+          "claim": "nautilus-drift"
+        }
+      ],
+      "collecting": [
+        {
+          "text": "Shell trade is the main threat; the species is threatened under the US Endangered Species Act. Avoid buying nautilus shells.",
+          "claim": "nautilus-protection"
+        }
+      ]
+    }
+  },
+  "shared": {
+    "remains": [
+      {
+        "id": "predator-holes",
+        "text": "A neat hole can mean a predator: moon snails, murex snails, octopuses, crabs and birds can all pierce shells.",
+        "claim": "predator-drill-holes"
+      },
+      {
+        "id": "wave-wear",
+        "text": "On the shore, waves and sand roll and wear the shell; abrasion alone can even make holes.",
+        "claim": "wave-abrasion-holes"
+      }
+    ],
+    "collecting": []
+  }
+}

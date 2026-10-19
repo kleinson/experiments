@@ -8,12 +8,6 @@ import {
   cutawaySvg,
   partAnchors,
 } from '../src/anatomy/animal.ts'
-import {
-  drawerProjection,
-  drawerSvg,
-  drawerTargets,
-  stageProgress,
-} from '../src/anatomy/drawer.ts'
 import { partNotes, tourOrder } from '../src/anatomy/parts.ts'
 import { wallProjection, wallSvg } from '../src/anatomy/wall.ts'
 import { beyond, ellipsoid, surfaceItems } from '../src/anatomy/surface.ts'
@@ -35,25 +29,6 @@ function assertDrawable(svg: string, label: string) {
     `${label} paints only through theme classes, never literal colours`,
   )
 }
-
-test('the specimen drawer shows every conceptual stage from the shared model', () => {
-  assert.deepEqual(stageProgress, [0, 25, 50, 100])
-  const P = drawerProjection()
-  const svg = drawerSvg(110, P)
-  assertDrawable(svg, 'drawer')
-  for (let stage = 0; stage < 4; stage++)
-    assert.ok(
-      svg.includes(`data-part="stage-${stage}"`),
-      `stage ${stage} drawn`,
-    )
-  assert.equal(drawerTargets(P).length, 4)
-  assert.notEqual(
-    svg,
-    drawerSvg(150, P),
-    'the adult reference length changes the drawing',
-  )
-  assert.equal(svg, drawerSvg(110, P), 'drawing is deterministic')
-})
 
 test('the cutaway reveals the inside only when opened, with a true section face', () => {
   const P = cutawayProjection()

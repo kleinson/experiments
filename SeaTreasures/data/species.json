@@ -1,0 +1,505 @@
+{
+  "species": [
+    {
+      "id": "tiger-cowrie",
+      "commonName": "Tiger cowrie",
+      "scientificName": "Cypraea tigris",
+      "authority": "Linnaeus, 1758",
+      "aphiaId": 216843,
+      "taxonClaim": "tiger-cowrie-taxonomy",
+      "group": "gastropod",
+      "lengthMm": {
+        "typical": null,
+        "max": 150,
+        "drawn": 120,
+        "claim": "tiger-cowrie-size"
+      },
+      "origins": [
+        {
+          "id": "red-sea",
+          "name": "Red Sea",
+          "habitat": "Coral reef flats and lagoons",
+          "depthM": null,
+          "claim": "tiger-cowrie-habitat"
+        },
+        {
+          "id": "seychelles",
+          "name": "Seychelles",
+          "habitat": "Coral reef flats and lagoons",
+          "depthM": null,
+          "claim": "tiger-cowrie-habitat"
+        },
+        {
+          "id": "hawaiian-islands",
+          "name": "Hawaiian Islands",
+          "habitat": "Under dead coral in shallow reef water; home to the locally distinct Hawaiian form/subspecies (covered separately in claims.json)",
+          "depthM": null,
+          "claim": "tiger-cowrie-habitat"
+        }
+      ],
+      "pattern": {
+        "description": "Glossy white, pale bluish-white, or buff dorsum densely covered with dark brown to blackish rounded spots, sometimes with a faint red line along the dorsal midline.",
+        "claim": "tiger-cowrie-pattern"
+      },
+      "life": {
+        "egg": {
+          "text": "Brooding females sit over their egg mass for 7 to 17 days until the larvae hatch.",
+          "range": [7, 17],
+          "unit": "days",
+          "claim": "tiger-cowrie-brooding"
+        },
+        "larva": {
+          "text": "Free-swimming veliger larvae have survived up to 37 days in captivity without settling; the natural larval duration and settlement cue are not established.",
+          "range": null,
+          "unit": "days",
+          "claim": "tiger-cowrie-larva-unresolved"
+        },
+        "maturity": {
+          "text": "Age at sexual maturity is not established for this species in the sources reviewed.",
+          "range": null,
+          "unit": "years",
+          "claim": null
+        },
+        "lifespan": {
+          "text": "Lifespan is not established for this species in the sources reviewed.",
+          "range": null,
+          "unit": "years",
+          "claim": null
+        }
+      },
+      "deaths": [
+        {
+          "id": "not-documented",
+          "cause": "Cause not documented in our sources",
+          "mark": "none",
+          "claim": "death-cause-not-documented"
+        }
+      ],
+      "remains": [
+        {
+          "id": "hermit-crab-shell-reuse",
+          "text": "After the animal dies, the empty shell may be recycled by hermit crabs and other organisms as a portable home, a pattern well documented across gastropod shells in general.",
+          "claim": "hermit-crab-shell-reuse"
+        }
+      ],
+      "collecting": [],
+      "hermit": true,
+      "drifts": false,
+      "drawnNote": "Drawn at an ordinary size below the reported maximum; no typical range was found."
+    },
+    {
+      "id": "money-cowrie",
+      "commonName": "Money cowrie",
+      "scientificName": "Monetaria moneta",
+      "authority": "(Linnaeus, 1758)",
+      "aphiaId": 216874,
+      "taxonClaim": "money-cowrie-taxonomy",
+      "group": "gastropod",
+      "lengthMm": {
+        "typical": null,
+        "max": 45,
+        "drawn": 36,
+        "claim": "money-cowrie-size"
+      },
+      "origins": [
+        {
+          "id": "red-sea",
+          "name": "Red Sea",
+          "habitat": "Intertidal rocky areas and shallow tide pools",
+          "depthM": null,
+          "claim": "money-cowrie-habitat-behavior"
+        },
+        {
+          "id": "hawaiian-islands",
+          "name": "Hawaiian Islands",
+          "habitat": "Shallow reef rock; reported locally uncommon around Hawaii and Maui",
+          "depthM": null,
+          "claim": "money-cowrie-habitat-behavior"
+        },
+        {
+          "id": "rapa-nui",
+          "name": "Rapa Nui (Easter Island)",
+          "habitat": "Intertidal rocky shore near the eastern edge of the species' range",
+          "depthM": null,
+          "claim": "money-cowrie-habitat-behavior"
+        }
+      ],
+      "pattern": {
+        "description": "Small, flattened, pale shell (white to dirty beige), dorsum often greenish-grey with yellowish margins and sometimes darker transverse stripes and a faint yellow ring; white underside with pronounced denticles. The living animal's mantle shows a vivid mottled, zebra-like black-and-white pattern.",
+        "claim": "money-cowrie-pattern"
+      },
+      "life": {
+        "egg": {
+          "text": "Not established for this species in the sources reviewed.",
+          "range": null,
+          "unit": "days",
+          "claim": null
+        },
+        "larva": {
+          "text": "Not established for this species in the sources reviewed.",
+          "range": null,
+          "unit": "days",
+          "claim": null
+        },
+        "maturity": {
+          "text": "Not established for this species in the sources reviewed.",
+          "range": null,
+          "unit": "years",
+          "claim": null
+        },
+        "lifespan": {
+          "text": "Not established for this species in the sources reviewed.",
+          "range": null,
+          "unit": "years",
+          "claim": null
+        }
+      },
+      "deaths": [
+        {
+          "id": "not-documented",
+          "cause": "Cause not documented in our sources",
+          "mark": "none",
+          "claim": "death-cause-not-documented"
+        }
+      ],
+      "remains": [
+        {
+          "id": "hermit-crab-shell-reuse",
+          "text": "After the animal dies, the empty shell may be recycled by hermit crabs and other organisms as a portable home, a pattern well documented across gastropod shells in general.",
+          "claim": "hermit-crab-shell-reuse"
+        }
+      ],
+      "collecting": [
+        {
+          "id": "money-cowrie-currency",
+          "text": "Money cowrie shells were historically used as currency (shell money) across Pacific and Indian Ocean trade networks, a use that persisted into the 1800s.",
+          "claim": "money-cowrie-currency"
+        }
+      ],
+      "hermit": true,
+      "drifts": false,
+      "drawnNote": "Drawn at an ordinary size below the reported maximum; no typical range was found."
+    },
+    {
+      "id": "textile-cone",
+      "commonName": "Textile cone",
+      "scientificName": "Conus textile",
+      "authority": "Linnaeus, 1758",
+      "aphiaId": 215529,
+      "taxonClaim": "textile-cone-taxonomy",
+      "group": "gastropod",
+      "lengthMm": {
+        "typical": null,
+        "max": 150,
+        "drawn": 120,
+        "claim": "textile-cone-size-pattern"
+      },
+      "origins": [
+        {
+          "id": "red-sea",
+          "name": "Red Sea",
+          "habitat": "Sand pockets or under dead coral, reported at any depth",
+          "depthM": null,
+          "claim": "textile-cone-size-pattern"
+        },
+        {
+          "id": "hawaiian-islands",
+          "name": "Hawaiian Islands",
+          "habitat": "Sand pockets or under dead coral, from shallow reef flats to deeper water",
+          "depthM": null,
+          "claim": "textile-cone-size-pattern"
+        },
+        {
+          "id": "madagascar",
+          "name": "Madagascar",
+          "habitat": "Reef and sand habitats within its WoRMS-recorded distribution range",
+          "depthM": null,
+          "claim": "textile-cone-taxonomy"
+        }
+      ],
+      "pattern": {
+        "description": "Shell with a concave spire, white ground colour with golden blotches and dark brown tent-like markings; living animal white mottled with tan, siphon banded black and red.",
+        "claim": "textile-cone-size-pattern"
+      },
+      "life": {
+        "egg": {
+          "text": "Across the genus, eggs are laid about once a year in capsules on the substrate; a figure of roughly 25,000 eggs per egg mass comes from two other cone species, not C. textile directly.",
+          "range": null,
+          "unit": "days",
+          "claim": "textile-cone-egg-genus"
+        },
+        "larva": {
+          "text": "The genus-wide pelagic veliger stage lasts about 1-50 days based on a study of a different species; C. textile larvae have been reared through this stage in captivity, but no confirmed duration specific to this species was found.",
+          "range": [1, 50],
+          "unit": "days",
+          "claim": "textile-cone-larva-genus"
+        },
+        "maturity": {
+          "text": "Age at sexual maturity is not established for C. textile in the sources reviewed.",
+          "range": null,
+          "unit": "years",
+          "claim": null
+        },
+        "lifespan": {
+          "text": "A genus-wide reference estimates cone snail lifespan at about 10 to 20 years based on shell growth marks; this is not confirmed specifically for C. textile.",
+          "range": [10, 20],
+          "unit": "years",
+          "claim": "textile-cone-lifespan-genus"
+        }
+      },
+      "deaths": [
+        {
+          "id": "a-hole-possibly-from-an-octopus-one-phot",
+          "cause": "A hole, possibly from an octopus (one photographed shell)",
+          "mark": "drill",
+          "claim": "textile-cone-shell-damage-observed"
+        },
+        {
+          "id": "not-documented",
+          "cause": "Cause not documented in our sources",
+          "mark": "none",
+          "claim": "death-cause-not-documented"
+        }
+      ],
+      "remains": [
+        {
+          "id": "hermit-crab-shell-reuse",
+          "text": "After the animal dies, the empty shell may be recycled by hermit crabs and other organisms as a portable home, a pattern well documented across gastropod shells in general.",
+          "claim": "hermit-crab-shell-reuse"
+        },
+        {
+          "id": "textile-cone-lifespan-genus",
+          "text": "Growth increments and marks on the shell surface are the basis researchers use to estimate a cone snail's age, underlying the genus-wide 10-20 year lifespan estimate.",
+          "claim": "textile-cone-lifespan-genus"
+        }
+      ],
+      "collecting": [
+        {
+          "id": "textile-cone-diet-behavior",
+          "text": "Never handle a live cone snail: C. textile can sting via a hollow, harpoon-like radular tooth that injects venom, normally used to subdue molluscan prey.",
+          "claim": "textile-cone-diet-behavior"
+        },
+        {
+          "id": "textile-cone-venom-safety",
+          "text": "Among roughly 700 Conus species, confirmed multi-fatality human stings are attributed only to a different species (C. geographus); older reports of human deaths from C. textile specifically have not been adequately verified in the peer-reviewed literature.",
+          "claim": "textile-cone-venom-safety"
+        }
+      ],
+      "hermit": true,
+      "drifts": false,
+      "drawnNote": "Drawn at an ordinary size below the reported maximum; no typical range was found."
+    },
+    {
+      "id": "queen-conch",
+      "commonName": "Queen conch",
+      "scientificName": "Aliger gigas",
+      "authority": "(Linnaeus, 1758)",
+      "aphiaId": 1429769,
+      "taxonClaim": "queen-conch-taxonomy",
+      "group": "gastropod",
+      "lengthMm": {
+        "typical": null,
+        "max": 300,
+        "drawn": 240,
+        "claim": "queen-conch-size"
+      },
+      "origins": [
+        {
+          "id": "bahamas",
+          "name": "The Bahamas",
+          "habitat": "Seagrass beds for juveniles; sandy algal flats and rubble for adults",
+          "depthM": [0, 30],
+          "claim": "queen-conch-range-habitat"
+        },
+        {
+          "id": "florida-keys",
+          "name": "Florida Keys",
+          "habitat": "Seagrass beds and sandy algal flats",
+          "depthM": [0, 30],
+          "claim": "queen-conch-range-habitat"
+        },
+        {
+          "id": "bermuda",
+          "name": "Bermuda",
+          "habitat": "Sand flats, algal beds and coral rubble",
+          "depthM": [0, 30],
+          "claim": "queen-conch-range-habitat"
+        }
+      ],
+      "pattern": {
+        "description": "A large, heavy shell with short spines around the spire and a glossy pink lip inside the opening.",
+        "claim": "queen-conch-appearance"
+      },
+      "life": {
+        "egg": {
+          "text": "An egg mass of 500,000 to 750,000 eggs hatches after about 5 days.",
+          "range": [5, 5],
+          "unit": "days",
+          "claim": "queen-conch-eggs"
+        },
+        "larva": {
+          "text": "Larvae drift for 21 to 30 days, eating phytoplankton, then settle and grow a shell.",
+          "range": [21, 30],
+          "unit": "days",
+          "claim": "queen-conch-larva"
+        },
+        "maturity": {
+          "text": "Mature at about 3.5 to 4 years. Then it stops growing longer: only the lip thickens.",
+          "range": [3.5, 4],
+          "unit": "years",
+          "claim": "queen-conch-maturity"
+        },
+        "lifespan": {
+          "text": "Generally lives 25 to 30 years.",
+          "range": [25, 30],
+          "unit": "years",
+          "claim": "queen-conch-lifespan"
+        }
+      },
+      "deaths": [
+        {
+          "id": "not-documented",
+          "cause": "Cause not documented in our sources",
+          "mark": "none",
+          "claim": "death-cause-not-documented"
+        }
+      ],
+      "remains": [],
+      "collecting": [
+        {
+          "id": "queen-conch-protection",
+          "text": "Threatened under the US Endangered Species Act since 2024. Check local rules before taking a conch shell; never take a live one.",
+          "claim": "queen-conch-protection"
+        }
+      ],
+      "hermit": true,
+      "drifts": false,
+      "drawnNote": "Drawn at an ordinary size below the reported maximum; no typical range was found."
+    },
+    {
+      "id": "chambered-nautilus",
+      "commonName": "Chambered nautilus",
+      "scientificName": "Nautilus pompilius",
+      "authority": "Linnaeus, 1758",
+      "aphiaId": 216384,
+      "taxonClaim": "nautilus-taxonomy",
+      "group": "cephalopod",
+      "lengthMm": {
+        "typical": null,
+        "max": 254,
+        "drawn": 165,
+        "claim": "nautilus-size-record"
+      },
+      "origins": [
+        {
+          "id": "western-pacific",
+          "name": "Western Pacific",
+          "habitat": "Small, isolated deep-water populations limited by depth and temperature",
+          "depthM": null,
+          "claim": "nautilus-range"
+        },
+        {
+          "id": "ambon",
+          "name": "Ambon, Indonesia",
+          "habitat": "Deep reef slopes in the Central Indo-Pacific",
+          "depthM": null,
+          "claim": "nautilus-range"
+        },
+        {
+          "id": "madagascar",
+          "name": "Madagascar",
+          "habitat": "Recorded in the western Indian Ocean",
+          "depthM": null,
+          "claim": "nautilus-range"
+        }
+      ],
+      "pattern": {
+        "description": "A smooth coiled shell, white to orange and even purple, with flame-like stripes; a pearly inside and walls dividing the old chambers.",
+        "claim": "nautilus-appearance"
+      },
+      "life": {
+        "egg": {
+          "text": "A few large eggs take at least a year to hatch.",
+          "range": [365, 365],
+          "unit": "days",
+          "claim": "nautilus-life-history"
+        },
+        "larva": {
+          "text": "No swimming larva: a small nautilus hatches already shelled.",
+          "range": null,
+          "unit": "days",
+          "claim": "nautilus-life-history"
+        },
+        "maturity": {
+          "text": "Grows slowly and matures at around 10 to 15 years.",
+          "range": [10, 15],
+          "unit": "years",
+          "claim": "nautilus-life-history"
+        },
+        "lifespan": {
+          "text": "Lives 15 to 20 years or more, unusually long for a cephalopod.",
+          "range": [15, 20],
+          "unit": "years",
+          "claim": "nautilus-life-history"
+        }
+      },
+      "deaths": [
+        {
+          "id": "eaten-by-an-octopus",
+          "cause": "Eaten by an octopus",
+          "mark": "drill",
+          "claim": "nautilus-predators"
+        },
+        {
+          "id": "eaten-by-a-shark-or-bony-fish",
+          "cause": "Eaten by a shark or bony fish",
+          "mark": "chip",
+          "claim": "nautilus-predators"
+        },
+        {
+          "id": "not-documented",
+          "cause": "Cause not documented in our sources",
+          "mark": "none",
+          "claim": "death-cause-not-documented"
+        }
+      ],
+      "remains": [
+        {
+          "id": "nautilus-drift",
+          "text": "The empty chambers can float the shell away; Nautilus pompilius shells drift far from where they lived.",
+          "claim": "nautilus-drift"
+        }
+      ],
+      "collecting": [
+        {
+          "id": "nautilus-protection",
+          "text": "Shell trade is the main threat; the species is threatened under the US Endangered Species Act. Avoid buying nautilus shells.",
+          "claim": "nautilus-protection"
+        }
+      ],
+      "hermit": false,
+      "drifts": true,
+      "drawnNote": "Drawn at an ordinary size below the reported maximum; no typical range was found."
+    }
+  ],
+  "shared": {
+    "remains": [
+      {
+        "id": "hermit-crab-reuse",
+        "text": "Hermit crabs move into empty snail shells and use them as portable homes.",
+        "claim": "hermit-crab-shell-reuse"
+      },
+      {
+        "id": "predator-holes",
+        "text": "A neat hole can mean a predator: moon snails, murex snails, octopuses, crabs and birds can all pierce shells.",
+        "claim": "predator-drill-holes"
+      },
+      {
+        "id": "wave-wear",
+        "text": "On the shore, waves and sand roll and wear the shell; abrasion alone can even make holes.",
+        "claim": "wave-abrasion-holes"
+      }
+    ],
+    "collecting": []
+  }
+}

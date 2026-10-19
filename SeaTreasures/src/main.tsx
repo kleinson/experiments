@@ -1,9 +1,10 @@
 import { StrictMode, Component } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { App } from './App.tsx'
+import { Simulator } from './sim/Simulator.tsx'
 import './theme.css'
 import './styles.css'
+import './sim/sim.css'
 
 class ExperienceBoundary extends Component<
   { children: ReactNode },
@@ -16,7 +17,7 @@ class ExperienceBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('The shell experience could not render.', error, info)
+    console.error('The simulator could not render.', error, info)
   }
 
   render() {
@@ -24,12 +25,12 @@ class ExperienceBoundary extends Component<
       return (
         <main className="fatal-error" role="alert">
           <p className="eyebrow">SeaTreasures</p>
-          <h1>The specimen could not be opened.</h1>
+          <h1>The simulator could not be opened.</h1>
           <p>
-            Something went wrong loading the experience. Please reload to try
-            again. Your saved specimen is kept on this device.
+            Something went wrong loading the simulator. Please reload to try
+            again. Your shelf is kept on this device.
           </p>
-          <button onClick={() => location.reload()}>Reload experience</button>
+          <button onClick={() => location.reload()}>Reload</button>
         </main>
       )
     }
@@ -38,11 +39,11 @@ class ExperienceBoundary extends Component<
 }
 
 const root = document.getElementById('root')
-if (!root) throw new Error('The shell experience is missing its root element.')
+if (!root) throw new Error('The simulator is missing its root element.')
 createRoot(root).render(
   <StrictMode>
     <ExperienceBoundary>
-      <App />
+      <Simulator />
     </ExperienceBoundary>
   </StrictMode>,
 )

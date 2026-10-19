@@ -1,0 +1,57 @@
+{
+  "sources": [
+    {
+      "id": "wikipedia-mollusca",
+      "title": "Mollusca",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Mollusca",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Lead and anatomy summary read directly. A tertiary source: its figures cite primary literature, so claims built on it are marked moderate confidence."
+    },
+    {
+      "id": "worms-mollusca",
+      "title": "Mollusca (AphiaID 51)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.molluscabase.org/aphia.php?p=taxdetails&id=51",
+      "accessedAt": "2026-10-19",
+      "kind": "taxonomic",
+      "accessNote": "Verified through the WoRMS REST record AphiaRecordByAphiaID/51: status accepted, rank Phylum, kingdom Animalia. MolluscaBase is the mollusc section of WoRMS."
+    }
+  ],
+  "claims": [
+    {
+      "id": "mollusca-phylum",
+      "text": "Molluscs form an accepted animal phylum, Mollusca, in the global register of marine species; the species names in this simulator follow the same register (WoRMS / MolluscaBase).",
+      "sourceIds": ["worms-mollusca"],
+      "scope": "mollusks",
+      "confidence": "high",
+      "evidenceNote": "Machine-readable WoRMS record for AphiaID 51 returns status accepted and rank Phylum. Each species in the simulator carries its own AphiaID claim."
+    },
+    {
+      "id": "mollusca-diversity",
+      "text": "About 86,600 living mollusc species are recognised, making molluscs the second-largest animal phylum. Gastropods, the snails, account for about 80% of classified mollusc species.",
+      "sourceIds": ["wikipedia-mollusca"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Figures read directly from the article lead, which cites its counts. Species counts change as new species are described, so these are approximate."
+    },
+    {
+      "id": "mollusca-body-plan",
+      "text": "A mollusc's soft body is mostly muscle. Its mantle encloses a cavity used for breathing and excretion and secretes the shell, which is made of proteins and chitin reinforced with calcium carbonate. Most molluscs feed with a rasping radula and move on a single muscular foot.",
+      "sourceIds": ["wikipedia-mollusca"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "From the article's description of the features shared by modern molluscs and its 'hypothetical ancestral mollusc'. Individual groups vary: bivalves lack a radula and cephalopods have arms rather than a crawling foot."
+    },
+    {
+      "id": "mollusca-larvae",
+      "text": "Nearly all molluscs lay eggs. Depending on the group, these hatch as trochophore larvae, as more complex veliger larvae, or as miniature adults.",
+      "sourceIds": ["wikipedia-mollusca"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Read directly from the article's overview of molluscan reproduction. Which route a species takes is given by its own sourced claims where known."
+    }
+  ],
+  "species": {}
+}
