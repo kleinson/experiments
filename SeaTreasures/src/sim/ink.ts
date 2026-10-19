@@ -155,6 +155,7 @@ uniform float depthScale;
 uniform float depthEdge;
 uniform float style;
 uniform float lines;
+uniform vec2 haze;
 uniform vec3 ink;
 varying vec2 vUv;
 
@@ -222,12 +223,17 @@ void main() {
   e += edgeAt(vUv + vec2(0.25, 0.25) * texel);
   e *= 0.25;
   float line = max(e.x, e.y * 0.45) * lines;
+  // Water haze: the further away, the more the scene fades into the water behind it.
+  float fade = haze.y > haze.x
+    ? 1.0 - smoothstep(haze.x, haze.y, texture2D(tDepth, vUv).x)
+    : 1.0;
+  line *= fade;
 
   vec4 drawn = texture2D(tDrawn, vUv);
   vec4 real = texture2D(tReal, vUv);
   vec3 drawnColour = drawn.rgb / max(drawn.a, 1e-4);
   vec3 realColour = filmic(real.rgb / max(real.a, 1e-4));
-  float alpha = mix(drawn.a, real.a, style);
+  float alpha = mix(drawn.a, real.a, style) * fade;
   vec3 colour = mix(drawnColour * drawn.a, realColour * real.a, style);
   colour = colour / max(alpha, 1e-4);
 
@@ -246,6 +252,8 @@ export type InkOptions = {
   depthEdge: number
   /** Called before each look is drawn, to set its lights and shadow. */
   light?: (look: Look) => void
+  /** Distances from the camera over which the scene fades into the water, or null for none. */
+  haze?: { from: number; to: number } | null
 }
 
 /** Renders the drawn and realistic looks, outlines the drawing and blends them. */
@@ -264,6 +272,7 @@ export class InkPass {
     depthTexture: new DepthTexture(1, 1),
   })
   private twins = new Map<Material, Material>()
+  private groundTwins = new Map<Material, Material>()
   private hidden = new MeshBasicMaterial({ visible: false })
   private quad: Mesh<PlaneGeometry, ShaderMaterial>
   private screen = new Scene()
@@ -289,6 +298,7 @@ export class InkPass {
           depthEdge: { value: 1 },
           style: { value: 0 },
           lines: { value: 1 },
+          haze: { value: new Vector2(0, 0) },
           ink: { value: new Color() },
         },
       }),
@@ -335,11 +345,34 @@ export class InkPass {
     return twin
   }
 
+  /** The seabed writes depth (for the haze) but no ink: alpha 0 keeps it out of the outlines. */
+  private groundTwin(material: Material) {
+    let twin = this.groundTwins.get(material)
+    if (!twin) {
+      // Blended, not opaque, so three keeps the zero alpha instead of forcing it to 1.
+      twin = new MeshNormalMaterial({
+        opacity: 0,
+        side: material.side,
+        transparent: true,
+        depthWrite: true,
+        blending: CustomBlending,
+        blendSrc: OneFactor,
+        blendDst: ZeroFactor,
+        blendSrcAlpha: ZeroFactor,
+        blendDstAlpha: ZeroFactor,
+      })
+      this.groundTwins.set(material, twin)
+    }
+    return twin
+  }
+
   /** Forget cached twins (after the scene's materials were replaced). */
   forget() {
     for (const twin of this.twins.values())
       if (twin !== this.hidden) twin.dispose()
+    for (const twin of this.groundTwins.values()) twin.dispose()
     this.twins.clear()
+    this.groundTwins.clear()
   }
 
   private pass(
@@ -361,6 +394,7 @@ export class InkPass {
   ) {
     const style = Math.min(1, Math.max(0, options.style))
     const lines = 1 - smooth(0.05, 0.85, style)
+    const haze = options.haze ?? null
     const clear = renderer.getClearColor(new Color())
     const alpha = renderer.getClearAlpha()
     renderer.setClearColor(0x000000, 0)
@@ -375,20 +409,28 @@ export class InkPass {
       options.light?.('real')
       this.pass(renderer, scene, camera, this.real)
     }
-    if (lines > 0) {
+    if (lines > 0 || haze) {
       const swapped: [Mesh, Material | Material[]][] = []
+      const muted: Object3D[] = []
       scene.traverse((object) => {
+        if (object.userData.noInk && object.visible) {
+          object.visible = false
+          muted.push(object)
+        }
         if (!(object instanceof Mesh)) return
         swapped.push([object, object.material])
+        const twin = (m: Material) =>
+          object.userData.inkGround ? this.groundTwin(m) : this.twin(m)
         object.material = Array.isArray(object.material)
-          ? object.material.map((m) => this.twin(m))
-          : this.twin(object.material)
+          ? object.material.map(twin)
+          : twin(object.material)
       })
       const shadows = renderer.shadowMap.enabled
       renderer.shadowMap.enabled = false
       this.pass(renderer, scene, camera, this.normals)
       renderer.shadowMap.enabled = shadows
       for (const [mesh, material] of swapped) mesh.material = material
+      for (const object of muted) object.visible = true
     }
     // Leave the scene in its realistic dress, so picking and bounds see the source materials.
     wear(scene, 'real')
@@ -399,6 +441,10 @@ export class InkPass {
     uniforms.depthEdge!.value = options.depthEdge
     uniforms.style!.value = style
     uniforms.lines!.value = lines
+    const depth = (distance: number) =>
+      (distance - camera.near) / (camera.far - camera.near)
+    if (haze) uniforms.haze!.value.set(depth(haze.from), depth(haze.to))
+    else uniforms.haze!.value.set(0, 0)
     renderer.setRenderTarget(null)
     renderer.render(this.screen, this.flat)
     renderer.setClearColor(clear, alpha)

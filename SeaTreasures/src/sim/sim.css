@@ -14,18 +14,6 @@ html[data-theme='dark'] .sim {
   --sim-ink: var(--cp-surface);
   --sim-shadow: color-mix(in srgb, var(--cp-link) 30%, var(--cp-surface));
 }
-.sim-top {
-  display: grid;
-  grid-template-columns: 240px 1fr auto;
-  align-items: center;
-  gap: var(--sim-gap);
-  min-height: 84px;
-  border-bottom: 1px solid var(--cp-border);
-}
-.sim-top .brand {
-  text-decoration: none;
-  color: var(--cp-text);
-}
 .sim-title {
   display: flex;
   align-items: baseline;
@@ -76,42 +64,6 @@ html[data-theme='dark'] .sim {
   text-transform: uppercase;
   color: var(--cp-text-soft);
 }
-.species-picker ul {
-  list-style: none;
-  margin: 0 0 24px;
-  padding: 0;
-  display: grid;
-  gap: 6px;
-}
-.species-picker li button {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 56px;
-  padding: 8px 12px;
-  text-align: left;
-  border: 1px solid var(--cp-border);
-  border-radius: 0.625rem;
-  background: var(--cp-surface);
-}
-.species-picker li button:hover {
-  border-color: var(--cp-border-strong);
-}
-.species-picker li button[aria-pressed='true'] {
-  border-color: var(--cp-accent);
-  background: var(--cp-accent-soft);
-}
-.species-picker strong {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-}
-.species-picker i {
-  display: block;
-  font-size: 12px;
-  color: var(--cp-text-muted);
-}
 .swatch {
   flex: none;
   width: 28px;
@@ -130,17 +82,6 @@ html[data-theme='dark'] .sim {
     ),
     var(--swatch);
   box-shadow: inset 0 0 0 1px var(--cp-border);
-}
-.species-picker select {
-  width: 100%;
-  min-height: 44px;
-  padding: 0 10px;
-  border-radius: 0.625rem;
-  border: 1px solid var(--cp-border);
-  background: var(--cp-surface);
-  color: var(--cp-text);
-  font: inherit;
-  margin-bottom: 12px;
 }
 .sim-view {
   --sim-paper: var(--cp-bg-elevated);
@@ -679,89 +620,6 @@ html[data-theme='dark'] .sim-view::after {
   color: var(--cp-text-soft);
 }
 
-@media (max-width: 1100px) {
-  .sim-main {
-    grid-template-columns: minmax(0, 1fr) 300px;
-  }
-  .species-picker {
-    grid-column: 1 / -1;
-  }
-  .species-picker ul {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    margin-bottom: 16px;
-  }
-  .sim-top {
-    grid-template-columns: auto 1fr auto;
-  }
-}
-@media (max-width: 760px) {
-  .sim {
-    padding: 0 16px;
-  }
-  .sim-top {
-    grid-template-columns: 1fr auto;
-    min-height: 64px;
-  }
-  .sim-title {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    flex-direction: column;
-    gap: 4px;
-    padding-bottom: 12px;
-  }
-  .sim-main {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .species-picker ul {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .species-picker li button {
-    min-height: 52px;
-    padding: 6px 8px;
-  }
-  .species-picker i {
-    font-size: 11px;
-  }
-  .sim-view {
-    min-height: 62vh;
-    order: -1;
-  }
-  .sim-view {
-    --sim-tools: 100px;
-  }
-  .view-controls {
-    left: 12px;
-    right: 12px;
-    top: 12px;
-    max-width: none;
-    justify-content: flex-start;
-  }
-  .view-badge {
-    top: 112px;
-    left: 14px;
-  }
-  .figure-tools {
-    padding: 10px 12px;
-    align-content: center;
-  }
-  .look-slider input {
-    width: 96px;
-  }
-  .sim-labels button {
-    min-height: 24px;
-    padding: 2px 5px;
-    font-size: 10px;
-    letter-spacing: 0.06em;
-  }
-  .phase-ticks button {
-    font-size: 0;
-    min-height: 24px;
-  }
-  .phase-ticks button[aria-current='step'] {
-    font-size: 11px;
-    overflow: visible;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   .sim * {
     transition: none !important;
@@ -830,21 +688,6 @@ html[data-theme='dark'] .sim-view::after {
 .picker-note .fact p {
   font-size: 12px;
   color: var(--cp-text-muted);
-}
-
-@media (max-width: 760px) {
-  .action-hint {
-    max-width: calc(100% - 28px);
-    top: 132px;
-    left: 14px;
-    font-size: 12px;
-  }
-  .take-apart {
-    top: auto;
-    right: 12px;
-    bottom: calc(var(--sim-tools) + 12px);
-    width: 160px;
-  }
 }
 
 /* Where it's found */
@@ -1212,4 +1055,654 @@ html[data-theme='dark'] .sim-view::after {
   margin-top: 4px;
   font-size: 12px;
   color: var(--cp-text-soft);
+}
+
+/* ── The ocean floor: one full-screen canvas with floating menus ───────── */
+.sim {
+  padding: 0;
+  grid-template-rows: auto;
+}
+.sim > #where,
+.sim > #lab,
+.sim > .field-plates,
+.sim > .footer {
+  margin-inline: 28px;
+}
+.sim-main {
+  display: block;
+  padding: 0;
+}
+.sim .sim-view.ocean {
+  /* Room the floating panels take; the stage frames the specimen in the rest. */
+  --safe-left: 120px;
+  --safe-right: 400px;
+  --safe-top: 160px;
+  --safe-bottom: 176px;
+  --float-shadow:
+    0 0 0 1px var(--cp-border),
+    0 10px 30px color-mix(in srgb, var(--cp-text) 10%, transparent);
+  position: relative;
+  height: 100dvh;
+  min-height: 680px;
+  border-radius: 0;
+  box-shadow: none;
+  font-family:
+    'Segoe UI',
+    Aptos,
+    Calibri,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  /* Water: what the seabed fades into with distance. */
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--cp-link) 30%, var(--cp-bg-elevated)) 0%,
+    color-mix(in srgb, var(--cp-link) 14%, var(--cp-bg-elevated)) 58%,
+    color-mix(in srgb, var(--cp-link) 10%, var(--cp-bg-elevated)) 100%
+  );
+}
+.sim .sim-view.ocean[data-bed='deep'] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--cp-link) 48%, var(--cp-text)) 0%,
+    color-mix(in srgb, var(--cp-link) 34%, var(--cp-bg-elevated)) 60%,
+    color-mix(in srgb, var(--cp-link) 22%, var(--cp-bg-elevated)) 100%
+  );
+}
+.sim .sim-view.ocean[data-scene='open-water'] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--cp-link) 22%, var(--cp-bg-elevated)) 0%,
+    color-mix(in srgb, var(--cp-link) 34%, var(--cp-bg-elevated)) 100%
+  );
+}
+.sim .sim-view.ocean[data-scene='beach'] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--cp-link) 16%, var(--cp-bg-elevated)) 0%,
+    color-mix(in srgb, var(--cp-warning) 12%, var(--cp-bg-elevated)) 70%
+  );
+}
+.ocean .sim-stage {
+  inset: 0;
+}
+.ocean .sim-stage:focus-visible {
+  border-radius: 0;
+  outline-offset: -3px;
+}
+.float {
+  position: absolute;
+  z-index: 5;
+  background: var(--cp-panel-strong);
+  border-radius: 16px;
+  box-shadow: var(--float-shadow);
+  color: var(--cp-text);
+}
+
+/* Title, shell menu, place and seabed: top left, with the view toolbar under it. */
+.float-left {
+  position: absolute;
+  z-index: 7;
+  top: 16px;
+  left: 16px;
+  width: min(430px, calc(100% - 32px));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  pointer-events: none;
+}
+.float-left > * {
+  pointer-events: auto;
+}
+.float-left .float {
+  position: relative;
+}
+.float-title {
+  width: 100%;
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px 12px;
+}
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.title-row .brand img {
+  display: block;
+  width: 36px;
+  height: 36px;
+}
+.float-title .sim-title {
+  display: grid;
+  gap: 2px;
+}
+.float-title .sim-title h1 {
+  font-size: clamp(22px, 2.1vw, 30px);
+}
+.float-title .sim-taxon {
+  font-size: 13px;
+  color: var(--cp-text-muted);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.chip-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  max-width: 100%;
+  padding: 0 4px 0 12px;
+  border: 1px solid var(--cp-border);
+  border-radius: 100px;
+  background: var(--cp-surface);
+  font:
+    10px Consolas,
+    'Courier New',
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cp-text-soft);
+}
+.chip-select select {
+  width: auto;
+  max-width: 230px;
+  min-height: 38px;
+  margin: 0;
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  color: var(--cp-text);
+  font:
+    13px 'Segoe UI',
+    Aptos,
+    Calibri,
+    sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: pointer;
+}
+.chip-select select:focus-visible {
+  outline: 2px solid var(--cp-accent);
+  border-radius: 100px;
+}
+.setting-note {
+  display: grid;
+  gap: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--cp-border);
+}
+.setting-note .fact p {
+  font-size: 13px;
+  line-height: 1.45;
+}
+.setting-note strong {
+  font-weight: 600;
+}
+.setting-note .where-link {
+  justify-self: start;
+  font-size: 12px;
+}
+
+/* The shell menu: one button that opens every species as shell and animal. */
+.shell-menu {
+  position: relative;
+}
+.shell-menu-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 2px 14px 2px 4px;
+  border: 1.5px solid var(--cp-text);
+  border-radius: 100px;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+  font-weight: 600;
+  font-size: 13px;
+}
+.shell-menu-button img {
+  width: 44px;
+  height: 30px;
+  object-fit: contain;
+}
+.shell-menu-button .swatch {
+  width: 30px;
+  height: 30px;
+}
+.shell-menu-button .chevron {
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+.shell-menu-button[aria-expanded='true'] .chevron {
+  transform: translateY(2px) rotate(225deg);
+}
+.shell-tray {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  left: -10px;
+  width: min(620px, calc(100vw - 32px));
+  max-height: min(70dvh, 620px);
+  overflow: auto;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--cp-panel-strong);
+  box-shadow: var(--float-shadow);
+}
+.shell-tray ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
+  gap: 8px;
+}
+.shell-tray li button {
+  width: 100%;
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px 10px;
+  text-align: left;
+  border: 1px solid var(--cp-border);
+  border-radius: 12px;
+  background: var(--cp-surface);
+  color: var(--cp-text);
+}
+.shell-tray li button:hover {
+  border-color: var(--cp-border-strong);
+}
+.shell-tray li button[aria-pressed='true'] {
+  border-color: var(--cp-accent);
+  box-shadow: 0 0 0 1px var(--cp-accent);
+}
+.tray-pictures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  height: 78px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--cp-link) 9%, var(--cp-bg-elevated));
+}
+html[data-theme='dark'] .tray-pictures {
+  background: color-mix(in srgb, var(--cp-text) 82%, var(--cp-link));
+}
+.tray-pictures img {
+  width: 100%;
+  height: 78px;
+  object-fit: contain;
+}
+.tray-pictures .swatch {
+  grid-column: 1 / -1;
+  margin: auto;
+}
+.shell-tray strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.shell-tray i {
+  font-size: 12px;
+  color: var(--cp-text-muted);
+}
+.tray-meta {
+  font:
+    11px Consolas,
+    'Courier New',
+    monospace;
+  color: var(--cp-text-soft);
+}
+.shell-tray .picker-note {
+  margin-top: 12px;
+}
+
+/* View toolbar: one row of tools under the title. */
+.sim .ocean .view-controls {
+  position: relative;
+  inset: auto;
+  max-width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+}
+.sim .ocean .view-controls button {
+  min-height: 36px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.sim .ocean .view-controls button {
+  justify-content: flex-start;
+  border-color: transparent;
+  background: transparent;
+}
+.sim
+  .ocean
+  .view-controls
+  button:hover:not(:disabled):not([aria-pressed='true']) {
+  background: var(--cp-surface-soft);
+}
+.sim .ocean .view-controls button[aria-pressed='true'] {
+  background: var(--cp-text);
+  color: var(--cp-bg-elevated);
+}
+
+/* Actions: top right. */
+.float-actions {
+  z-index: 8;
+  top: 16px;
+  right: 16px;
+  padding: 4px 6px;
+}
+.float-actions .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* The life panel floats on the right. */
+.sim .ocean .life-panel {
+  top: 80px;
+  right: 16px;
+  bottom: 176px;
+  width: 360px;
+  padding: 18px 18px 14px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* The timeline and figure tools float along the bottom. */
+.float-bottom {
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  display: grid;
+  gap: 4px;
+  padding: 10px 16px 8px;
+}
+.ocean .timeline {
+  position: static;
+  padding: 0;
+  background: none;
+  border: 0;
+}
+.ocean .figure-tools {
+  position: static;
+  height: auto;
+  min-height: 44px;
+  padding: 6px 0 0;
+  border-top: 1px solid var(--cp-border);
+  background: none;
+  justify-content: flex-start;
+  gap: 8px 24px;
+}
+.ocean .figure-views {
+  margin-left: auto;
+}
+.ocean .take-apart {
+  position: static;
+  display: flex;
+  width: auto;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cp-text-muted);
+}
+.ocean .take-apart input {
+  width: 140px;
+}
+.ocean .action-hint {
+  top: auto;
+  left: 50%;
+  bottom: 184px;
+  z-index: 4;
+  max-width: calc(100% - 820px);
+  min-width: 260px;
+  padding: 8px 16px;
+  border-radius: 100px;
+  background: var(--cp-panel-strong);
+  box-shadow: var(--float-shadow);
+  transform: translateX(calc(-50% - 100px));
+  justify-content: center;
+}
+.ocean .view-badge {
+  top: auto;
+  left: 16px;
+  bottom: 206px;
+  z-index: 4;
+  padding: 3px 8px;
+  border-radius: 100px;
+  background: var(--cp-panel-strong);
+}
+.ocean .scale-bar {
+  left: 16px;
+  bottom: 168px;
+  z-index: 4;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--cp-panel-strong);
+}
+.ocean .part-card {
+  right: auto;
+  left: 220px;
+  bottom: 184px;
+  z-index: 5;
+  /* Never grows up over the title and its tools: long evidence scrolls inside. */
+  max-height: max(160px, calc(100% - 184px - 330px));
+  overflow: auto;
+  overscroll-behavior: contain;
+  box-shadow: var(--float-shadow);
+  border-color: var(--cp-text);
+}
+.part-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.part-actions button {
+  min-height: 34px;
+  padding: 4px 12px;
+  border: 1.5px solid var(--cp-text);
+  border-radius: 100px;
+  background: transparent;
+  color: var(--cp-text);
+  font:
+    12px Consolas,
+    'Courier New',
+    monospace;
+}
+.part-actions button:hover {
+  background: var(--cp-surface-soft);
+}
+
+/* Short screens: keep the title panel compact so it clears the timeline. */
+@media (max-height: 860px) {
+  .setting-note .fact + .fact,
+  .setting-note .where-link {
+    display: none;
+  }
+  .float-title .sim-taxon .fact details {
+    display: none;
+  }
+}
+
+/* Narrower screens: the life panel moves under the ocean. */
+@media (max-width: 1000px) {
+  .sim .sim-view.ocean {
+    --stage: 78dvh;
+    --safe-left: 12px;
+    --safe-right: 12px;
+    --safe-top: 360px;
+    --safe-bottom: 190px;
+    height: auto;
+    min-height: 0;
+    padding-top: var(--stage);
+    background-size: 100% var(--stage);
+    background-repeat: no-repeat;
+  }
+  .ocean .sim-stage {
+    inset: 0 0 auto;
+    height: var(--stage);
+  }
+  .float-left {
+    flex-direction: column;
+  }
+  .setting-note .fact + .fact,
+  .setting-note .where-link {
+    display: none;
+  }
+  .sim .ocean .view-controls {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .sim .ocean .view-controls button {
+    flex: none;
+  }
+  .float-bottom {
+    top: calc(var(--stage) - 16px);
+    bottom: auto;
+    transform: translateY(-100%);
+  }
+  .ocean .action-hint {
+    top: calc(var(--stage) - 168px);
+    bottom: auto;
+    max-width: calc(100% - 32px);
+    transform: translateX(-50%);
+  }
+  .ocean .view-badge,
+  .ocean .scale-bar,
+  .ocean .part-card {
+    top: auto;
+    bottom: auto;
+  }
+  .ocean .view-badge {
+    display: none;
+  }
+  .ocean .scale-bar {
+    top: calc(var(--stage) - 222px);
+  }
+  .ocean .part-card {
+    left: 16px;
+    top: calc(var(--stage) - 180px);
+    transform: translateY(-100%);
+    max-height: max(140px, calc(var(--stage) - 190px - var(--safe-top)));
+  }
+  .sim .ocean .life-panel {
+    position: static;
+    width: auto;
+    margin: 16px;
+    max-height: none;
+    overflow: visible;
+  }
+}
+@media (max-width: 760px) {
+  .sim > #where,
+  .sim > #lab,
+  .sim > .field-plates,
+  .sim > .footer {
+    margin-inline: 16px;
+  }
+  .sim .sim-view.ocean {
+    --stage: 86dvh;
+    --safe-top: 290px;
+    --safe-bottom: 210px;
+  }
+  .ocean .action-hint,
+  .ocean .view-badge {
+    display: none;
+  }
+  .ocean .scale-bar {
+    top: 286px;
+    left: auto;
+    right: 12px;
+  }
+  .ocean .figure-tools .look-slider span,
+  .ocean .take-apart span {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+  }
+  .ocean .figure-views button {
+    min-height: 34px;
+    padding: 2px 10px;
+  }
+  .float-left {
+    top: 10px;
+    left: 10px;
+    width: calc(100% - 20px);
+  }
+  .float-title {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .title-row {
+    padding-right: 96px;
+  }
+  .title-row .brand {
+    display: none;
+  }
+  .chip-select select {
+    max-width: 120px;
+  }
+  .float-actions {
+    top: 14px;
+    right: 14px;
+    box-shadow: none;
+    background: transparent;
+  }
+  .float-actions .header-actions > .text-button:first-child {
+    display: none;
+  }
+  .float-bottom {
+    left: 10px;
+    right: 10px;
+    padding: 8px 10px 6px;
+  }
+  .ocean .figure-tools {
+    gap: 6px 12px;
+  }
+  .ocean .figure-views {
+    margin-left: 0;
+  }
+  .ocean .take-apart input {
+    width: 96px;
+  }
+  .look-slider input {
+    width: 96px;
+  }
+  .sim-labels button {
+    min-height: 24px;
+    padding: 2px 5px;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+  }
+  .phase-ticks button {
+    font-size: 0;
+    min-height: 24px;
+  }
+  .phase-ticks button[aria-current='step'] {
+    font-size: 11px;
+    overflow: visible;
+  }
+}
+.sim .sim-view.ocean::after {
+  display: none;
 }

@@ -25,6 +25,16 @@ import {
   startOf,
 } from './life.ts'
 import { glossary } from './glossary.ts'
+import {
+  bedLabels,
+  beds,
+  coastLabels,
+  seabedFor,
+  settingLabel,
+} from './seabed.ts'
+import type { Bed, Setting } from './seabed.ts'
+import { drawThumbs } from './thumbs.ts'
+import type { Thumbs } from './thumbs.ts'
 import type { PhaseId } from './life.ts'
 import { addToShelf, parseShelf, shelfKey } from './shelf.ts'
 import type { Found } from './shelf.ts'
@@ -554,6 +564,130 @@ function PhaseStory({
   }
 }
 
+/** What the setting chip says about where the seabed came from. */
+function settingNote(setting: Setting, choice: Bed | null) {
+  if (setting.scene === 'open-water')
+    return ' · the larva drifts in the plankton'
+  if (setting.scene === 'beach') return ' · washed ashore'
+  if (choice)
+    return setting.elsewhere
+      ? ' · your pick; not where this species lives'
+      : ' · your pick'
+  return setting.coast === 'reef'
+    ? ' · from its habitat'
+    : ` · from its habitat, with this coast's ${coastLabels[setting.coast]}`
+}
+
+const groupLabel: Record<string, string> = {
+  gastropod: 'Sea snail',
+  cephalopod: 'Cephalopod',
+}
+
+/** The floating shell menu: each species as its empty shell and its living animal. */
+function ShellMenu({
+  species,
+  thumbs,
+  onChoose,
+  onOpen,
+}: {
+  species: Species
+  thumbs: Record<string, Thumbs>
+  onChoose: (id: string) => void
+  onOpen: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const root = useRef<HTMLDivElement>(null)
+  const toggle = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const away = (event: PointerEvent) => {
+      if (!root.current?.contains(event.target as Node)) setOpen(false)
+    }
+    const key = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setOpen(false)
+      toggle.current?.focus()
+    }
+    document.addEventListener('pointerdown', away)
+    document.addEventListener('keydown', key)
+    return () => {
+      document.removeEventListener('pointerdown', away)
+      document.removeEventListener('keydown', key)
+    }
+  }, [open])
+  const current = thumbs[species.id]
+  return (
+    <div className="shell-menu" ref={root}>
+      <button
+        ref={toggle}
+        className="shell-menu-button"
+        aria-expanded={open}
+        aria-controls="shell-tray"
+        aria-label="Shells"
+        onClick={() => {
+          if (!open) onOpen()
+          setOpen(!open)
+        }}
+        style={swatch(species)}
+      >
+        {current ? (
+          <img src={current.shell} alt="" width="44" height="30" />
+        ) : (
+          <span className="swatch" aria-hidden="true" />
+        )}
+        <span aria-hidden="true">Shells</span>
+        <span className="chevron" aria-hidden="true" />
+      </button>
+      {open && (
+        <div className="shell-tray" id="shell-tray">
+          <p className="panel-label">Choose a shell · shell and animal</p>
+          <ul>
+            {allSpecies.map((item) => {
+              const pictures = thumbs[item.id]
+              return (
+                <li key={item.id}>
+                  <button
+                    aria-pressed={item.id === species.id}
+                    onClick={() => {
+                      onChoose(item.id)
+                      setOpen(false)
+                      toggle.current?.focus()
+                    }}
+                    style={swatch(item)}
+                  >
+                    <span className="tray-pictures" aria-hidden="true">
+                      {pictures ? (
+                        <>
+                          <img src={pictures.shell} alt="" />
+                          <img src={pictures.animal} alt="" />
+                        </>
+                      ) : (
+                        <span className="swatch" />
+                      )}
+                    </span>
+                    <strong>{item.commonName}</strong>
+                    <i>{item.scientificName}</i>
+                    <span className="tray-meta">
+                      {groupLabel[item.group] ?? item.group} · drawn at{' '}
+                      {item.lengthMm.drawn} mm
+                    </span>
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+          <div className="picker-note">
+            <Fact claim="mollusca-diversity">
+              Five of about 86,600 living mollusc species. Snails make up about
+              80% of them.
+            </Fact>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function Simulator() {
   const [speciesId, setSpeciesId] = useState(() => {
     const requested = new URLSearchParams(location.search).get('species')
@@ -564,13 +698,27 @@ export function Simulator() {
   const species = getSpecies(speciesId)
   const [originId, setOriginId] = useState(() => firstOrigin(species))
   const origins = originsFor(species.id)
-  const habitat = species.origins[0]!
   const origin = {
     id: origins.some((place) => place.region.id === originId)
       ? originId
       : firstOrigin(species),
     name: placeName(species, originId),
   }
+  const habitat =
+    species.origins.find((item) => item.id === origin.id) ?? species.origins[0]!
+  const [bedChoice, setBedChoice] = useState<Bed | null>(null)
+  const [thumbs, setThumbs] = useState<Record<string, Thumbs>>({})
+  // The menu's drawings are made the first time it opens, so they never slow the first view.
+  const [menuOpened, setMenuOpened] = useState(false)
+  useEffect(
+    () =>
+      menuOpened
+        ? drawThumbs(allSpecies, (id, pictures) =>
+            setThumbs((all) => ({ ...all, [id]: pictures })),
+          )
+        : undefined,
+    [menuOpened],
+  )
   const [t, setT] = useState(startOf('adult') + 0.06)
   const [playing, setPlaying] = useState(false)
   const [deathId, setDeathId] = useState(species.deaths[0]?.id ?? '')
@@ -653,6 +801,10 @@ export function Simulator() {
       wear: base.beach ? Math.min(0.9, base.wear + waves * 0.08) : base.wear,
     }),
     [base, inRemains, crabCalled, floatCalled, waves, species],
+  )
+  const setting = useMemo(
+    () => seabedFor(species, origin.id, frame.phase, bedChoice),
+    [species, origin.id, frame.phase, bedChoice],
   )
   const action = actionFor(frame.phase, species)
   const { index: phaseIndex, phase } = phaseAt(t)
@@ -824,106 +976,13 @@ export function Simulator() {
       <a className="skip-link" href="#timeline">
         Skip to the life timeline
       </a>
-      <header className="sim-top">
-        <a className="brand" href={import.meta.env.BASE_URL}>
-          <img src={`${import.meta.env.BASE_URL}shell-mark.svg`} alt="" />
-          <span>
-            Sea
-            <br />
-            Treasures
-          </span>
-        </a>
-        <div className="sim-title">
-          <h1 ref={heading} tabIndex={-1}>
-            {species.commonName}
-          </h1>
-          <div className="sim-taxon">
-            <Fact claim={species.taxonClaim}>
-              <i>{species.scientificName}</i> {species.authority}
-            </Fact>
-          </div>
-        </div>
-        <div className="header-actions">
-          <button
-            className="text-button"
-            onClick={() => sources.current?.showModal()}
-          >
-            Sources
-          </button>
-          <button
-            className="icon-button"
-            aria-label={
-              theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
-            }
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          >
-            <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
-          </button>
-        </div>
-      </header>
-
       <main className="sim-main" id="main">
-        <nav className="species-picker" aria-label="Choose a shell">
-          <h2 className="panel-label">Species</h2>
-          <ul>
-            {allSpecies.map((item) => (
-              <li key={item.id}>
-                <button
-                  aria-pressed={item.id === species.id}
-                  onClick={() => chooseSpecies(item.id)}
-                  style={swatch(item)}
-                >
-                  <span className="swatch" aria-hidden="true" />
-                  <span>
-                    <strong>{item.commonName}</strong>
-                    <i>{item.scientificName}</i>
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-          <label className="panel-label" htmlFor="origin">
-            Origin
-          </label>
-          <select
-            id="origin"
-            value={origin.id}
-            onChange={(event) => setOriginId(event.target.value)}
-          >
-            {Object.entries(ranges.oceans).map(([ocean, label]) => {
-              const here = origins.filter(
-                (place) => place.region.ocean === ocean,
-              )
-              return here.length ? (
-                <optgroup key={ocean} label={label}>
-                  {here.map((place) => (
-                    <option key={place.region.id} value={place.region.id}>
-                      {place.region.name} · {place.count.n} record
-                      {place.count.n === 1 ? '' : 's'}
-                      {place.outside ? ' · outside range' : ''}
-                    </option>
-                  ))}
-                </optgroup>
-              ) : null
-            })}
-          </select>
-          <Fact claim={habitat.claim}>
-            {habitat.habitat}
-            {habitat.depthM &&
-              ` · ${habitat.depthM[0]}–${habitat.depthM[1]} m deep`}
-          </Fact>
-          <a className="text-button where-link" href="#where">
-            See it on the map
-          </a>
-          <div className="picker-note">
-            <Fact claim="mollusca-diversity">
-              Five of about 86,600 living mollusc species. Snails make up about
-              80% of them.
-            </Fact>
-          </div>
-        </nav>
-
-        <section className="sim-view" aria-label="Shell">
+        <section
+          className="sim-view ocean"
+          aria-label="Ocean floor"
+          data-scene={setting.scene}
+          data-bed={setting.main ?? 'open-water'}
+        >
           <Suspense
             fallback={
               <div className="sim-stage loading" role="status">
@@ -941,6 +1000,7 @@ export function Simulator() {
               pxPerMm={calibration.pxPerMm}
               reducedMotion={reducedMotion}
               pulse={pulse}
+              setting={setting}
               labels={labels}
               look={look}
               turntable={turntable}
@@ -967,58 +1027,155 @@ export function Simulator() {
             <span style={{ width: bar.px }} />
             {bar.mm < 1 ? `${bar.mm * 1000} µm` : `${bar.mm} mm`}
           </div>
-          <div className="view-controls" role="group" aria-label="View">
-            <button
-              aria-pressed={cut}
-              onClick={() => setCut(!cut)}
-              disabled={frame.size === 0}
-            >
-              <Icon name="cut" />
-              Cut open
-            </button>
-            <button
-              aria-pressed={xray}
-              onClick={() => setXray(!xray)}
-              disabled={frame.size === 0}
-            >
-              <Icon name="xray" />
-              See-through
-            </button>
-            <button aria-pressed={labels} onClick={() => setLabels(!labels)}>
-              <Icon name="label" />
-              Labels
-            </button>
-            <button aria-pressed={actual} onClick={() => setActual(!actual)}>
-              <Icon name="ruler" />
-              Actual size
-            </button>
-            {actual && (
+
+          <div className="float-left">
+            <header className="float float-title">
+              <div className="title-row">
+                <a className="brand" href={import.meta.env.BASE_URL}>
+                  <img
+                    src={`${import.meta.env.BASE_URL}shell-mark.svg`}
+                    alt=""
+                  />
+                  <span className="sr-only">SeaTreasures</span>
+                </a>
+                <div className="sim-title">
+                  <h1 ref={heading} tabIndex={-1}>
+                    {species.commonName}
+                  </h1>
+                  <div className="sim-taxon">
+                    <Fact claim={species.taxonClaim}>
+                      <i>{species.scientificName}</i> {species.authority}
+                    </Fact>
+                  </div>
+                </div>
+              </div>
+              <div className="chips">
+                <ShellMenu
+                  species={species}
+                  thumbs={thumbs}
+                  onChoose={chooseSpecies}
+                  onOpen={() => setMenuOpened(true)}
+                />
+                <label className="chip-select">
+                  <span>Place</span>
+                  <select
+                    id="origin"
+                    value={origin.id}
+                    onChange={(event) => setOriginId(event.target.value)}
+                  >
+                    {Object.entries(ranges.oceans).map(([ocean, label]) => {
+                      const here = origins.filter(
+                        (place) => place.region.ocean === ocean,
+                      )
+                      return here.length ? (
+                        <optgroup key={ocean} label={label}>
+                          {here.map((place) => (
+                            <option
+                              key={place.region.id}
+                              value={place.region.id}
+                            >
+                              {place.region.name} · {place.count.n} record
+                              {place.count.n === 1 ? '' : 's'}
+                              {place.outside ? ' · outside range' : ''}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ) : null
+                    })}
+                  </select>
+                </label>
+                <label className="chip-select">
+                  <span>Seabed</span>
+                  <select
+                    id="seabed"
+                    value={bedChoice ?? ''}
+                    onChange={(event) =>
+                      setBedChoice((event.target.value || null) as Bed | null)
+                    }
+                  >
+                    <option value="">Its habitat</option>
+                    {beds.map((bed) => (
+                      <option key={bed} value={bed}>
+                        {bedLabels[bed]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <div className="setting-note" aria-live="polite">
+                <Fact claim="seabed-setting-illustrative">
+                  <strong>{settingLabel(setting)}</strong>
+                  {settingNote(setting, bedChoice)}
+                </Fact>
+                <Fact claim={habitat.claim}>
+                  {habitat.habitat}
+                  {habitat.depthM &&
+                    ` · ${habitat.depthM[0]}–${habitat.depthM[1]} m deep`}
+                </Fact>
+                <a className="text-button where-link" href="#where">
+                  See it on the map
+                </a>
+              </div>
+            </header>
+            <div className="float view-controls" role="group" aria-label="View">
+              <button
+                aria-pressed={cut}
+                onClick={() => setCut(!cut)}
+                disabled={frame.size === 0}
+              >
+                <Icon name="cut" />
+                Cut open
+              </button>
+              <button
+                aria-pressed={xray}
+                onClick={() => setXray(!xray)}
+                disabled={frame.size === 0}
+              >
+                <Icon name="xray" />
+                See-through
+              </button>
+              <button aria-pressed={labels} onClick={() => setLabels(!labels)}>
+                <Icon name="label" />
+                Labels
+              </button>
+              <button aria-pressed={actual} onClick={() => setActual(!actual)}>
+                <Icon name="ruler" />
+                Actual size
+              </button>
+              {actual && (
+                <button
+                  className="text-button"
+                  onClick={() => calibrate.current?.showModal()}
+                >
+                  Calibrate
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="float float-actions">
+            <div className="header-actions">
+              <button className="text-button" onClick={() => act('reset')}>
+                Reset view
+              </button>
               <button
                 className="text-button"
-                onClick={() => calibrate.current?.showModal()}
+                onClick={() => sources.current?.showModal()}
               >
-                Calibrate
+                Sources
               </button>
-            )}
-          </div>
-          {frame.animal > 0 && frame.larva === 0 && (
-            <label className="take-apart">
-              <Icon name="apart" />
-              <span>Take apart</span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={Math.round(apart * 100)}
-                onChange={(event) => setApart(Number(event.target.value) / 100)}
-                aria-valuetext={
-                  apart > 0.05
-                    ? `Body pulled ${Math.round(apart * 100)}% out of the shell`
-                    : 'Body inside the shell'
+              <button
+                className="icon-button"
+                aria-label={
+                  theme === 'dark'
+                    ? 'Switch to light mode'
+                    : 'Switch to dark mode'
                 }
-              />
-            </label>
-          )}
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              >
+                <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
+              </button>
+            </div>
+          </div>
           {labels && part && glossary[part] && (
             <div className="part-card" role="region" aria-label={part}>
               <div className="part-card-head">
@@ -1032,131 +1189,213 @@ export function Simulator() {
                 </button>
               </div>
               <Fact claim={glossary[part].claim}>{glossary[part].text}</Fact>
+              <div className="part-actions">
+                <button
+                  onClick={() =>
+                    setPulse({ kind: 'focus', part, at: performance.now() })
+                  }
+                >
+                  Zoom to {part.toLowerCase()}
+                </button>
+                <button onClick={() => act('reset')}>Show whole</button>
+              </div>
             </div>
           )}
-          <div className="figure-tools">
-            <label className="look-slider">
-              <span aria-hidden="true">Drawing</span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                aria-label="Drawing or realistic"
-                value={Math.round(look * 100)}
-                onChange={(event) => setLook(Number(event.target.value) / 100)}
-                aria-valuetext={
-                  look < 0.15
-                    ? 'Educational drawing'
-                    : look > 0.85
-                      ? 'Realistic'
-                      : `${Math.round(look * 100)}% realistic`
+
+          <aside className="float life-panel" aria-labelledby="phase-title">
+            <p className="panel-label">
+              {String(phaseIndex + 1).padStart(2, '0')} /{' '}
+              {String(phases.length).padStart(2, '0')}
+            </p>
+            <h2 id="phase-title">{phase.label}</h2>
+            <p className={`clock${clock.known ? '' : ' unknown'}`}>
+              {clock.label}
+            </p>
+            {action.button && (
+              <button
+                className="primary action-button"
+                onClick={runAction}
+                aria-pressed={frame.phase === 'growth' ? growing : undefined}
+              >
+                <Icon name="hand" />
+                {frame.phase === 'growth' && growing
+                  ? 'Stop growing'
+                  : action.button}
+              </button>
+            )}
+            <div className="phase-story">
+              <PhaseStory
+                species={species}
+                phase={frame.phase}
+                deathId={death?.id ?? ''}
+                onDeath={setDeathId}
+                originName={origin.name}
+                shelf={shelf}
+                shelfError={shelfError}
+                onRemove={(index) =>
+                  writeShelf(
+                    shelf.filter((_, at) => at !== index),
+                    'Removed from your shelf.',
+                  )
                 }
               />
-              <span aria-hidden="true">Realistic</span>
-            </label>
-            <div className="figure-views" role="group" aria-label="Turn">
+            </div>
+            <dl className="durations">
+              <div>
+                <dt>Egg</dt>
+                <dd>{describeDuration(species.life.egg)}</dd>
+              </div>
+              <div>
+                <dt>Larva</dt>
+                <dd>{describeDuration(species.life.larva)}</dd>
+              </div>
+              <div>
+                <dt>To adult</dt>
+                <dd>{describeDuration(species.life.maturity)}</dd>
+              </div>
+              <div>
+                <dt>Lifespan</dt>
+                <dd>{describeDuration(species.life.lifespan)}</dd>
+              </div>
+              <div>
+                <dt>Adult size</dt>
+                <dd>
+                  {species.lengthMm.typical
+                    ? `${species.lengthMm.typical[0]}–${species.lengthMm.typical[1]} mm`
+                    : 'Not established'}
+                  {species.lengthMm.max
+                    ? ` · up to ${species.lengthMm.max} mm`
+                    : ''}
+                </dd>
+              </div>
+              <div>
+                <dt>Drawn at</dt>
+                <dd title={species.drawnNote}>{species.lengthMm.drawn} mm</dd>
+              </div>
+            </dl>
+          </aside>
+
+          <div className="float float-bottom">
+            <section
+              className="timeline"
+              id="timeline"
+              aria-label="Life timeline"
+            >
               <button
+                className="play"
                 onClick={() => {
-                  setTurntable(false)
-                  act('front')
+                  if (t >= 1) setT(0)
+                  setPlaying(!playing)
                 }}
+                aria-label={playing ? 'Pause the life' : 'Play the life'}
               >
-                Front view
+                <Icon name={playing ? 'pause' : 'play'} />
               </button>
-              <button
-                onClick={() => {
-                  setTurntable(false)
-                  act('iso')
-                }}
-              >
-                Isometric
-              </button>
-              <button
-                aria-pressed={turntable}
-                onClick={() => setTurntable(!turntable)}
-                disabled={reducedMotion}
-              >
-                Turntable
-              </button>
+              <div className="track">
+                <input
+                  className="range"
+                  type="range"
+                  min="0"
+                  max="1000"
+                  step="1"
+                  value={Math.round(t * 1000)}
+                  onChange={(event) => {
+                    setPlaying(false)
+                    setT(Number(event.target.value) / 1000)
+                  }}
+                  aria-label="Life timeline"
+                  aria-valuetext={`${phase.label}. ${clock.label}`}
+                />
+                <ol className="phase-ticks">
+                  {phases.map((item, index) => (
+                    <li key={item.id} style={{ flexGrow: item.share }}>
+                      <button
+                        aria-current={index === phaseIndex ? 'step' : undefined}
+                        onClick={() => {
+                          setPlaying(false)
+                          setT(startOf(item.id) + item.share * 0.5)
+                        }}
+                      >
+                        {item.label}
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </section>
+            <div className="figure-tools">
+              <label className="look-slider">
+                <span aria-hidden="true">Drawing</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  aria-label="Drawing or realistic"
+                  value={Math.round(look * 100)}
+                  onChange={(event) =>
+                    setLook(Number(event.target.value) / 100)
+                  }
+                  aria-valuetext={
+                    look < 0.15
+                      ? 'Educational drawing'
+                      : look > 0.85
+                        ? 'Realistic'
+                        : `${Math.round(look * 100)}% realistic`
+                  }
+                />
+                <span aria-hidden="true">Realistic</span>
+              </label>
+              <div className="figure-views" role="group" aria-label="Turn">
+                <button
+                  onClick={() => {
+                    setTurntable(false)
+                    act('front')
+                  }}
+                >
+                  Front view
+                </button>
+                <button
+                  onClick={() => {
+                    setTurntable(false)
+                    act('iso')
+                  }}
+                >
+                  Isometric
+                </button>
+                <button
+                  aria-pressed={turntable}
+                  onClick={() => setTurntable(!turntable)}
+                  disabled={reducedMotion}
+                >
+                  Turntable
+                </button>
+              </div>
+              {frame.animal > 0 && frame.larva === 0 && (
+                <label className="take-apart">
+                  <Icon name="apart" />
+                  <span>Take apart</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={Math.round(apart * 100)}
+                    onChange={(event) =>
+                      setApart(Number(event.target.value) / 100)
+                    }
+                    aria-valuetext={
+                      apart > 0.05
+                        ? `Body pulled ${Math.round(apart * 100)}% out of the shell`
+                        : 'Body inside the shell'
+                    }
+                  />
+                </label>
+              )}
             </div>
           </div>
           <p className="sr-only" id="sim-summary">
             {summary}
           </p>
         </section>
-
-        <aside className="life-panel" aria-labelledby="phase-title">
-          <p className="panel-label">
-            {String(phaseIndex + 1).padStart(2, '0')} /{' '}
-            {String(phases.length).padStart(2, '0')}
-          </p>
-          <h2 id="phase-title">{phase.label}</h2>
-          <p className={`clock${clock.known ? '' : ' unknown'}`}>
-            {clock.label}
-          </p>
-          {action.button && (
-            <button
-              className="primary action-button"
-              onClick={runAction}
-              aria-pressed={frame.phase === 'growth' ? growing : undefined}
-            >
-              <Icon name="hand" />
-              {frame.phase === 'growth' && growing
-                ? 'Stop growing'
-                : action.button}
-            </button>
-          )}
-          <div className="phase-story">
-            <PhaseStory
-              species={species}
-              phase={frame.phase}
-              deathId={death?.id ?? ''}
-              onDeath={setDeathId}
-              originName={origin.name}
-              shelf={shelf}
-              shelfError={shelfError}
-              onRemove={(index) =>
-                writeShelf(
-                  shelf.filter((_, at) => at !== index),
-                  'Removed from your shelf.',
-                )
-              }
-            />
-          </div>
-          <dl className="durations">
-            <div>
-              <dt>Egg</dt>
-              <dd>{describeDuration(species.life.egg)}</dd>
-            </div>
-            <div>
-              <dt>Larva</dt>
-              <dd>{describeDuration(species.life.larva)}</dd>
-            </div>
-            <div>
-              <dt>To adult</dt>
-              <dd>{describeDuration(species.life.maturity)}</dd>
-            </div>
-            <div>
-              <dt>Lifespan</dt>
-              <dd>{describeDuration(species.life.lifespan)}</dd>
-            </div>
-            <div>
-              <dt>Adult size</dt>
-              <dd>
-                {species.lengthMm.typical
-                  ? `${species.lengthMm.typical[0]}–${species.lengthMm.typical[1]} mm`
-                  : 'Not established'}
-                {species.lengthMm.max
-                  ? ` · up to ${species.lengthMm.max} mm`
-                  : ''}
-              </dd>
-            </div>
-            <div>
-              <dt>Drawn at</dt>
-              <dd title={species.drawnNote}>{species.lengthMm.drawn} mm</dd>
-            </div>
-          </dl>
-        </aside>
       </main>
 
       <div id="where">
@@ -1170,51 +1409,6 @@ export function Simulator() {
           fact={(claim, children) => <Fact claim={claim}>{children}</Fact>}
         />
       </div>
-
-      <section className="timeline" id="timeline" aria-label="Life timeline">
-        <button
-          className="play"
-          onClick={() => {
-            if (t >= 1) setT(0)
-            setPlaying(!playing)
-          }}
-          aria-label={playing ? 'Pause the life' : 'Play the life'}
-        >
-          <Icon name={playing ? 'pause' : 'play'} />
-        </button>
-        <div className="track">
-          <input
-            className="range"
-            type="range"
-            min="0"
-            max="1000"
-            step="1"
-            value={Math.round(t * 1000)}
-            onChange={(event) => {
-              setPlaying(false)
-              setT(Number(event.target.value) / 1000)
-            }}
-            aria-label="Life timeline"
-            aria-valuetext={`${phase.label}. ${clock.label}`}
-          />
-          <ol className="phase-ticks">
-            {phases.map((item, index) => (
-              <li key={item.id} style={{ flexGrow: item.share }}>
-                <button
-                  aria-current={index === phaseIndex ? 'step' : undefined}
-                  onClick={() => {
-                    setPlaying(false)
-                    setT(startOf(item.id) + item.share * 0.5)
-                  }}
-                >
-                  {item.label}
-                </button>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
       <div id="lab">
         <Suspense
           fallback={

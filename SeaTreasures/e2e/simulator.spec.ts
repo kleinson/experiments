@@ -12,6 +12,14 @@ const species = [
 const phase = (page: Page, name: string) =>
   page.locator('.phase-ticks button', { hasText: name }).click()
 const announced = (page: Page) => page.locator('.sim > [role="status"]')
+/** Opens the floating shell menu and picks a species from it. */
+async function chooseShell(page: Page, name: string) {
+  await page.getByRole('button', { name: 'Shells', exact: true }).click()
+  await page
+    .locator('#shell-tray')
+    .getByRole('button', { name: new RegExp(name) })
+    .click()
+}
 
 /** Fraction of the stage's pixels that differ clearly from its corner: something is drawn. */
 async function drawn(page: Page) {
@@ -53,7 +61,7 @@ test('every species can be chosen and is drawn with its sourced name', async ({
   page.on('pageerror', (error) => errors.push(error.message))
   await page.goto('./')
   for (const [id, name] of species) {
-    await page.getByRole('button', { name: new RegExp(name) }).click()
+    await chooseShell(page, name)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(name)
     await expect(page).toHaveURL(new RegExp(`species=${id}`))
     await expect.poll(() => drawn(page)).toBeGreaterThan(0.02)
@@ -178,6 +186,79 @@ test('the drawing-to-realistic slider and the views change the figure', async ({
   await changedFrom(before)
 })
 
+test('the ocean floor changes with the species, the place and the reader', async ({
+  page,
+}) => {
+  await page.goto('./?species=queen-conch')
+  await phase(page, 'Adult')
+  const ocean = page.getByRole('region', { name: 'Ocean floor' })
+  await expect(ocean).toHaveAttribute('data-bed', 'seagrass')
+  const canvas = page.locator('[data-sim-canvas]')
+  let before = await canvas.screenshot()
+  await chooseShell(page, 'Chambered nautilus')
+  await expect(ocean).toHaveAttribute('data-bed', 'deep')
+  await expect(page.locator('.setting-note')).toContainText('Deep reef slope')
+  await expect
+    .poll(async () => (await canvas.screenshot()).equals(before))
+    .toBe(false)
+  await chooseShell(page, 'Tiger cowrie')
+  await expect(ocean).toHaveAttribute('data-bed', 'coral')
+  await page.locator('#origin').selectOption('hawaiian-islands')
+  await expect(page.locator('.setting-note')).toContainText('volcanic rock')
+  before = await canvas.screenshot()
+  await page.locator('#seabed').selectOption('kelp')
+  await expect(ocean).toHaveAttribute('data-bed', 'kelp')
+  await expect(page.locator('.setting-note')).toContainText(
+    'not where this species lives',
+  )
+  await expect
+    .poll(async () => (await canvas.screenshot()).equals(before))
+    .toBe(false)
+  await phase(page, 'Beach')
+  await expect(ocean).toHaveAttribute('data-scene', 'beach')
+  await phase(page, 'Larva')
+  await expect(ocean).toHaveAttribute('data-scene', 'open-water')
+})
+
+test('the shell menu shows each species as its shell and its animal', async ({
+  page,
+}) => {
+  await page.goto('./?species=money-cowrie')
+  const toggle = page.getByRole('button', { name: 'Shells', exact: true })
+  await toggle.click()
+  const tray = page.locator('#shell-tray')
+  await expect(tray.getByRole('button')).toHaveCount(5)
+  await expect(
+    tray.getByRole('button', { name: /Money cowrie/ }),
+  ).toHaveAttribute('aria-pressed', 'true')
+  await expect(tray.locator('.tray-pictures img')).toHaveCount(10, {
+    timeout: 20000,
+  })
+  await page.keyboard.press('Escape')
+  await expect(tray).toBeHidden()
+  await expect(toggle).toBeFocused()
+})
+
+test('reset view and zoom to a part', async ({ page }) => {
+  await page.goto('./?species=queen-conch')
+  await phase(page, 'Adult')
+  const canvas = page.locator('[data-sim-canvas]')
+  await page
+    .getByRole('list', { name: 'Labelled parts' })
+    .getByRole('button', { name: 'Operculum' })
+    .click()
+  const before = await canvas.screenshot()
+  await page.getByRole('button', { name: 'Zoom to operculum' }).click()
+  await expect
+    .poll(async () => (await canvas.screenshot()).equals(before))
+    .toBe(false)
+  const zoomed = await canvas.screenshot()
+  await page.getByRole('button', { name: 'Reset view' }).click()
+  await expect
+    .poll(async () => (await canvas.screenshot()).equals(zoomed))
+    .toBe(false)
+})
+
 test('actual size draws the shell at a millimetre scale and can be calibrated', async ({
   page,
 }) => {
@@ -208,7 +289,7 @@ test('durations are sourced or plainly marked as not established', async ({
   await page.goto('./?species=queen-conch')
   await expect(page.locator('.durations')).toContainText('21–30 days')
   await expect(page.locator('.durations')).toContainText('25–30 years')
-  await page.getByRole('button', { name: /Money cowrie/ }).click()
+  await chooseShell(page, 'Money cowrie')
   await expect(page.locator('.durations')).toContainText('Not established')
   await phase(page, 'Adult')
   await expect(page.locator('.clock')).toContainText('not established')
@@ -337,7 +418,7 @@ test('the production build works offline after its first visit', async ({
   try {
     await page.reload()
     await expect(page.locator('[data-sim-canvas]')).toBeVisible()
-    await page.getByRole('button', { name: /Chambered nautilus/ }).click()
+    await chooseShell(page, 'Chambered nautilus')
     await phase(page, 'Empty shell')
     await page.getByRole('button', { name: 'Let it drift' }).click()
     await expect(announced(page)).toContainText('float')
@@ -364,7 +445,7 @@ test('where it is found: every ocean, recorded places as origins, flagged outlie
   await expect(
     where.getByRole('button', { name: /^Madagascar/ }),
   ).toBeDisabled()
-  await page.getByRole('button', { name: /Chambered nautilus/ }).click()
+  await chooseShell(page, 'Chambered nautilus')
   await expect(where.locator('[aria-pressed="true"]')).toContainText(
     'Great Barrier Reef',
   )
