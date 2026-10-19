@@ -219,18 +219,18 @@ function organs(open: number, mantle: number): Organ[] {
       },
     })
 
-  blob('foot', [-6, 0, 6], [70, 33, 6.5], [20, 34])
+  blob('foot', [-6, 0, 6], [70, 33, 6.5], [28, 56])
   list.push({
     part: 'foot',
     param: ellipsoid(at(-10, 0, -15), [48, 17, 9]),
-    style: { rows: 16, columns: 26, wrap: true, doubleSided: true, soft: true },
+    style: { rows: 22, columns: 40, wrap: true, doubleSided: true, soft: true },
   })
   list.push({
     part: 'visceral',
     param: ellipsoid(at(16, -3, 3), [38, 22, 19], 0, 0.08),
-    style: { rows: 20, columns: 30, wrap: true, doubleSided: true, soft: true },
+    style: { rows: 26, columns: 44, wrap: true, doubleSided: true, soft: true },
   })
-  blob('head', at(-62, 0, -20), [11, 10, 7], [16, 22])
+  blob('head', at(-62, 0, -20), [11, 10, 7], [20, 30])
   for (const side of [-1, 1]) {
     duct(
       'head',
@@ -244,13 +244,7 @@ function organs(open: number, mantle: number): Organ[] {
     )
     blob('head', at(-68, side * 9, -16.4), [2, 2, 2], [10, 12])
   }
-  duct(
-    'siphon',
-    bend(at(-50, 0, -4), at(-64, 0, -4), at(-72, 0, 6)),
-    (t) => 3 + 0.6 * t * t,
-    16,
-    true,
-  )
+  blob('siphon', at(-60, 0, 0), [11, 3.6, 3.4], [14, 20], 0, -0.55)
   if (open > 0.15) {
     const whorl = (t: number) => {
       const angle = t * Math.PI * 4.5
@@ -466,7 +460,7 @@ export function partAnchors(open: number, P: Projection) {
     mantle: at(-6, 26, -6),
     foot: [30, 26, 8],
     head: at(-76, 6, -14),
-    siphon: at(-78, 0, 6),
+    siphon: at(-64, 0, 3),
   }
   if (open > 0.4) {
     Object.assign(anchors, {

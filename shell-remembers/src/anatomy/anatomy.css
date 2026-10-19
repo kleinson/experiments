@@ -144,8 +144,8 @@ html[data-theme='dark'] .an-plates {
 }
 .an-tooth {
   fill: var(--anatomy-top);
-  stroke: var(--anatomy-mid);
-  stroke-width: 0.5;
+  stroke: var(--anatomy-lo);
+  stroke-width: 0.45;
 }
 .an-rest {
   filter: blur(5px);

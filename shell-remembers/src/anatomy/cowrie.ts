@@ -152,7 +152,7 @@ export function cowrieItems(
           P,
           u,
           v,
-          [span * 0.0045, span * (0.01 + 0.032 * shape.teeth)],
+          [span * 0.004, span * (0.008 + 0.017 * shape.teeth)],
           0,
           {
             center,
