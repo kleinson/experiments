@@ -6,6 +6,9 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   workers: 2,
+  // The ocean fills the window and headless browsers draw it in software: give each test room.
+  timeout: 75_000,
+  expect: { timeout: 10_000 },
   reporter: 'list',
   use: {
     baseURL: 'http://127.0.0.1:5175/seatreasures/',

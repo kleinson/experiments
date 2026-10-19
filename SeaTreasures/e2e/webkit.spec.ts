@@ -44,7 +44,11 @@ test('WebKit reopens the simulator offline', async ({ page, context }) => {
   try {
     await page.reload()
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-    await page.getByRole('button', { name: /Textile cone/ }).tap()
+    await page.getByRole('button', { name: 'Shells', exact: true }).tap()
+    await page
+      .locator('#shell-tray')
+      .getByRole('button', { name: /Textile cone/ })
+      .tap()
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       'Textile cone',
     )

@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import type { ReactNode, RefObject } from 'react'
+import type { ReactNode } from 'react'
 import { getClaim, manifest, sourcesFor } from '../evidence.ts'
 import {
   CARD_MM,
@@ -24,7 +24,75 @@ import {
   phases,
   startOf,
 } from './life.ts'
+import {
+  BookOpen,
+  ChevronDown,
+  Hand,
+  Layers,
+  MapPin,
+  Maximize,
+  Moon,
+  Pause,
+  Play,
+  Rotate3d,
+  RotateCcw,
+  Ruler,
+  ScanEye,
+  Scissors,
+  Sun,
+  Tag,
+  Waves,
+  X,
+  ZoomIn,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
+import { Slider } from '@/components/ui/slider'
+import { Toggle } from '@/components/ui/toggle'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { cn } from '@/lib/utils'
 import { glossary } from './glossary.ts'
+import {
+  bedLabels,
+  beds,
+  coastLabels,
+  seabedFor,
+  settingLabel,
+} from './seabed.ts'
+import type { Bed, Setting } from './seabed.ts'
+import { drawThumbs } from './thumbs.ts'
+import type { Thumbs } from './thumbs.ts'
 import type { PhaseId } from './life.ts'
 import { addToShelf, parseShelf, shelfKey } from './shelf.ts'
 import type { Found } from './shelf.ts'
@@ -38,59 +106,6 @@ import { WhereFound } from './WhereFound.tsx'
 const Stage = lazy(() => import('./Stage.tsx'))
 const FieldPlates = lazy(() => import('./FieldPlates.tsx'))
 const ShellLab = lazy(() => import('../lab/ShellLab.tsx'))
-
-type IconName =
-  | 'play'
-  | 'pause'
-  | 'sun'
-  | 'moon'
-  | 'close'
-  | 'reset'
-  | 'cut'
-  | 'xray'
-  | 'ruler'
-  | 'hand'
-  | 'apart'
-  | 'label'
-
-function Icon({ name }: { name: IconName }) {
-  const paths: Record<IconName, ReactNode> = {
-    play: <path d="M8 5v14l11-7Z" />,
-    pause: <path d="M8 5v14M16 5v14" />,
-    sun: (
-      <>
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
-      </>
-    ),
-    moon: <path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z" />,
-    close: <path d="m6 6 12 12M6 18 18 6" />,
-    reset: <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4" />,
-    cut: <path d="M12 3v18M6 7a6 6 0 0 0 0 10M18 7a6 6 0 0 1 0 10" />,
-    xray: (
-      <>
-        <circle cx="12" cy="12" r="8" />
-        <circle cx="12" cy="12" r="3.5" />
-      </>
-    ),
-    ruler: <path d="M3 16 16 3l5 5L8 21Zm4-3 2 2m1-5 2 2m1-5 2 2" />,
-    hand: (
-      <path d="M8 13V5a1.5 1.5 0 0 1 3 0v6m0-1V4a1.5 1.5 0 0 1 3 0v6m0-1V5.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-3l-2.5-4a1.5 1.5 0 0 1 2.5-1.6L8 15" />
-    ),
-    apart: <path d="M4 12h5m6 0h5M9 8l-3 4 3 4m6-8 3 4-3 4" />,
-    label: (
-      <>
-        <circle cx="6" cy="17" r="2" />
-        <path d="m7.5 15.5 5-5H20" />
-      </>
-    ),
-  }
-  return (
-    <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
-      {paths[name]}
-    </svg>
-  )
-}
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(
@@ -142,125 +157,137 @@ function Fact({ claim: id, children }: { claim: string; children: ReactNode }) {
 }
 
 function EvidenceLibrary({
-  dialog,
+  open,
+  onOpenChange,
 }: {
-  dialog: RefObject<HTMLDialogElement | null>
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }) {
   return (
-    <dialog
-      ref={dialog}
-      className="evidence-dialog"
-      aria-labelledby="evidence-title"
-    >
-      <div className="dialog-heading">
-        <h2 id="evidence-title">Sources and uncertainty</h2>
-        <button
-          className="icon-button"
-          aria-label="Close sources"
-          onClick={() => dialog.current?.close()}
-        >
-          <Icon name="close" />
-        </button>
-      </div>
-      <p>
-        Every fact in the simulator links to a source read for this project.
-        Scope says whether it is about this species, its family, or molluscs in
-        general. Shell shapes, animals and patterns are original illustrations
-        from simple growth models, not scans.
-      </p>
-      {manifest.sources.map((source) => (
-        <article className="source-entry" key={source.id}>
-          <h3>{source.title}</h3>
-          <a href={source.url} target="_blank" rel="noreferrer">
-            {source.publisher} ↗
-          </a>
-          <p className="metadata">
-            {source.kind} · accessed {source.accessedAt}
-          </p>
-          {manifest.claims
-            .filter((claim) => claim.sourceIds.includes(source.id))
-            .map((claim) => (
-              <div className="source-claim" key={claim.id}>
-                <p>{claim.text}</p>
-                <p className="metadata">
-                  {scopeLabel[claim.scope] ?? claim.scope} · {claim.confidence}{' '}
-                  confidence
-                </p>
-              </div>
-            ))}
-        </article>
-      ))}
-    </dialog>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        showCloseButton={false}
+        className="evidence-dialog flex max-h-[86dvh] flex-col gap-3 sm:max-w-2xl"
+      >
+        <DialogHeader className="flex-row items-start justify-between gap-4">
+          <div className="grid gap-1">
+            <DialogTitle className="text-xl font-normal tracking-tight">
+              Sources and uncertainty
+            </DialogTitle>
+            <DialogDescription>
+              Every fact in the simulator links to a source read for this
+              project. Scope says whether it is about this species, its family,
+              or molluscs in general. Shell shapes, animals, scenery and
+              patterns are original illustrations from simple models, not scans.
+            </DialogDescription>
+          </div>
+          <DialogClose asChild>
+            <Button variant="ghost" size="icon" aria-label="Close sources">
+              <X />
+            </Button>
+          </DialogClose>
+        </DialogHeader>
+        <ScrollArea className="min-h-0 flex-1 pr-3">
+          {manifest.sources.map((source) => (
+            <article className="source-entry" key={source.id}>
+              <h3>{source.title}</h3>
+              <a href={source.url} target="_blank" rel="noreferrer">
+                {source.publisher} ↗
+              </a>
+              <p className="metadata">
+                {source.kind} · accessed {source.accessedAt}
+              </p>
+              {manifest.claims
+                .filter((claim) => claim.sourceIds.includes(source.id))
+                .map((claim) => (
+                  <div className="source-claim" key={claim.id}>
+                    <p>{claim.text}</p>
+                    <p className="metadata">
+                      {scopeLabel[claim.scope] ?? claim.scope} ·{' '}
+                      {claim.confidence} confidence
+                    </p>
+                  </div>
+                ))}
+            </article>
+          ))}
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
   )
 }
 
 function CalibrationDialog({
-  dialog,
+  open,
+  onOpenChange,
   pxPerMm,
   onSave,
 }: {
-  dialog: RefObject<HTMLDialogElement | null>
+  open: boolean
+  onOpenChange: (open: boolean) => void
   pxPerMm: number
   onSave: (value: number) => void
 }) {
   const [value, setValue] = useState(pxPerMm)
   return (
-    <dialog
-      ref={dialog}
-      className="calibration-dialog"
-      aria-labelledby="calibration-title"
-      onClose={() => setValue(pxPerMm)}
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) setValue(pxPerMm)
+        onOpenChange(next)
+      }}
     >
-      <div className="dialog-heading">
-        <h2 id="calibration-title">Match a real card</h2>
-        <button
-          className="icon-button"
-          aria-label="Close calibration"
-          onClick={() => dialog.current?.close()}
+      <DialogContent showCloseButton={false} className="sm:max-w-xl">
+        <DialogHeader className="flex-row items-start justify-between gap-4">
+          <div className="grid gap-1">
+            <DialogTitle className="text-xl font-normal tracking-tight">
+              Match a real card
+            </DialogTitle>
+            <DialogDescription>
+              Hold any bank or ID card against the screen and drag until the
+              outline matches its width. Screens differ, so this makes “actual
+              size” true on yours.
+            </DialogDescription>
+          </div>
+          <DialogClose asChild>
+            <Button variant="ghost" size="icon" aria-label="Close calibration">
+              <X />
+            </Button>
+          </DialogClose>
+        </DialogHeader>
+        <div
+          className="card-outline"
+          style={{ width: CARD_MM[0] * value, height: CARD_MM[1] * value }}
         >
-          <Icon name="close" />
-        </button>
-      </div>
-      <p>
-        Hold any bank or ID card against the screen and drag until the outline
-        matches its width. Screens differ, so this makes “actual size” true on
-        yours.
-      </p>
-      <div
-        className="card-outline"
-        style={{ width: CARD_MM[0] * value, height: CARD_MM[1] * value }}
-      >
-        <span>85.6 × 54 mm</span>
-      </div>
-      <label className="control-label" htmlFor="calibration">
-        Card width on screen
-      </label>
-      <input
-        className="range"
-        id="calibration"
-        type="range"
-        min={PX_PER_MM_RANGE[0]}
-        max={PX_PER_MM_RANGE[1]}
-        step="0.01"
-        value={value}
-        onChange={(event) => setValue(Number(event.target.value))}
-        aria-valuetext={`${Math.round(CARD_MM[0] * value)} pixels wide`}
-      />
-      <div className="dialog-actions">
-        <button className="secondary" onClick={() => dialog.current?.close()}>
-          Cancel
-        </button>
-        <button
-          className="primary"
-          onClick={() => {
-            onSave(value)
-            dialog.current?.close()
-          }}
-        >
-          Use this size
-        </button>
-      </div>
-    </dialog>
+          <span>85.6 × 54 mm</span>
+        </div>
+        <Label htmlFor="calibration">Card width on screen</Label>
+        <input
+          className="w-full accent-(--cp-accent)"
+          id="calibration"
+          type="range"
+          min={PX_PER_MM_RANGE[0]}
+          max={PX_PER_MM_RANGE[1]}
+          step="0.01"
+          value={value}
+          onChange={(event) => setValue(Number(event.target.value))}
+          aria-valuetext={`${Math.round(CARD_MM[0] * value)} pixels wide`}
+        />
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button
+            className="bg-brand text-brand-foreground hover:bg-brand/85"
+            onClick={() => {
+              onSave(value)
+              onOpenChange(false)
+            }}
+          >
+            Use this size
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -554,6 +581,146 @@ function PhaseStory({
   }
 }
 
+/** What the setting chip says about where the seabed came from. */
+function settingNote(setting: Setting, choice: Bed | null) {
+  if (setting.scene === 'open-water')
+    return ' · the larva drifts in the plankton'
+  if (setting.scene === 'beach') return ' · washed ashore'
+  if (choice)
+    return setting.elsewhere
+      ? ' · your pick; not where this species lives'
+      : ' · your pick'
+  return setting.coast === 'reef'
+    ? ' · from its habitat'
+    : ` · from its habitat, with this coast's ${coastLabels[setting.coast]}`
+}
+
+const groupLabel: Record<string, string> = {
+  gastropod: 'Sea snail',
+  cephalopod: 'Cephalopod',
+}
+
+/** The floating shell menu: each species as its empty shell and its living animal. */
+function ShellMenu({
+  species,
+  thumbs,
+  onChoose,
+  onOpen,
+}: {
+  species: Species
+  thumbs: Record<string, Thumbs>
+  onChoose: (id: string) => void
+  onOpen: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const current = thumbs[species.id]
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        if (next) onOpen()
+        setOpen(next)
+      }}
+    >
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className="h-10 gap-2 rounded-full pr-3 pl-1 font-semibold"
+          aria-label="Shells"
+          style={swatch(species)}
+        >
+          {current ? (
+            <img
+              src={current.shell}
+              alt=""
+              className="h-8 w-11 object-contain"
+            />
+          ) : (
+            <span className="swatch size-8" aria-hidden="true" />
+          )}
+          <span aria-hidden="true">Shells</span>
+          <ChevronDown aria-hidden="true" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        sideOffset={8}
+        aria-label="Choose a shell"
+        id="shell-tray"
+        className="w-[min(640px,calc(100vw-2rem))] gap-3 rounded-2xl p-3"
+      >
+        <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+          Choose a shell · shell and animal
+        </p>
+        <ScrollArea className="max-h-[min(62dvh,560px)]">
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2">
+            {allSpecies.map((item) => {
+              const pictures = thumbs[item.id]
+              const chosen = item.id === species.id
+              return (
+                <li key={item.id}>
+                  <Button
+                    variant="outline"
+                    aria-pressed={chosen}
+                    onClick={() => {
+                      onChoose(item.id)
+                      setOpen(false)
+                    }}
+                    style={swatch(item)}
+                    className={cn(
+                      'h-auto w-full flex-col items-stretch gap-0.5 rounded-xl p-2 text-left whitespace-normal',
+                      chosen && 'border-brand ring-1 ring-brand',
+                    )}
+                  >
+                    <span
+                      className="tray-pictures mb-1.5 grid h-20 grid-cols-2 gap-0.5 rounded-lg bg-[color-mix(in_srgb,var(--cp-link)_10%,var(--cp-bg-elevated))]"
+                      aria-hidden="true"
+                    >
+                      {pictures ? (
+                        <>
+                          <img
+                            src={pictures.shell}
+                            alt=""
+                            className="size-full object-contain"
+                          />
+                          <img
+                            src={pictures.animal}
+                            alt=""
+                            className="size-full object-contain"
+                          />
+                        </>
+                      ) : (
+                        <span className="swatch col-span-2 m-auto" />
+                      )}
+                    </span>
+                    <strong className="text-sm font-semibold">
+                      {item.commonName}
+                    </strong>
+                    <i className="text-xs font-normal text-muted-foreground">
+                      {item.scientificName}
+                    </i>
+                    <span className="font-mono text-[11px] font-normal text-muted-foreground">
+                      {groupLabel[item.group] ?? item.group} · drawn at{' '}
+                      {item.lengthMm.drawn} mm
+                    </span>
+                  </Button>
+                </li>
+              )
+            })}
+          </ul>
+        </ScrollArea>
+        <Separator />
+        <div className="text-xs text-muted-foreground">
+          <Fact claim="mollusca-diversity">
+            Five of about 86,600 living mollusc species. Snails make up about
+            80% of them.
+          </Fact>
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 export function Simulator() {
   const [speciesId, setSpeciesId] = useState(() => {
     const requested = new URLSearchParams(location.search).get('species')
@@ -564,20 +731,35 @@ export function Simulator() {
   const species = getSpecies(speciesId)
   const [originId, setOriginId] = useState(() => firstOrigin(species))
   const origins = originsFor(species.id)
-  const habitat = species.origins[0]!
   const origin = {
     id: origins.some((place) => place.region.id === originId)
       ? originId
       : firstOrigin(species),
     name: placeName(species, originId),
   }
+  const habitat =
+    species.origins.find((item) => item.id === origin.id) ?? species.origins[0]!
+  const [bedChoice, setBedChoice] = useState<Bed | null>(null)
+  const [thumbs, setThumbs] = useState<Record<string, Thumbs>>({})
+  // The menu's drawings are made the first time it opens, so they never slow the first view.
+  const [menuOpened, setMenuOpened] = useState(false)
+  useEffect(
+    () =>
+      menuOpened
+        ? drawThumbs(allSpecies, (id, pictures) =>
+            setThumbs((all) => ({ ...all, [id]: pictures })),
+          )
+        : undefined,
+    [menuOpened],
+  )
   const [t, setT] = useState(startOf('adult') + 0.06)
   const [playing, setPlaying] = useState(false)
   const [deathId, setDeathId] = useState(species.deaths[0]?.id ?? '')
   const [cut, setCut] = useState(false)
   const [xray, setXray] = useState(false)
   const [labels, setLabels] = useState(true)
-  const [look, setLook] = useState(0)
+  // Opens on the realistic sea; the slider turns it into an educational drawing.
+  const [look, setLook] = useState(1)
   const [turntable, setTurntable] = useState(false)
   const [part, setPart] = useState<string | null>(null)
   const [actual, setActual] = useState(false)
@@ -631,8 +813,8 @@ export function Simulator() {
       active = false
     }
   }, [])
-  const sources = useRef<HTMLDialogElement>(null)
-  const calibrate = useRef<HTMLDialogElement>(null)
+  const [sourcesOpen, setSourcesOpen] = useState(false)
+  const [calibrateOpen, setCalibrateOpen] = useState(false)
   const heading = useRef<HTMLHeadingElement>(null)
 
   const death =
@@ -653,6 +835,10 @@ export function Simulator() {
       wear: base.beach ? Math.min(0.9, base.wear + waves * 0.08) : base.wear,
     }),
     [base, inRemains, crabCalled, floatCalled, waves, species],
+  )
+  const setting = useMemo(
+    () => seabedFor(species, origin.id, frame.phase, bedChoice),
+    [species, origin.id, frame.phase, bedChoice],
   )
   const action = actionFor(frame.phase, species)
   const { index: phaseIndex, phase } = phaseAt(t)
@@ -824,106 +1010,13 @@ export function Simulator() {
       <a className="skip-link" href="#timeline">
         Skip to the life timeline
       </a>
-      <header className="sim-top">
-        <a className="brand" href={import.meta.env.BASE_URL}>
-          <img src={`${import.meta.env.BASE_URL}shell-mark.svg`} alt="" />
-          <span>
-            Sea
-            <br />
-            Treasures
-          </span>
-        </a>
-        <div className="sim-title">
-          <h1 ref={heading} tabIndex={-1}>
-            {species.commonName}
-          </h1>
-          <div className="sim-taxon">
-            <Fact claim={species.taxonClaim}>
-              <i>{species.scientificName}</i> {species.authority}
-            </Fact>
-          </div>
-        </div>
-        <div className="header-actions">
-          <button
-            className="text-button"
-            onClick={() => sources.current?.showModal()}
-          >
-            Sources
-          </button>
-          <button
-            className="icon-button"
-            aria-label={
-              theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
-            }
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          >
-            <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
-          </button>
-        </div>
-      </header>
-
       <main className="sim-main" id="main">
-        <nav className="species-picker" aria-label="Choose a shell">
-          <h2 className="panel-label">Species</h2>
-          <ul>
-            {allSpecies.map((item) => (
-              <li key={item.id}>
-                <button
-                  aria-pressed={item.id === species.id}
-                  onClick={() => chooseSpecies(item.id)}
-                  style={swatch(item)}
-                >
-                  <span className="swatch" aria-hidden="true" />
-                  <span>
-                    <strong>{item.commonName}</strong>
-                    <i>{item.scientificName}</i>
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-          <label className="panel-label" htmlFor="origin">
-            Origin
-          </label>
-          <select
-            id="origin"
-            value={origin.id}
-            onChange={(event) => setOriginId(event.target.value)}
-          >
-            {Object.entries(ranges.oceans).map(([ocean, label]) => {
-              const here = origins.filter(
-                (place) => place.region.ocean === ocean,
-              )
-              return here.length ? (
-                <optgroup key={ocean} label={label}>
-                  {here.map((place) => (
-                    <option key={place.region.id} value={place.region.id}>
-                      {place.region.name} · {place.count.n} record
-                      {place.count.n === 1 ? '' : 's'}
-                      {place.outside ? ' · outside range' : ''}
-                    </option>
-                  ))}
-                </optgroup>
-              ) : null
-            })}
-          </select>
-          <Fact claim={habitat.claim}>
-            {habitat.habitat}
-            {habitat.depthM &&
-              ` · ${habitat.depthM[0]}–${habitat.depthM[1]} m deep`}
-          </Fact>
-          <a className="text-button where-link" href="#where">
-            See it on the map
-          </a>
-          <div className="picker-note">
-            <Fact claim="mollusca-diversity">
-              Five of about 86,600 living mollusc species. Snails make up about
-              80% of them.
-            </Fact>
-          </div>
-        </nav>
-
-        <section className="sim-view" aria-label="Shell">
+        <section
+          className="sim-view ocean"
+          aria-label="Ocean floor"
+          data-scene={setting.scene}
+          data-bed={setting.main ?? 'open-water'}
+        >
           <Suspense
             fallback={
               <div className="sim-stage loading" role="status">
@@ -941,6 +1034,7 @@ export function Simulator() {
               pxPerMm={calibration.pxPerMm}
               reducedMotion={reducedMotion}
               pulse={pulse}
+              setting={setting}
               labels={labels}
               look={look}
               turntable={turntable}
@@ -951,7 +1045,7 @@ export function Simulator() {
             />
           </Suspense>
           <div className="action-hint" aria-hidden="true">
-            <Icon name="hand" />
+            <Hand aria-hidden="true" />
             {action.hint}
           </div>
           <div className="view-badge" aria-live="polite">
@@ -967,196 +1061,491 @@ export function Simulator() {
             <span style={{ width: bar.px }} />
             {bar.mm < 1 ? `${bar.mm * 1000} µm` : `${bar.mm} mm`}
           </div>
-          <div className="view-controls" role="group" aria-label="View">
-            <button
-              aria-pressed={cut}
-              onClick={() => setCut(!cut)}
-              disabled={frame.size === 0}
+
+          <div className="float-left">
+            <Card className="float-title pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md gap-3 py-3.5">
+              <CardHeader className="px-4">
+                <div className="title-row">
+                  <a className="brand" href={import.meta.env.BASE_URL}>
+                    <img
+                      src={`${import.meta.env.BASE_URL}shell-mark.svg`}
+                      alt=""
+                    />
+                    <span className="sr-only">SeaTreasures</span>
+                  </a>
+                  <div className="sim-title">
+                    <h1 ref={heading} tabIndex={-1}>
+                      {species.commonName}
+                    </h1>
+                    <div className="sim-taxon">
+                      <Fact claim={species.taxonClaim}>
+                        <i>{species.scientificName}</i> {species.authority}
+                      </Fact>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="grid gap-3 px-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <ShellMenu
+                    species={species}
+                    thumbs={thumbs}
+                    onChoose={chooseSpecies}
+                    onOpen={() => setMenuOpened(true)}
+                  />
+                  <Select value={origin.id} onValueChange={setOriginId}>
+                    <SelectTrigger
+                      id="origin"
+                      aria-label="Place"
+                      data-value={origin.id}
+                      className="h-10 max-w-[15rem] rounded-full bg-background pl-3"
+                    >
+                      <MapPin className="text-muted-foreground" />
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="max-h-[60dvh]">
+                      {Object.entries(ranges.oceans).map(([ocean, label]) => {
+                        const here = origins.filter(
+                          (place) => place.region.ocean === ocean,
+                        )
+                        return here.length ? (
+                          <SelectGroup key={ocean}>
+                            <SelectLabel>{label}</SelectLabel>
+                            {here.map((place) => (
+                              <SelectItem
+                                key={place.region.id}
+                                value={place.region.id}
+                              >
+                                {place.region.name}
+                                <span className="text-muted-foreground">
+                                  {place.count.n} record
+                                  {place.count.n === 1 ? '' : 's'}
+                                  {place.outside ? ' · outside range' : ''}
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        ) : null
+                      })}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={bedChoice ?? 'habitat'}
+                    onValueChange={(value) =>
+                      setBedChoice(value === 'habitat' ? null : (value as Bed))
+                    }
+                  >
+                    <SelectTrigger
+                      id="seabed"
+                      aria-label="Seabed"
+                      data-value={bedChoice ?? 'habitat'}
+                      className="h-10 rounded-full bg-background pl-3"
+                    >
+                      <Waves className="text-muted-foreground" />
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent position="popper">
+                      <SelectItem value="habitat">Its habitat</SelectItem>
+                      <SelectSeparator />
+                      {beds.map((bed) => (
+                        <SelectItem key={bed} value={bed}>
+                          {bedLabels[bed]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Separator />
+                <div className="setting-note" aria-live="polite">
+                  <Fact claim="seabed-setting-illustrative">
+                    <strong>{settingLabel(setting)}</strong>
+                    {settingNote(setting, bedChoice)}
+                  </Fact>
+                  <Fact claim={habitat.claim}>
+                    {habitat.habitat}
+                    {habitat.depthM &&
+                      ` · ${habitat.depthM[0]}–${habitat.depthM[1]} m deep`}
+                  </Fact>
+                  <Button
+                    asChild
+                    variant="link"
+                    className="where-link h-auto justify-self-start p-0 text-xs text-muted-foreground"
+                  >
+                    <a href="#where">See it on the map</a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <div
+              className="float view-controls pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md flex flex-wrap gap-1 p-1"
+              role="group"
+              aria-label="View"
             >
-              <Icon name="cut" />
-              Cut open
-            </button>
-            <button
-              aria-pressed={xray}
-              onClick={() => setXray(!xray)}
-              disabled={frame.size === 0}
-            >
-              <Icon name="xray" />
-              See-through
-            </button>
-            <button aria-pressed={labels} onClick={() => setLabels(!labels)}>
-              <Icon name="label" />
-              Labels
-            </button>
-            <button aria-pressed={actual} onClick={() => setActual(!actual)}>
-              <Icon name="ruler" />
-              Actual size
-            </button>
-            {actual && (
-              <button
-                className="text-button"
-                onClick={() => calibrate.current?.showModal()}
+              <Toggle
+                size="lg"
+                pressed={cut}
+                onPressedChange={setCut}
+                disabled={frame.size === 0}
+                className="tool-toggle rounded-xl data-[state=on]:bg-foreground data-[state=on]:text-background"
               >
-                Calibrate
-              </button>
-            )}
+                <Scissors />
+                Cut open
+              </Toggle>
+              <Toggle
+                size="lg"
+                pressed={xray}
+                onPressedChange={setXray}
+                disabled={frame.size === 0}
+                className="tool-toggle rounded-xl data-[state=on]:bg-foreground data-[state=on]:text-background"
+              >
+                <ScanEye />
+                See-through
+              </Toggle>
+              <Toggle
+                size="lg"
+                pressed={labels}
+                onPressedChange={setLabels}
+                className="tool-toggle rounded-xl data-[state=on]:bg-foreground data-[state=on]:text-background"
+              >
+                <Tag />
+                Labels
+              </Toggle>
+              <Toggle
+                size="lg"
+                pressed={actual}
+                onPressedChange={setActual}
+                className="tool-toggle rounded-xl data-[state=on]:bg-foreground data-[state=on]:text-background"
+              >
+                <Ruler />
+                Actual size
+              </Toggle>
+              {actual && (
+                <Button
+                  variant="link"
+                  size="lg"
+                  onClick={() => setCalibrateOpen(true)}
+                >
+                  Calibrate
+                </Button>
+              )}
+            </div>
           </div>
-          {frame.animal > 0 && frame.larva === 0 && (
-            <label className="take-apart">
-              <Icon name="apart" />
-              <span>Take apart</span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={Math.round(apart * 100)}
-                onChange={(event) => setApart(Number(event.target.value) / 100)}
-                aria-valuetext={
-                  apart > 0.05
-                    ? `Body pulled ${Math.round(apart * 100)}% out of the shell`
-                    : 'Body inside the shell'
-                }
-              />
-            </label>
-          )}
+          <div className="float float-actions pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md flex items-center gap-1 rounded-full p-1">
+            <Button
+              variant="ghost"
+              size="lg"
+              className="rounded-full max-md:hidden"
+              onClick={() => act('reset')}
+            >
+              <RotateCcw />
+              Reset view
+            </Button>
+            <Button
+              variant="ghost"
+              size="lg"
+              onClick={() => setSourcesOpen(true)}
+            >
+              <BookOpen />
+              <span className="max-md:sr-only">Sources</span>
+            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  className="rounded-full"
+                  aria-label={
+                    theme === 'dark'
+                      ? 'Switch to light mode'
+                      : 'Switch to dark mode'
+                  }
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                >
+                  {theme === 'dark' ? <Sun /> : <Moon />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+              </TooltipContent>
+            </Tooltip>
+          </div>
           {labels && part && glossary[part] && (
-            <div className="part-card" role="region" aria-label={part}>
-              <div className="part-card-head">
-                <h3>{part}</h3>
-                <button
-                  className="icon-button"
+            <Card
+              className="part-card pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md gap-2 py-3"
+              role="region"
+              aria-label={part}
+            >
+              <CardHeader className="grid-cols-[1fr_auto] items-center px-4">
+                <h3 className="font-mono text-xs font-semibold tracking-[0.12em] uppercase">
+                  {part}
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   aria-label={`Close ${part}`}
                   onClick={() => setPart(null)}
                 >
-                  <Icon name="close" />
-                </button>
-              </div>
-              <Fact claim={glossary[part].claim}>{glossary[part].text}</Fact>
-            </div>
+                  <X />
+                </Button>
+              </CardHeader>
+              <CardContent className="grid gap-2 px-4">
+                <Fact claim={glossary[part].claim}>{glossary[part].text}</Fact>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setPulse({ kind: 'focus', part, at: performance.now() })
+                    }
+                  >
+                    <ZoomIn />
+                    Zoom to {part.toLowerCase()}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => act('reset')}
+                  >
+                    <Maximize />
+                    Show whole
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           )}
-          <div className="figure-tools">
-            <label className="look-slider">
-              <span aria-hidden="true">Drawing</span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                aria-label="Drawing or realistic"
-                value={Math.round(look * 100)}
-                onChange={(event) => setLook(Number(event.target.value) / 100)}
-                aria-valuetext={
-                  look < 0.15
-                    ? 'Educational drawing'
-                    : look > 0.85
-                      ? 'Realistic'
-                      : `${Math.round(look * 100)}% realistic`
-                }
-              />
-              <span aria-hidden="true">Realistic</span>
-            </label>
-            <div className="figure-views" role="group" aria-label="Turn">
-              <button
+
+          <Card
+            className="float life-panel pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md gap-0 py-0"
+            aria-labelledby="phase-title"
+            role="complementary"
+          >
+            <ScrollArea className="min-h-0 flex-1">
+              <div className="grid gap-4 p-5">
+                <div className="grid gap-1">
+                  <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+                    {String(phaseIndex + 1).padStart(2, '0')} /{' '}
+                    {String(phases.length).padStart(2, '0')}
+                  </p>
+                  <h2
+                    id="phase-title"
+                    className="text-[26px] font-normal tracking-tight"
+                  >
+                    {phase.label}
+                  </h2>
+                  <p className={`clock${clock.known ? '' : ' unknown'}`}>
+                    {clock.label}
+                  </p>
+                </div>
+                {action.button && (
+                  <Button
+                    size="lg"
+                    className="action-button h-11 justify-self-start rounded-full bg-brand px-5 text-brand-foreground hover:bg-brand/85"
+                    onClick={runAction}
+                    aria-pressed={
+                      frame.phase === 'growth' ? growing : undefined
+                    }
+                  >
+                    <Hand />
+                    {frame.phase === 'growth' && growing
+                      ? 'Stop growing'
+                      : action.button}
+                  </Button>
+                )}
+                <div className="phase-story">
+                  <PhaseStory
+                    species={species}
+                    phase={frame.phase}
+                    deathId={death?.id ?? ''}
+                    onDeath={setDeathId}
+                    originName={origin.name}
+                    shelf={shelf}
+                    shelfError={shelfError}
+                    onRemove={(index) =>
+                      writeShelf(
+                        shelf.filter((_, at) => at !== index),
+                        'Removed from your shelf.',
+                      )
+                    }
+                  />
+                </div>
+                <Separator />
+                <dl className="durations">
+                  <div>
+                    <dt>Egg</dt>
+                    <dd>{describeDuration(species.life.egg)}</dd>
+                  </div>
+                  <div>
+                    <dt>Larva</dt>
+                    <dd>{describeDuration(species.life.larva)}</dd>
+                  </div>
+                  <div>
+                    <dt>To adult</dt>
+                    <dd>{describeDuration(species.life.maturity)}</dd>
+                  </div>
+                  <div>
+                    <dt>Lifespan</dt>
+                    <dd>{describeDuration(species.life.lifespan)}</dd>
+                  </div>
+                  <div>
+                    <dt>Adult size</dt>
+                    <dd>
+                      {species.lengthMm.typical
+                        ? `${species.lengthMm.typical[0]}–${species.lengthMm.typical[1]} mm`
+                        : 'Not established'}
+                      {species.lengthMm.max
+                        ? ` · up to ${species.lengthMm.max} mm`
+                        : ''}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Drawn at</dt>
+                    <dd title={species.drawnNote}>
+                      {species.lengthMm.drawn} mm
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </ScrollArea>
+          </Card>
+
+          <Card className="float float-bottom pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md gap-2 px-4 py-3">
+            <section
+              className="timeline"
+              id="timeline"
+              aria-label="Life timeline"
+            >
+              <Button
+                size="icon-lg"
+                className="play size-12 rounded-full bg-brand text-brand-foreground hover:bg-brand/85"
                 onClick={() => {
-                  setTurntable(false)
-                  act('front')
+                  if (t >= 1) setT(0)
+                  setPlaying(!playing)
                 }}
+                aria-label={playing ? 'Pause the life' : 'Play the life'}
               >
-                Front view
-              </button>
-              <button
-                onClick={() => {
-                  setTurntable(false)
-                  act('iso')
-                }}
+                {playing ? (
+                  <Pause className="fill-current" />
+                ) : (
+                  <Play className="fill-current" />
+                )}
+              </Button>
+              <div className="track">
+                <Slider
+                  className="h-8"
+                  min={0}
+                  max={1000}
+                  step={1}
+                  value={[Math.round(t * 1000)]}
+                  onValueChange={([value]) => {
+                    setPlaying(false)
+                    setT((value ?? 0) / 1000)
+                  }}
+                  thumbProps={{
+                    'aria-label': 'Life timeline',
+                    'aria-valuetext': `${phase.label}. ${clock.label}`,
+                  }}
+                />
+                <ol className="phase-ticks">
+                  {phases.map((item, index) => (
+                    <li key={item.id} style={{ flexGrow: item.share }}>
+                      <button
+                        aria-current={index === phaseIndex ? 'step' : undefined}
+                        onClick={() => {
+                          setPlaying(false)
+                          setT(startOf(item.id) + item.share * 0.5)
+                        }}
+                      >
+                        {item.label}
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </section>
+            <Separator />
+            <div className="figure-tools">
+              <div className="look-slider">
+                <span aria-hidden="true">Drawing</span>
+                <Slider
+                  className="w-36"
+                  min={0}
+                  max={100}
+                  value={[Math.round(look * 100)]}
+                  onValueChange={([value]) => setLook((value ?? 0) / 100)}
+                  thumbProps={{
+                    'aria-label': 'Drawing or realistic',
+                    'aria-valuetext':
+                      look < 0.15
+                        ? 'Educational drawing'
+                        : look > 0.85
+                          ? 'Realistic'
+                          : `${Math.round(look * 100)}% realistic`,
+                  }}
+                />
+                <span aria-hidden="true">Realistic</span>
+              </div>
+              <div
+                className="figure-views flex flex-wrap gap-1.5"
+                role="group"
+                aria-label="Turn"
               >
-                Isometric
-              </button>
-              <button
-                aria-pressed={turntable}
-                onClick={() => setTurntable(!turntable)}
-                disabled={reducedMotion}
-              >
-                Turntable
-              </button>
+                <Button
+                  variant="outline"
+                  className="rounded-full"
+                  onClick={() => {
+                    setTurntable(false)
+                    act('front')
+                  }}
+                >
+                  Front view
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-full"
+                  onClick={() => {
+                    setTurntable(false)
+                    act('iso')
+                  }}
+                >
+                  Isometric
+                </Button>
+                <Toggle
+                  variant="outline"
+                  className="rounded-full data-[state=on]:bg-foreground data-[state=on]:text-background"
+                  pressed={turntable}
+                  onPressedChange={setTurntable}
+                  disabled={reducedMotion}
+                >
+                  <Rotate3d />
+                  Turntable
+                </Toggle>
+              </div>
+              {frame.animal > 0 && frame.larva === 0 && (
+                <div className="take-apart">
+                  <Layers aria-hidden="true" className="size-4" />
+                  <span aria-hidden="true">Take apart</span>
+                  <Slider
+                    className="w-36"
+                    min={0}
+                    max={100}
+                    value={[Math.round(apart * 100)]}
+                    onValueChange={([value]) => setApart((value ?? 0) / 100)}
+                    thumbProps={{
+                      'aria-label': 'Take apart',
+                      'aria-valuetext':
+                        apart > 0.05
+                          ? `Body pulled ${Math.round(apart * 100)}% out of the shell`
+                          : 'Body inside the shell',
+                    }}
+                  />
+                </div>
+              )}
             </div>
-          </div>
+          </Card>
           <p className="sr-only" id="sim-summary">
             {summary}
           </p>
         </section>
-
-        <aside className="life-panel" aria-labelledby="phase-title">
-          <p className="panel-label">
-            {String(phaseIndex + 1).padStart(2, '0')} /{' '}
-            {String(phases.length).padStart(2, '0')}
-          </p>
-          <h2 id="phase-title">{phase.label}</h2>
-          <p className={`clock${clock.known ? '' : ' unknown'}`}>
-            {clock.label}
-          </p>
-          {action.button && (
-            <button
-              className="primary action-button"
-              onClick={runAction}
-              aria-pressed={frame.phase === 'growth' ? growing : undefined}
-            >
-              <Icon name="hand" />
-              {frame.phase === 'growth' && growing
-                ? 'Stop growing'
-                : action.button}
-            </button>
-          )}
-          <div className="phase-story">
-            <PhaseStory
-              species={species}
-              phase={frame.phase}
-              deathId={death?.id ?? ''}
-              onDeath={setDeathId}
-              originName={origin.name}
-              shelf={shelf}
-              shelfError={shelfError}
-              onRemove={(index) =>
-                writeShelf(
-                  shelf.filter((_, at) => at !== index),
-                  'Removed from your shelf.',
-                )
-              }
-            />
-          </div>
-          <dl className="durations">
-            <div>
-              <dt>Egg</dt>
-              <dd>{describeDuration(species.life.egg)}</dd>
-            </div>
-            <div>
-              <dt>Larva</dt>
-              <dd>{describeDuration(species.life.larva)}</dd>
-            </div>
-            <div>
-              <dt>To adult</dt>
-              <dd>{describeDuration(species.life.maturity)}</dd>
-            </div>
-            <div>
-              <dt>Lifespan</dt>
-              <dd>{describeDuration(species.life.lifespan)}</dd>
-            </div>
-            <div>
-              <dt>Adult size</dt>
-              <dd>
-                {species.lengthMm.typical
-                  ? `${species.lengthMm.typical[0]}–${species.lengthMm.typical[1]} mm`
-                  : 'Not established'}
-                {species.lengthMm.max
-                  ? ` · up to ${species.lengthMm.max} mm`
-                  : ''}
-              </dd>
-            </div>
-            <div>
-              <dt>Drawn at</dt>
-              <dd title={species.drawnNote}>{species.lengthMm.drawn} mm</dd>
-            </div>
-          </dl>
-        </aside>
       </main>
 
       <div id="where">
@@ -1170,51 +1559,6 @@ export function Simulator() {
           fact={(claim, children) => <Fact claim={claim}>{children}</Fact>}
         />
       </div>
-
-      <section className="timeline" id="timeline" aria-label="Life timeline">
-        <button
-          className="play"
-          onClick={() => {
-            if (t >= 1) setT(0)
-            setPlaying(!playing)
-          }}
-          aria-label={playing ? 'Pause the life' : 'Play the life'}
-        >
-          <Icon name={playing ? 'pause' : 'play'} />
-        </button>
-        <div className="track">
-          <input
-            className="range"
-            type="range"
-            min="0"
-            max="1000"
-            step="1"
-            value={Math.round(t * 1000)}
-            onChange={(event) => {
-              setPlaying(false)
-              setT(Number(event.target.value) / 1000)
-            }}
-            aria-label="Life timeline"
-            aria-valuetext={`${phase.label}. ${clock.label}`}
-          />
-          <ol className="phase-ticks">
-            {phases.map((item, index) => (
-              <li key={item.id} style={{ flexGrow: item.share }}>
-                <button
-                  aria-current={index === phaseIndex ? 'step' : undefined}
-                  onClick={() => {
-                    setPlaying(false)
-                    setT(startOf(item.id) + item.share * 0.5)
-                  }}
-                >
-                  {item.label}
-                </button>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
       <div id="lab">
         <Suspense
           fallback={
@@ -1254,9 +1598,10 @@ export function Simulator() {
       <p className="sr-only" role="status" aria-live="polite">
         {announcement}
       </p>
-      <EvidenceLibrary dialog={sources} />
+      <EvidenceLibrary open={sourcesOpen} onOpenChange={setSourcesOpen} />
       <CalibrationDialog
-        dialog={calibrate}
+        open={calibrateOpen}
+        onOpenChange={setCalibrateOpen}
         pxPerMm={calibration.pxPerMm}
         onSave={(value) => {
           try {

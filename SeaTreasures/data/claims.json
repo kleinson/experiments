@@ -1222,6 +1222,14 @@
       "scope": "species",
       "confidence": "moderate",
       "evidenceNote": "Nautilus: septa pierced by the siphuncle, the hood from two folded tentacles, jet propulsion with the hyponome. Septum (cephalopod): the body moves forward to a new living chamber, secreting septa behind it."
+    },
+    {
+      "id": "seabed-setting-illustrative",
+      "text": "The seabed around the shell is an illustration. Its main bed is read from this species' sourced habitat; the chosen place adds a touch of its coast's general character (volcanic rock, seagrass, or kelp and brown algae). It does not claim that this species lives on that bed at that place, and the scenery is not drawn to scale.",
+      "sourceIds": [],
+      "scope": "demo-limitation",
+      "confidence": "high",
+      "evidenceNote": "A deliberate design choice. Plants, corals and rocks are generic, original drawings and are not identified to species; habitat words come from each species' origin entry in species.json."
     }
   ]
 }

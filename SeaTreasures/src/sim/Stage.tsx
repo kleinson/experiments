@@ -33,6 +33,10 @@ import type { Look } from './ink.ts'
 import { labelsIn } from './labels.ts'
 import type { Label } from './labels.ts'
 import type { LifeFrame } from './life.ts'
+import type { Setting } from './seabed.ts'
+import { buildSeafloor } from './seafloor.ts'
+import { buildWater, submerge, water, waterFor } from './water.ts'
+import type { Scenery } from './seafloor.ts'
 import { buildScene } from './scene.ts'
 import type { Built } from './scene.ts'
 import type { Species } from './species.ts'
@@ -55,9 +59,25 @@ export type StageEvent =
 
 /** Actions the page asks the stage to perform, so buttons and taps do the same thing. */
 export type Pulse = {
-  kind: 'poke' | 'tumble' | 'pickup' | 'hatch' | 'settle' | 'front' | 'iso'
+  kind:
+    | 'poke'
+    | 'tumble'
+    | 'pickup'
+    | 'hatch'
+    | 'settle'
+    | 'front'
+    | 'iso'
+    | 'reset'
+    | 'focus'
   at: number
+  /** For `focus`: the label of the part to zoom to. */
+  part?: string
 }
+
+/** A stable seed for the scenery, so a place always looks the same. */
+const seedOf = (text: string) =>
+  [...text].reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0, 7) ||
+  1
 
 function store<T>(initial: T) {
   let value = initial
@@ -107,6 +127,7 @@ export default function Stage({
   pxPerMm,
   reducedMotion,
   pulse,
+  setting,
   labels,
   look,
   turntable,
@@ -124,6 +145,8 @@ export default function Stage({
   pxPerMm: number
   reducedMotion: boolean
   pulse: Pulse | null
+  /** The seabed, beach or open water around the specimen. */
+  setting: Setting
   /** Show leader-line labels on the parts. */
   labels: boolean
   /** 0 draws the specimen as an educational figure, 1 shows it realistically. */
@@ -142,6 +165,7 @@ export default function Stage({
     update: () => void
     nudge: () => void
     reset: () => void
+    dress: () => void
     pulse: (pulse: Pulse) => void
   } | null>(null)
   const latest = useRef({
@@ -156,6 +180,7 @@ export default function Stage({
     labels,
     look,
     turntable,
+    setting,
   })
   const [status] = useState(failureStore)
   const failure = useSyncExternalStore(status.subscribe, status.snapshot)
@@ -187,6 +212,11 @@ export default function Stage({
     latest.current = { ...latest.current, labels, look, turntable }
     api.current?.nudge()
   }, [labels, look, turntable, parts, cut, xray])
+
+  useEffect(() => {
+    latest.current = { ...latest.current, setting }
+    api.current?.dress()
+  }, [setting])
 
   useEffect(() => {
     api.current?.reset()
@@ -225,7 +255,7 @@ export default function Stage({
     const sky = new HemisphereLight(0xffffff, 0x8a7f74, 0)
     const key = new DirectionalLight(0xffffff, LIGHTS.drawn.key)
     key.castShadow = true
-    key.shadow.mapSize.set(2048, 2048)
+    key.shadow.mapSize.set(1024, 1024)
     key.shadow.radius = 4
     const rim = new DirectionalLight(0xffffff, 0)
     scene.add(ambient, sky, key, key.target, rim)
@@ -239,8 +269,22 @@ export default function Stage({
       sky.intensity = set.hemisphere
       key.intensity = set.key
       rim.intensity = set.rim
+      // Under water the sun is filtered from above and tinted by the water; the drawing stays neutral.
+      const wet = look === 'real' && Boolean(scenery?.ground)
+      const submerged = wet && latest.current.setting.scene !== 'beach'
+      key.color.setRGB(1, submerged ? 0.97 : 1, submerged ? 0.9 : 1)
+      sky.color.setRGB(submerged ? 0.75 : 1, submerged ? 0.92 : 1, 1)
+      sky.groundColor.setRGB(0.55, 0.5, 0.45)
+      if (submerged) {
+        key.intensity = set.key * 0.62
+        sky.intensity = set.hemisphere * 0.55
+        ambient.intensity = set.ambient * 0.6
+        rim.intensity = set.rim * 0.2
+      }
       paper.material.color.copy(look === 'drawn' ? shadowTint : black)
       paper.material.opacity = look === 'drawn' ? 0.42 : 0.3
+      // Light rays, fish and drifting particles belong to the realistic water only.
+      if (waterParts) waterParts.group.visible = look === 'real'
     }
     paper.rotation.x = -Math.PI / 2
     paper.receiveShadow = true
@@ -264,18 +308,41 @@ export default function Stage({
     controls.enablePan = false
     controls.minPolarAngle = 0.05
     controls.maxPolarAngle = Math.PI - 0.05
-    controls.minZoom = 0.5
+    controls.minZoom = 0.3
     controls.maxZoom = 6
     const home = () => {
       const target = controls.target.clone()
-      camera.position.set(target.x + 260, target.y + 220, target.z + 520)
+      // Over a seabed the view sits low, a diver's eye, so the floor runs back into open water.
+      const low = Boolean(scenery?.ground) && !built?.close
+      camera.position.set(
+        target.x + 260,
+        target.y + (low ? 130 : 220),
+        target.z + 520,
+      )
       camera.zoom = 1
       camera.updateProjectionMatrix()
       controls.update()
     }
-    home()
 
     let built: Built | null = null
+    let scenery: Scenery | null = null
+    let undoScenery: (() => void) | null = null
+    let waterParts: ReturnType<typeof buildWater> | null = null
+    let waterCss = ''
+    let sceneryKey = ''
+    let ambientTimer = 0
+    /** Room taken by the floating panels, in CSS pixels: the specimen is framed in what is left. */
+    const safe = { left: 0, right: 0, top: 0, bottom: 0 }
+    const readSafe = () => {
+      const style = getComputedStyle(container)
+      const read = (name: string) =>
+        parseFloat(style.getPropertyValue(name)) || 0
+      safe.left = read('--safe-left')
+      safe.right = read('--safe-right')
+      safe.top = read('--safe-top')
+      safe.bottom = read('--safe-bottom')
+    }
+    home()
     let frameId = 0
     let visible = true
     let disposed = false
@@ -299,44 +366,96 @@ export default function Stage({
       apart: 0,
     }
 
-    /** Vertical millimetres the view spans, and where it looks. */
+    /** Millimetres per screen pixel at zoom 1, and where the view looks. */
     const frameSize = () => {
       const { actual, pxPerMm } = latest.current
       const width = container.clientWidth || 1
       const height = container.clientHeight || 1
-      if (!built) return { mm: 100, magnified: false, target: new Vector3() }
-      const view = !actual && built.close ? built.close : built.view
+      const free = {
+        width: Math.max(width * 0.45, width - safe.left - safe.right),
+        height: Math.max(height * 0.45, height - safe.top - safe.bottom),
+      }
+      if (!built)
+        return { perPx: 100 / height, magnified: false, target: new Vector3() }
       if (actual)
         return {
-          mm: height / pxPerMm,
+          perPx: 1 / pxPerMm,
           magnified: false,
           target: built.view.target,
         }
-      const mm = Math.max(view.height, view.width * (height / width))
-      return { mm, magnified: Boolean(built.close), target: view.target }
+      const view = built.close ?? built.view
+      // With a seabed around it, step back so the specimen sits in its setting.
+      const room = scenery?.ground && !built.close ? 1.7 : 1
+      const perPx =
+        Math.max(view.height / free.height, view.width / free.width) * room
+      return { perPx, magnified: Boolean(built.close), target: view.target }
+    }
+
+    const aimAt = (target: Vector3) => {
+      const offset = camera.position.clone().sub(controls.target)
+      controls.target.copy(target)
+      camera.position.copy(target).add(offset)
     }
 
     const fit = () => {
       const width = container.clientWidth
       const height = container.clientHeight
       if (!width || !height) return
+      readSafe()
+      // The canvas fills the screen and is drawn in several passes: keep it under about 3.5 million pixels.
+      renderer.setPixelRatio(
+        Math.min(
+          devicePixelRatio,
+          1.75,
+          Math.sqrt(3_500_000 / (width * height)),
+        ),
+      )
       renderer.setSize(width, height)
-      const { mm, magnified, target } = frameSize()
-      if (!controls.target.equals(target)) {
-        const offset = camera.position.clone().sub(controls.target)
-        controls.target.copy(target)
-        camera.position.copy(target).add(offset)
-      }
-      const half = mm / 2
-      camera.top = half
-      camera.bottom = -half
-      camera.left = -half * (width / height)
-      camera.right = half * (width / height)
+      const { perPx, magnified, target } = frameSize()
+      if (!controls.target.equals(target)) aimAt(target)
+      // Centre the specimen in the space the floating panels leave free.
+      const shiftX = ((safe.left - safe.right) / 2) * perPx
+      const shiftY = ((safe.top - safe.bottom) / 2) * perPx
+      camera.left = (-width / 2) * perPx - shiftX
+      camera.right = (width / 2) * perPx - shiftX
+      camera.top = (height / 2) * perPx + shiftY
+      camera.bottom = (-height / 2) * perPx + shiftY
       controls.enableZoom = !latest.current.actual
       if (latest.current.actual) camera.zoom = 1
       camera.updateProjectionMatrix()
       ink.setSize(width, height, renderer.getPixelRatio())
-      measure({ pxPerMm: (height / mm) * camera.zoom, magnified })
+      measure({ pxPerMm: camera.zoom / perPx, magnified })
+    }
+
+    /** Builds the seabed again when the species, place, bed or scene changes. */
+    const dress = () => {
+      if (!built) return
+      const { setting, species } = latest.current
+      const key = `${setting.key}|${species.id}`
+      if (key === sceneryKey) return
+      sceneryKey = key
+      if (scenery) {
+        scene.remove(scenery.group)
+        undoScenery?.()
+        scenery.dispose()
+      }
+      if (waterParts) {
+        scene.remove(waterParts.group)
+        waterParts.dispose()
+      }
+      ink.forget()
+      scenery = buildSeafloor(setting, built.extent, seedOf(key))
+      undoScenery = inkify(scenery.group)
+      submerge(scenery.group)
+      waterParts = buildWater(setting, built.extent, seedOf(key) + 1)
+      scene.add(waterParts.group)
+      home()
+      // Only the specimen casts a shadow: the scenery's own would cost more than it shows.
+      scenery.group.traverse((object) => (object.castShadow = false))
+      scene.add(scenery.group)
+      paper.visible = !scenery.ground
+      fit()
+      request()
     }
 
     /** Puts a rolled shell back on the sand: its lowest point touches the floor, centred over it. */
@@ -360,6 +479,7 @@ export default function Stage({
       ink.forget()
       built = buildScene(species, frame, { cut, xray })
       undoInk = inkify(built.group)
+      submerge(built.group, true)
       scene.add(built.group)
       const extent = built.extent
       // The shadow falls on paper just under whatever is shown, so swimmers and larvae keep theirs close.
@@ -389,6 +509,7 @@ export default function Stage({
       key.shadow.normalBias = span * 0.002
       labelled = labelsIn(built.group)
       partList.report(labelled)
+      dress()
       if (frame.beach) {
         built.specimen.quaternion.multiply(motion.resting)
         rest(built)
@@ -555,9 +676,12 @@ export default function Stage({
           .sort((a, b) => a.ly - b.ly)
         for (let i = 1; i < column.length; i++)
           column[i]!.ly = Math.max(column[i]!.ly, column[i - 1]!.ly + 30)
-        const overflow = (column.at(-1)?.ly ?? 0) - (height - 24)
+        const overflow =
+          (column.at(-1)?.ly ?? 0) - (height - Math.max(24, safe.bottom + 12))
         if (overflow > 0) column.forEach((item) => (item.ly -= overflow))
-        column.forEach((item) => (item.ly = Math.max(24, item.ly)))
+        column.forEach(
+          (item) => (item.ly = Math.max(Math.max(24, safe.top + 12), item.ly)),
+        )
       }
       const shown = new Map(placed.map((item) => [item.text, item]))
       const near = width < 560 ? 26 : 48
@@ -571,8 +695,8 @@ export default function Stage({
         item.lx = item.x + item.side * near
         item.lx =
           item.side > 0
-            ? Math.min(item.lx, width - 6 - wide)
-            : Math.max(item.lx, 6 + wide)
+            ? Math.min(item.lx, width - safe.right - 6 - wide)
+            : Math.max(item.lx, safe.left + 6 + wide)
         element.style.left = `${item.lx}px`
         element.style.top = `${item.ly}px`
       })
@@ -602,6 +726,25 @@ export default function Stage({
       controls.autoRotate = turntable && !reducedMotion
       controls.autoRotateSpeed = 1.2
       if (controls.autoRotate) moving = true
+      const ambient = Boolean(scenery?.animated || waterParts) && !reducedMotion
+      if (ambient) {
+        scenery?.sway(now())
+        waterParts?.animate(now())
+        water.time.value = now()
+      }
+      water.centre.value.copy(controls.target)
+      if (built) {
+        const tone = waterFor(
+          latest.current.setting,
+          built.extent,
+          document.documentElement.dataset.theme === 'dark',
+        )
+        const css = `rgb(${tone.join(' ')})`
+        if (css !== waterCss) {
+          waterCss = css
+          container.parentElement?.style.setProperty('--water', css)
+        }
+      }
       controls.update()
       cssColour(shadowProbe, shadowTint)
       ink.render(renderer, scene, camera, {
@@ -609,10 +752,27 @@ export default function Stage({
         ink: cssColour(inkProbe, inkColour),
         depthEdge: ((camera.top - camera.bottom) / camera.zoom) * 0.02,
         light,
+        haze:
+          scenery?.ground && built
+            ? {
+                from:
+                  camera.position.distanceTo(controls.target) +
+                  built.extent * 3,
+                to:
+                  camera.position.distanceTo(controls.target) +
+                  built.extent * 14,
+              }
+            : null,
       })
       placeLabels()
       // controls.update() may already have asked for the next frame through its change event.
       if (moving && !frameId) frameId = requestAnimationFrame(draw)
+      else if (ambient && !frameId && !ambientTimer)
+        // The water's slow sway only needs about 25 frames a second.
+        ambientTimer = window.setTimeout(() => {
+          ambientTimer = 0
+          request()
+        }, 40)
     }
     const request = () => {
       if (!disposed && !frameId && visible && !document.hidden)
@@ -642,9 +802,8 @@ export default function Stage({
     let reported = ''
     controls.addEventListener('change', () => {
       if (!latest.current.actual) {
-        const height = container.clientHeight || 1
         const size = frameSize()
-        const pxPerMm = (height / size.mm) * camera.zoom
+        const pxPerMm = camera.zoom / size.perPx
         // Turning (and the turntable) fire this every frame; only zooming changes the scale.
         const key = `${pxPerMm.toFixed(4)}:${size.magnified}`
         if (key !== reported) {
@@ -745,6 +904,21 @@ export default function Stage({
       },
       iso() {
         home()
+        request()
+      },
+      reset() {
+        aimAt(frameSize().target)
+        home()
+        request()
+      },
+      focus(part?: string) {
+        const label = labelled.find((item) => item.text === part)
+        if (!label) return
+        aimAt(label.anchor.getWorldPosition(new Vector3()))
+        if (!latest.current.actual)
+          camera.zoom = Math.min(controls.maxZoom, Math.max(camera.zoom, 2.6))
+        camera.updateProjectionMatrix()
+        controls.update()
         request()
       },
       pickup() {
@@ -860,8 +1034,10 @@ export default function Stage({
         home()
         request()
       },
+      dress,
       pulse(next) {
-        actions[next.kind]()
+        if (next.kind === 'focus') actions.focus(next.part)
+        else actions[next.kind]()
       },
     }
     rebuild()
@@ -879,6 +1055,12 @@ export default function Stage({
       renderer.domElement.removeEventListener('pointermove', pointermove)
       renderer.domElement.removeEventListener('pointercancel', pointercancel)
       renderer.domElement.removeEventListener('webglcontextlost', lost)
+      window.clearTimeout(ambientTimer)
+      if (scenery) {
+        undoScenery?.()
+        scenery.dispose()
+      }
+      waterParts?.dispose()
       themeWatch.disconnect()
       scheme.removeEventListener('change', visibility)
       controls.dispose()
