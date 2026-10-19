@@ -92,6 +92,42 @@ The [source manifest](shell-remembers/data/claims.json) records each substantive
 claim, source, publisher, URL, access date, evidence scope, confidence, and caveat.
 It is available inside the experience without a network connection.
 
+### Anatomy plates
+
+Three interactive isometric plates sit under the main specimen. They were made
+with the [Anatomy skill](https://skills.wheresryan.sh/anatomy) (MIT), whose rule
+is “the object is the explanation”: each plate is a real object, built from many
+small solid parts, with one lit accent, a card with a live readout, and no labels
+inside the drawing. The kit's camera, solids, card and tone vocabulary are
+vendored in `shell-remembers/src/anatomy/kit/` with its licence; colours come
+only from the site's `--cp-*` tokens, in light and dark.
+
+| Plate                               | Where         | What moves                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Fig. 1 · Every shell it was**     | Growth & time | A museum specimen drawer holds the cowrie at all four conceptual stages, top-side up behind and aperture-side up in front. Tapping a compartment or pressing ← → sets the same growth control the 3D shell uses. The drawer front carries a millimetre ruler.                                                                                                                                                  |
+| **Fig. 2 · The animal inside**      | The builder   | A living cowrie on a display stand. A section plane cuts away the near upper quarter of the shell to show the porcelain wall in section, the earlier whorls the last whorl encloses, and the gill, osphradium, heart, kidney, stomach, digestive gland, gonad, gut and radula. The mantle lobes follow the builder's coverage control. Tap a part, use the chips, or press ← →. An idle tour visits each part. |
+| **Fig. 3 · How the shell is built** | Growth & time | A stepped block cut from the shell wall: three mineral layers of thin plates, the newest glossy coat growing as crystal columns, and the mantle's secreting cells above it, lit as the builder. A control lays the coat down; the readout and facts state composition.                                                                                                                                         |
+
+The curved bodies (shells, tissue, organs) are drawn by a small surface painter
+(`anatomy/surface.ts`) in the kit's camera: facets are clipped exactly against
+the section plane, shaded in thirteen interpolated tones, and depth sorted, or
+merged into one path per tone where a convex body cannot overlap itself. Every
+shell in the plates comes from the same `shellPoint` model as the 3D view.
+Selecting a part changes one scoped CSS rule rather than redrawing the plate.
+
+Scientific boundaries specific to the plates:
+
+- Organ shapes, sizes and positions are simplified and illustrative. The plate
+  names only parts supported by the manifest, and each note shows the evidence
+  scope (cowries as a family, or snails generally) and confidence.
+- Living tissue is toned differently from shell so the two can be told apart.
+  This is a drawing convention, not natural colour.
+- A cowrie-specific shell microstructure could not be verified, so Fig. 3 shows
+  generic layered mineral and says so. Composition (mostly aragonite, about 1–5%
+  organic by weight) is sourced for aragonitic sea-snail shells generally.
+- Fluid chemistry between mantle and shell is not drawn because it was not
+  verified for this demo.
+
 ### Accessibility and rendering
 
 - Native controls for growth, length, mantle coverage, and notes.
@@ -124,16 +160,20 @@ offline reload, keyboard operation, reduced motion, theme behavior, 200% layout
 zoom, and 320/375/430/768/1280 CSS-pixel layouts.
 Separate WebKit touch tests cover the phone journey at 320/375/430 CSS pixels,
 system appearance, reduced motion, and reopening the cached experience offline.
+Plate tests cover part highlighting, opening and closing the section, the shared
+mantle and growth controls, the wall control and its sourced composition, the
+idle tour stopping when the reader takes over, and 320/390 CSS-pixel layouts.
 
 The prepared CI definition runs web checks, browser tests, portable native-model
 tests, and an unsigned generic iOS Simulator build in full Xcode. Publishing that
 workflow was rejected by both available authenticated GitHub connections
-(HTTP 404); it remains in a local commit, not in the review branch on GitHub.
+(HTTP 404); it is preserved in the local branch `ci/check-workflow`, not in the review branch on GitHub.
 CI has therefore **not run**. Publishing it requires GitHub workflow-write
 permission.
 
 Local verification passed formatting, lint, TypeScript, the production build,
-26 Node tests, and 22 portable Swift tests. Chromium and WebKit exercise the
+32 Node tests, 32 browser tests (27 Chromium, 5 WebKit), and 22 portable Swift
+tests. Chromium and WebKit exercise the
 production build, including actual foreground pixels in each conceptual stage
 and recovery from an already-running graphics context being lost. A successful
 Swift package test is **not** a substitute for an iOS application build.
@@ -155,6 +195,7 @@ No warning threshold was raised to conceal that tradeoff.
 | `shell-remembers/src/geometry.ts`       | Original parametric cowrie geometry and seeded spots       |
 | `shell-remembers/src/ShellFigure.tsx`   | On-demand 3D renderer and direct manipulation              |
 | `shell-remembers/src/ShellFallback.tsx` | Advanced-rendering alternative                             |
+| `shell-remembers/src/anatomy/`          | The three Anatomy plates, surface painter and vendored kit |
 | `shell-remembers/src/theme.css`         | Shared light/dark visual tokens                            |
 | `shell-remembers/ios/`                  | Native SwiftUI project and portable Swift package          |
 | `shell-remembers/tests/`, `e2e/`        | Unit and production-browser tests                          |

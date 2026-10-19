@@ -7,3 +7,4 @@ DerivedData
 test-results
 playwright-report
 shell-remembers/ios/Sources/ShellCore/Resources
+shell-remembers/src/anatomy/kit

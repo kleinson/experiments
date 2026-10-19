@@ -23,6 +23,7 @@ import { ShellFallback } from './ShellFallback.tsx'
 import type { ShellView } from './ShellFigure.tsx'
 
 const ShellFigure = lazy(() => import('./ShellFigure.tsx'))
+const AnatomyPlates = lazy(() => import('./anatomy/AnatomyPlates.tsx'))
 
 function Icon({
   name,
@@ -896,6 +897,24 @@ export function App() {
             </div>
           </div>
         </section>
+        {(moment === 'builder' || moment === 'growth') && (
+          <Suspense
+            fallback={
+              <p className="an-loading" role="status">
+                Preparing the anatomy plates…
+              </p>
+            }
+          >
+            <AnatomyPlates
+              moment={moment}
+              progress={progress}
+              lengthMm={lengthMm}
+              mantle={mantle}
+              reducedMotion={reducedMotion}
+              onProgress={setProgress}
+            />
+          </Suspense>
+        )}
         <div className="journey-actions">
           <button
             className="secondary"

@@ -1,0 +1,325 @@
+@import './kit/iso-rules.css';
+
+/* Anatomy kit tokens, derived only from the site's --cp-* palette. */
+.an-plates {
+  --an-paper: var(--cp-bg-elevated);
+  --anatomy-page: var(--cp-bg);
+  --anatomy-card: var(--an-paper);
+  --anatomy-paper: var(--an-paper);
+  --anatomy-text: var(--cp-text-muted);
+  --anatomy-strong: var(--cp-text);
+  --anatomy-muted: var(--cp-text-soft);
+  --anatomy-face: var(--cp-surface);
+  --anatomy-top: var(--cp-surface);
+  --anatomy-shade-3: color-mix(in srgb, var(--an-paper) 95%, var(--cp-text));
+  --anatomy-shade-2: color-mix(in srgb, var(--an-paper) 90%, var(--cp-text));
+  --anatomy-shade-1: color-mix(in srgb, var(--an-paper) 85%, var(--cp-text));
+  --anatomy-shade-0: color-mix(in srgb, var(--an-paper) 79%, var(--cp-text));
+  --an-recess: color-mix(in srgb, var(--an-paper) 58%, var(--cp-text));
+  --anatomy-lit-top: color-mix(
+    in srgb,
+    var(--cp-surface) 90%,
+    var(--cp-accent)
+  );
+  --anatomy-lit-shade: color-mix(
+    in srgb,
+    var(--an-paper) 84%,
+    var(--cp-accent)
+  );
+  --anatomy-hi: var(--cp-text);
+  --anatomy-mid: color-mix(in srgb, var(--cp-text) 58%, var(--an-paper));
+  --anatomy-lo: color-mix(in srgb, var(--cp-text) 34%, var(--an-paper));
+  --anatomy-faint: color-mix(in srgb, var(--cp-text) 17%, var(--an-paper));
+  --anatomy-lit: var(--cp-accent);
+  --anatomy-dot: var(--cp-text);
+  --anatomy-halo: var(--cp-text);
+  --anatomy-halo-opacity: 0.16;
+  --anatomy-red: var(--cp-danger);
+  --anatomy-green: var(--cp-success);
+  --anatomy-blue: var(--cp-link);
+  --anatomy-weight: 0.7px;
+  --anatomy-mono: Consolas, 'Courier New', Courier, monospace;
+  --an-ink: color-mix(in srgb, var(--cp-text) 82%, var(--an-paper));
+}
+html[data-theme='dark'] .an-plates {
+  --an-paper: var(--cp-surface);
+  --anatomy-top: color-mix(in srgb, var(--an-paper) 80%, var(--cp-text));
+  --anatomy-face: color-mix(in srgb, var(--an-paper) 84%, var(--cp-text));
+  --anatomy-shade-3: color-mix(in srgb, var(--an-paper) 86%, var(--cp-text));
+  --anatomy-shade-2: color-mix(in srgb, var(--an-paper) 91%, var(--cp-text));
+  --anatomy-shade-1: color-mix(in srgb, var(--an-paper) 96%, var(--cp-text));
+  --anatomy-shade-0: var(--an-paper);
+  --an-recess: color-mix(in srgb, var(--an-paper) 72%, var(--cp-bg-elevated));
+  --anatomy-lit-top: color-mix(in srgb, var(--an-paper) 66%, var(--cp-accent));
+  --anatomy-lit-shade: color-mix(
+    in srgb,
+    var(--an-paper) 80%,
+    var(--cp-accent)
+  );
+  --anatomy-mid: color-mix(in srgb, var(--cp-text) 52%, var(--an-paper));
+  --anatomy-lo: color-mix(in srgb, var(--cp-text) 30%, var(--an-paper));
+  --anatomy-faint: color-mix(in srgb, var(--cp-text) 16%, var(--an-paper));
+  --anatomy-halo: var(--cp-accent-fg);
+  --anatomy-halo-opacity: 0.7;
+  --an-ink: color-mix(in srgb, var(--cp-text) 70%, var(--an-paper));
+}
+
+/* Curved surfaces: thirteen interpolated tones, each facet stroked in its own fill so no seams show. */
+.an-q {
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+}
+.an-q[data-shade='0'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-top) 0%, var(--anatomy-shade-0));
+}
+.an-q[data-shade='1'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-top) 8%, var(--anatomy-shade-0));
+}
+.an-q[data-shade='2'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-top) 17%, var(--anatomy-shade-0));
+}
+.an-q[data-shade='3'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-top) 25%, var(--anatomy-shade-0));
+}
+.an-q[data-shade='4'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-top) 33%, var(--anatomy-shade-0));
+}
+.an-q[data-shade='5'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-top) 42%, var(--anatomy-shade-0));
+}
+.an-q[data-shade='6'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-top) 50%, var(--anatomy-shade-0));
+}
+.an-q[data-shade='7'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-top) 58%, var(--anatomy-shade-0));
+}
+.an-q[data-shade='8'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-top) 67%, var(--anatomy-shade-0));
+}
+.an-q[data-shade='9'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-top) 75%, var(--anatomy-shade-0));
+}
+.an-q[data-shade='10'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-top) 83%, var(--anatomy-shade-0));
+}
+.an-q[data-shade='11'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-top) 92%, var(--anatomy-shade-0));
+}
+.an-q[data-shade='12'] {
+  --an-tone: color-mix(
+    in srgb,
+    var(--anatomy-top) 100%,
+    var(--anatomy-shade-0)
+  );
+}
+.an-q[data-shade='r0'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-shade-0) 0%, var(--an-recess));
+}
+.an-q[data-shade='r1'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-shade-0) 22%, var(--an-recess));
+}
+.an-q[data-shade='r2'] {
+  --an-tone: color-mix(in srgb, var(--anatomy-shade-0) 40%, var(--an-recess));
+}
+.an-q {
+  fill: var(--an-tone);
+  stroke: var(--an-tone);
+}
+.an-q[data-lit] {
+  fill: color-mix(in srgb, var(--an-tone) 93%, var(--cp-accent));
+  stroke: color-mix(in srgb, var(--an-tone) 93%, var(--cp-accent));
+}
+/* Living tissue: the same light, shifted toward ink so it separates from porcelain shell. */
+.an-q[data-soft] {
+  fill: color-mix(in srgb, var(--an-tone) 80%, var(--cp-text));
+  stroke: color-mix(in srgb, var(--an-tone) 80%, var(--cp-text));
+}
+.an-q[data-soft][data-lit] {
+  fill: color-mix(in srgb, var(--an-tone) 72%, var(--cp-accent));
+  stroke: color-mix(in srgb, var(--an-tone) 72%, var(--cp-accent));
+}
+.an-spot {
+  fill: var(--an-ink);
+  stroke: none;
+}
+.an-tooth {
+  fill: var(--anatomy-top);
+  stroke: var(--anatomy-mid);
+  stroke-width: 0.5;
+}
+.an-rest {
+  filter: blur(5px);
+}
+.an-hit {
+  fill: transparent;
+  stroke: none;
+  cursor: pointer;
+}
+.an-cut {
+  fill: var(--anatomy-face);
+  stroke: var(--anatomy-face);
+  stroke-width: 0.5;
+}
+.an-cut[data-lit] {
+  fill: var(--anatomy-lit-top);
+  stroke: var(--anatomy-lit-top);
+}
+.an-papilla {
+  fill: var(--anatomy-top);
+  stroke: var(--anatomy-mid);
+  stroke-width: 0.45;
+}
+
+/* Plate layout inside the journey */
+.an-plates {
+  display: grid;
+  gap: 8px 32px;
+  padding: 8px 0 40px;
+  border-top: 1px solid var(--cp-border);
+}
+.an-plates-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 40px;
+}
+.an-plates-head h2 {
+  font-size: clamp(24px, 2.6vw, 34px);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+.an-plates-head p {
+  color: var(--cp-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 52ch;
+}
+.an-figure {
+  margin: 24px 0 8px;
+  min-width: 0;
+}
+.an-figure .iso-plate {
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px var(--cp-border);
+  padding: 48px 20px;
+}
+.an-figure .iso-plate:focus-visible {
+  outline: 2px solid var(--cp-accent);
+  outline-offset: 3px;
+}
+.an-figure .iso-plate-corner[data-corner='title'] {
+  color: var(--cp-text-muted);
+}
+.an-figure .iso-plate-corner[data-corner='readout'] {
+  color: var(--cp-accent);
+}
+.an-figure .iso-svg {
+  max-height: 560px;
+}
+.an-controls {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+.an-control {
+  max-width: 520px;
+}
+.an-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.an-chips button {
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--cp-border);
+  background: var(--cp-surface);
+  color: var(--cp-text-muted);
+  font-size: 12px;
+}
+.an-chips button:hover {
+  border-color: var(--cp-border-strong);
+  color: var(--cp-text);
+}
+.an-chips button[aria-pressed='true'] {
+  border-color: var(--cp-accent);
+  background: var(--cp-accent-soft);
+  color: var(--cp-text);
+}
+.an-note {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--cp-text-muted);
+  max-width: 64ch;
+  min-height: 3.2em;
+}
+.an-note strong {
+  color: var(--cp-text);
+  font-weight: 600;
+}
+.an-scope {
+  display: block;
+  margin-top: 4px;
+  font:
+    10px Consolas,
+    'Courier New',
+    monospace;
+  letter-spacing: 0.04em;
+  color: var(--cp-text-soft);
+}
+.an-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.an-facts dt {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cp-text);
+}
+.an-facts dd {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--cp-text-muted);
+}
+.an-figure .iso-legend {
+  color: var(--cp-text-soft);
+  font-size: 12px;
+}
+.an-figure .iso-caption {
+  max-width: 72ch;
+}
+.an-loading {
+  padding: 40px 0;
+  color: var(--cp-text-soft);
+  font-size: 12px;
+}
+@media (min-width: 1100px) {
+  .an-plates[data-count='2'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .an-plates[data-count='2'] .an-plates-head {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 760px) {
+  .an-figure .iso-plate {
+    padding: 44px 6px 56px;
+  }
+  .an-figure .iso-plate-corner[data-corner='hint'] {
+    bottom: 22px;
+  }
+  .an-facts {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .an-plates-head {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
