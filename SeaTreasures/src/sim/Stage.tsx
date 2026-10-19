@@ -15,7 +15,7 @@ import {
   NoToneMapping,
   Object3D,
   OrthographicCamera,
-  PCFSoftShadowMap,
+  PCFShadowMap,
   Plane,
   PlaneGeometry,
   Quaternion,
@@ -215,7 +215,7 @@ export default function Stage({
     renderer.toneMapping = NoToneMapping
     renderer.localClippingEnabled = true
     renderer.shadowMap.enabled = true
-    renderer.shadowMap.type = PCFSoftShadowMap
+    renderer.shadowMap.type = PCFShadowMap
     renderer.domElement.setAttribute('aria-hidden', 'true')
     renderer.domElement.setAttribute('data-sim-canvas', '')
     container.prepend(renderer.domElement)
@@ -226,6 +226,7 @@ export default function Stage({
     const key = new DirectionalLight(0xffffff, LIGHTS.drawn.key)
     key.castShadow = true
     key.shadow.mapSize.set(2048, 2048)
+    key.shadow.radius = 4
     const rim = new DirectionalLight(0xffffff, 0)
     scene.add(ambient, sky, key, key.target, rim)
     // A soft cast shadow on the paper: tinted in the drawing, neutral when realistic.
