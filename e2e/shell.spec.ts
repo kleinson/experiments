@@ -130,6 +130,58 @@ test('the five-moment journey manipulates a rendered shell and saves a real loca
   ).toBeNull()
 })
 
+test('every growth stage retains visible underside geometry rather than an empty changed canvas', async ({
+  page,
+}) => {
+  await page.goto('./')
+  await page
+    .getByRole('navigation')
+    .getByRole('button', { name: 'Growth & time', exact: true })
+    .click()
+  await expect(
+    page.getByRole('button', { name: 'Underside', exact: true }),
+  ).toHaveAttribute('aria-pressed', 'true')
+  for (const value of ['0', '25', '50', '75', '100']) {
+    await page
+      .getByRole('slider', { name: 'Move through growth stages' })
+      .fill(value)
+    await expect
+      .poll(async () => {
+        const png = (
+          await page.locator('[data-shell-canvas]').screenshot()
+        ).toString('base64')
+        return page.evaluate(async (data) => {
+          const image = new Image()
+          image.src = `data:image/png;base64,${data}`
+          await image.decode()
+          const canvas = document.createElement('canvas')
+          canvas.width = image.naturalWidth
+          canvas.height = image.naturalHeight
+          const context = canvas.getContext('2d')
+          if (!context)
+            throw new Error('The screenshot decoder is unavailable.')
+          context.drawImage(image, 0, 0)
+          const pixels = context.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height,
+          ).data
+          let foreground = 0
+          for (let i = 0; i < pixels.length; i += 4) {
+            const difference =
+              Math.abs(pixels[i] - pixels[0]) +
+              Math.abs(pixels[i + 1] - pixels[1]) +
+              Math.abs(pixels[i + 2] - pixels[2])
+            if (difference > 96) foreground++
+          }
+          return foreground / (pixels.length / 4)
+        }, png)
+      })
+      .toBeGreaterThan(0.01)
+  }
+})
+
 test('keyboard-only controls, focus transitions and source dialog work', async ({
   page,
 }) => {

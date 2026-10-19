@@ -125,10 +125,19 @@ zoom, and 320/375/430/768/1280 CSS-pixel layouts.
 Separate WebKit touch tests cover the phone journey at 320/375/430 CSS pixels,
 system appearance, reduced motion, and reopening the cached experience offline.
 
-CI runs web checks, browser tests, and portable native-model tests. A successful
-Swift package test is **not** a substitute for an iOS application build; the
-native CI job also performs an unsigned generic iOS Simulator build in full
-Xcode. Local CLT-only checks cannot run that build.
+The prepared CI definition runs web checks, browser tests, portable native-model
+tests, and an unsigned generic iOS Simulator build in full Xcode. Publishing that
+workflow was rejected by both available authenticated GitHub connections
+(HTTP 404); it remains in a local commit, not in the review branch on GitHub.
+CI has therefore **not run**. Publishing it requires GitHub workflow-write
+permission.
+
+Local verification passed formatting, lint, TypeScript, the production build,
+26 Node tests, and 22 portable Swift tests. Chromium and WebKit exercise the
+production build, including actual foreground pixels in each conceptual stage
+and recovery from an already-running graphics context being lost. A successful
+Swift package test is **not** a substitute for an iOS application build.
+The iOS UI still needs a full-Xcode build, simulator review, and device testing.
 
 The 3D renderer is a separately loaded approximately 568 kB minified chunk
 (approximately 143 kB compressed); Vite reports its standard 500 kB warning.
