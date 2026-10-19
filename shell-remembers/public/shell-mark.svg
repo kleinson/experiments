@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <style>:root{--cp-bg:#f7f4ef;--cp-text:#242424;--cp-accent:#b11f4b}@media(prefers-color-scheme:dark){:root{--cp-bg:#3d3b3a;--cp-text:#dedede;--cp-accent:#fd8ea1}}</style>
+  <rect width="128" height="128" rx="28" fill="var(--cp-bg)"/>
+  <path d="M21 69C13 40 41 22 72 30s49 35 32 54S33 104 21 69Z" fill="none" stroke="var(--cp-text)" stroke-width="3"/>
+  <g fill="var(--cp-text)"><ellipse cx="43" cy="49" rx="5" ry="4"/><ellipse cx="68" cy="45" rx="4" ry="6"/><ellipse cx="88" cy="60" rx="6" ry="4"/><ellipse cx="58" cy="68" rx="5" ry="4"/><ellipse cx="36" cy="72" rx="3" ry="5"/><ellipse cx="78" cy="82" rx="4" ry="3"/></g>
+  <path d="M33 89Q65 80 99 86" fill="none" stroke="var(--cp-accent)" stroke-width="3" stroke-linecap="round"/>
+</svg>

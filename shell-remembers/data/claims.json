@@ -1,0 +1,346 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": "worms-schilderiana",
+      "title": "Cypraea tigris schilderiana C. N. Cate, 1961 (AphiaID 574019)",
+      "publisher": "WoRMS (World Register of Marine Species) / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=574019",
+      "accessedAt": "2026-10-19",
+      "kind": "taxonomic",
+      "accessNote": "Rendered page is JavaScript-driven; verified directly via the WoRMS REST API endpoints (AphiaRecordByAphiaID/574019 and AphiaDistributionsByAphiaID/574019 and AphiaSourcesByAphiaID/574019), which return the same record in machine-readable form and resolve from the same AphiaID."
+    },
+    {
+      "id": "worms-tigris",
+      "title": "Cypraea tigris Linnaeus, 1758 (AphiaID 216843)",
+      "publisher": "WoRMS (World Register of Marine Species) / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=216843",
+      "accessedAt": "2026-10-19",
+      "kind": "taxonomic",
+      "accessNote": "Verified via the WoRMS REST API (AphiaRecordByAphiaID/216843), confirming accepted species status and that it is the parent taxon of AphiaID 574019."
+    },
+    {
+      "id": "cate-1961",
+      "title": "Description of a new Hawaiian subspecies of Cypraea tigris Linnaeus, 1758",
+      "publisher": "The Veliger 3(4): 107-108 (original description, as catalogued by WoRMS)",
+      "url": "https://www.marinespecies.org/aphia.php?p=sourcedetails&id=416497",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Original BHL scan (biodiversitylibrary.org/page/42431777) returned HTTP 403 for direct fetch; verified instead via WoRMS's own sourcedetails record, which WoRMS lists as the 'original description' source for AphiaID 574019."
+    },
+    {
+      "id": "meyer-tweedt-2017",
+      "title": "A new subspecies of Cypraea tigris Linnaeus 1758 (Gastropoda: Cypraeidae)",
+      "publisher": "Acta Conchyliorum 16: 59-68 (as catalogued by WoRMS)",
+      "url": "https://www.marinespecies.org/aphia.php?p=sourcedetails&id=284684",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Listed by WoRMS as the 'status source' underpinning the current accepted subspecies rank of C. tigris schilderiana; sourcedetails page verified to resolve and display the matching title."
+    },
+    {
+      "id": "lorenz-2017-cowries",
+      "title": "Cowries. A guide to the gastropod family Cypraeidae. Volume 1, Biology and systematics.",
+      "publisher": "ConchBooks, Harxheim (specialist malacological monograph, as catalogued by WoRMS)",
+      "url": "https://www.marinespecies.org/aphia.php?p=sourcedetails&id=287926",
+      "accessedAt": "2026-10-19",
+      "kind": "specialist",
+      "accessNote": "Listed by WoRMS as 'basis of record' and 'additional source' (p.284, pl.56) for AphiaID 574019; full monograph text not independently accessed, only the WoRMS citation record and its sourcedetails page were verified."
+    },
+    {
+      "id": "marinelifephotography-schilderiana",
+      "title": "Hawaiian Tiger Cowry, Cypraea tigris schilderiana",
+      "publisher": "marinelifephotography.com (specialist marine-life field photography/natural history reference site)",
+      "url": "https://www.marinelifephotography.com/marine/mollusks/gastropods/cowries/cypraea-tigris-schilderiana.htm",
+      "accessedAt": "2026-10-19",
+      "kind": "specialist",
+      "accessNote": "Fetched and read directly. Independent, non-institutional field-naturalist source; treated as specialist-provenance rather than museum/government-grade authority."
+    },
+    {
+      "id": "marinelifephotography-cowries",
+      "title": "Cowries, Family Cypraeidae",
+      "publisher": "marinelifephotography.com (specialist marine-life field photography/natural history reference site)",
+      "url": "https://www.marinelifephotography.com/marine/mollusks/gastropods/cowries/cowries.htm",
+      "accessedAt": "2026-10-19",
+      "kind": "specialist",
+      "accessNote": "Fetched and read directly. Family-level overview page (not subspecies-specific); treated as specialist provenance."
+    },
+    {
+      "id": "conchsoc-shell-money",
+      "title": "Shell money",
+      "publisher": "The Conchological Society of Great Britain and Ireland",
+      "url": "https://conchsoc.org/interests/shell-money.php",
+      "accessedAt": "2026-10-19",
+      "kind": "specialist",
+      "accessNote": "Fetched and read directly. A national malacological society page; specialist-hobbyist/society provenance rather than peer-reviewed or museum-curated, cited with that caveat."
+    },
+    {
+      "id": "reefs-tiger-cowrie",
+      "title": "Tiger Cowrie (Cypraea tigris) care and natural history notes",
+      "publisher": "Reefs.com (marine aquarium hobbyist/specialist reference)",
+      "url": "https://reefs.com/invertebrates/tiger-cowrie/",
+      "accessedAt": "2026-10-19",
+      "kind": "specialist",
+      "accessNote": "Fetched and read directly. Aquarium-trade specialist source describing the species-level (not subspecies-specific) animal's diet, day/night behavior, and mantle/aperture anatomy; clearly marked as specialist, non-peer-reviewed provenance."
+    },
+    {
+      "id": "marinelifephotography-tigris-nominal",
+      "title": "Tiger Cowry, Cypraea tigris tigris",
+      "publisher": "marinelifephotography.com (specialist marine-life field photography/natural history reference site)",
+      "url": "https://www.marinelifephotography.com/marine/mollusks/gastropods/cowries/cypraea-tigris.htm",
+      "accessedAt": "2026-10-19",
+      "kind": "specialist",
+      "accessNote": "Fetched and read directly. Gives the nominal-form size envelope used here to contrast with the Hawaiian subspecies page from the same author/site."
+    },
+    {
+      "id": "worms-pantherina",
+      "title": "Cypraea pantherina [Lightfoot], 1786 (AphiaID 216812)",
+      "publisher": "WoRMS (World Register of Marine Species) / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=216812",
+      "accessedAt": "2026-10-19",
+      "kind": "taxonomic",
+      "accessNote": "Verified via the WoRMS REST API: AphiaRecordsByName/Cypraea%20pantherina confirmed AphiaID 216812 with status \"accepted\"; AphiaDistributionsByAphiaID/216812 returned the distribution records cited below."
+    },
+    {
+      "id": "redseacreatures-pantherina",
+      "title": "Panther Cowry (Cypraea pantherina)",
+      "publisher": "Red Sea Creatures (specialist Red Sea field-identification reference)",
+      "url": "https://redseacreatures.com/taxon/invertebrate/molluscs/prosobranchia/panther-cowry",
+      "accessedAt": "2026-10-19",
+      "kind": "specialist",
+      "accessNote": "Fetched and read directly. Independent field-naturalist/dive-guide site; treated as specialist provenance, not peer-reviewed or museum-curated."
+    },
+    {
+      "id": "smithsonian-seashell-formation",
+      "title": "The Story Behind the Seashells By the Seashore",
+      "publisher": "Smithsonian Magazine, in coordination with the Smithsonian National Museum of Natural History (quotes Chris Meyer, NMNH research zoologist and curator of mollusks, and Gabriela Farfan, NMNH curator of gems and minerals)",
+      "url": "https://www.smithsonianmag.com/blogs/national-museum-of-natural-history/2022/06/22/the-story-behind-the-seashells-by-the-seashore/",
+      "accessedAt": "2026-10-19",
+      "kind": "museum",
+      "accessNote": "Fetched and read directly in full (the direct naturalhistory.si.edu and ocean.si.edu domains returned HTTP 403 for this and related pages; this Smithsonian Magazine article, co-produced with and quoting named NMNH curators, was used instead and did resolve)."
+    },
+    {
+      "id": "whoi-seashell-formation",
+      "title": "How are seashells made?",
+      "publisher": "Woods Hole Oceanographic Institution (WHOI), Ocean Learning Hub",
+      "url": "https://www.whoi.edu/ocean-learning-hub/ocean-facts/how-are-seashells-made/",
+      "accessedAt": "2026-10-19",
+      "kind": "university",
+      "accessNote": "Fetched and read directly. WHOI is a private, nonprofit oceanographic research and education institution (operates jointly with MIT on some programs); treated here as university/research-institution-grade rather than a government agency."
+    },
+    {
+      "id": "crane-shell-repair-2021",
+      "title": "Bivalves rapidly repair shells damaged by fatigue and bolster strength",
+      "publisher": "Journal of Experimental Biology, The Company of Biologists; open-access full text archived in PubMed Central",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8541735/",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Read the abstract and introduction directly from the open-access article. Citation metadata was cross-checked with Europe PMC: Crane RL, Diaz Reyes JL, Denny MW (2021), volume 224, article jeb242681, DOI 10.1242/jeb.242681. The experiment concerns California mussels, not cowries."
+    }
+  ],
+  "claims": [
+    {
+      "id": "taxonomy-accepted-subspecies",
+      "text": "Cypraea tigris schilderiana C. N. Cate, 1961 is currently recognized as an accepted subspecies of Cypraea tigris Linnaeus, 1758, per the WoRMS/MolluscaBase taxonomic database.",
+      "sourceIds": ["worms-schilderiana", "worms-tigris"],
+      "scope": "subspecies",
+      "confidence": "high",
+      "evidenceNote": "WoRMS REST API record for AphiaID 574019 returns status:\"accepted\", rank:\"Subspecies\", and parentNameUsageID:216843, which itself resolves to the accepted species Cypraea tigris. Both records were retrieved directly from the machine-readable AphiaRecordByAphiaID endpoint, not inferred from a search snippet."
+    },
+    {
+      "id": "taxonomy-original-description",
+      "text": "The Hawaiian tiger cowrie subspecies was first formally described by C. N. Cate in 1961, in a short paper in The Veliger naming it as a new Hawaiian subspecies of Cypraea tigris.",
+      "sourceIds": ["cate-1961", "worms-schilderiana"],
+      "scope": "subspecies",
+      "confidence": "high",
+      "evidenceNote": "WoRMS's AphiaSourcesByAphiaID list for 574019 cites Cate (1961), Veliger 3(4):107-108, pl.9, with use:\"original description\" — this is the formal taxonomic act that established the subspecies."
+    },
+    {
+      "id": "taxonomy-later-review",
+      "text": "The subspecies status of Cypraea tigris schilderiana has been reaffirmed in more recent peer-reviewed taxonomic literature, separate from the original 1961 description.",
+      "sourceIds": ["meyer-tweedt-2017", "worms-schilderiana"],
+      "scope": "subspecies",
+      "confidence": "moderate",
+      "evidenceNote": "WoRMS cites Meyer & Tweedt (2017), Acta Conchyliorum 16:59-68, with use:\"status source\" for AphiaID 574019. The full paper text was not independently retrieved, so the specific reasoning for reaffirmation is not verified beyond the WoRMS citation itself — confidence set to moderate rather than high."
+    },
+    {
+      "id": "distribution-hawaii-type-locality",
+      "text": "The type locality of Cypraea tigris schilderiana is Hawaii, and its confirmed distribution centers on the Hawaiian Islands, distinguishing it geographically from the broader Indo-Pacific range of the parent species Cypraea tigris.",
+      "sourceIds": ["worms-schilderiana", "worms-tigris"],
+      "scope": "subspecies",
+      "confidence": "high",
+      "evidenceNote": "WoRMS AphiaDistributionsByAphiaID/574019 lists two valid locality records: \"Hawaiian Islands\" (North Pacific Ocean) and \"Hawaii\" with typeStatus:\"holotype\", both with qualityStatus:\"checked\". The parent species Cypraea tigris is a separate, far more widely distributed Indo-Pacific taxon."
+    },
+    {
+      "id": "mantle-coating-and-polish",
+      "text": "In cowries generally, the mantle (a soft extension of the animal's body) can spread out and cover the entire outer shell surface while the animal is active, and this ongoing coverage and maintenance by the mantle is how the shell surface is kept smooth and glossy during life.",
+      "sourceIds": ["marinelifephotography-cowries", "reefs-tiger-cowrie"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "reefs-tiger-cowrie states the mantle \"will completely cover its shell unless it feels threatened,\" at the species (Cypraea tigris) level. marinelifephotography-cowries corroborates the family-level mantle/shell relationship. Neither source is a peer-reviewed biomineralization paper, so confidence is moderate and scope is kept at family/species rather than claimed for the subspecies specifically. Narrowed to drop an earlier unconditional \"gloss fades once dead\" statement: dead/beachworn shells can remain glossy for a long time, and dulling depends on abrasion, erosion, and environmental exposure rather than death alone, so that claim is not supported as an unconditional rule by these sources."
+    },
+    {
+      "id": "juvenile-to-adult-shape-change",
+      "text": "Juvenile cowries look very different from adults: they begin as thin, open, visibly coiled shells resembling small olive shells, and only take on the smooth, rounded, egg-like adult cowrie shape as the animal matures and the outer lip thickens inward.",
+      "sourceIds": ["marinelifephotography-cowries"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Direct quote basis: \"Juveniles look nothing like adults, resembling paper-thin olive shells. Coiling as they grow until maturity, when the outer lip turns inward, forms teeth, and the shell thickens...\" This is a family-level (Cypraeidae) description from a single specialist field-naturalist source, not a peer-reviewed developmental study, hence moderate confidence."
+    },
+    {
+      "id": "aperture-teeth-at-maturity",
+      "text": "The narrow, tooth-lined aperture (opening) on the underside of a mature cowrie shell forms as part of the maturation process, when the outer lip curls inward and thickens; this toothed margin is a maturity feature, not present on the early juvenile shell.",
+      "sourceIds": ["marinelifephotography-cowries", "reefs-tiger-cowrie"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "marinelifephotography-cowries: outer lip \"turns inward, forms teeth, and the shell thickens.\" reefs-tiger-cowrie independently notes the Cypraea tigris aperture is \"lined with 'threatening' tooth-like structures.\" Combined these support the claim at family/species level; subspecies-specific documentation was not found."
+    },
+    {
+      "id": "length-finalized-at-maturity",
+      "text": "In cowries, a shell's overall length is understood to become fixed once the animal reaches maturity and the outer lip thickens; further growth after that point is mainly in shell width and thickness rather than additional length, and the point at which an individual juvenile stops coiling (and thus its final length) varies between individuals.",
+      "sourceIds": ["marinelifephotography-cowries"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Direct quote basis: \"The length of an adult cowry is finalized at this point, and additional growth is limited to width and thickness... young cowries stop coiling at random lengths, resulting in mature shells of varying size.\" This is a single specialist source's general description for the family, not a controlled study, hence moderate confidence."
+    },
+    {
+      "id": "demo-no-length-to-age-model",
+      "text": "This demo does not have a validated length-to-age model. Size alone does not supply a defensible exact age.",
+      "sourceIds": [],
+      "scope": "demo-limitation",
+      "confidence": "high",
+      "evidenceNote": "Methodological statement about this project's scope, not a biological finding: no peer-reviewed, subspecies-specific length-at-age calibration for Cypraea tigris schilderiana was located during this research (searches covering WoRMS source lists, the original 1961 description citation, and specialist cowrie references returned none). Independently, marinelifephotography-cowries notes that individual cowries stop coiling (and thus reach final length) at varying points, which is consistent with size not being a reliable age proxy even in general cowrie biology."
+    },
+    {
+      "id": "size-reference-schilderiana",
+      "text": "Published field reference figures for Cypraea tigris schilderiana describe an average adult length around 100 mm (about 4 in), a maximum of about 153 mm (about 6 in), and note that specimens exceeding roughly 125 mm (about 5 in) are considered rare.",
+      "sourceIds": ["marinelifephotography-schilderiana"],
+      "scope": "subspecies",
+      "confidence": "moderate",
+      "evidenceNote": "Direct quote basis: \"attains at least 6 inches, 153 mm, while the average is 4 inches, 100 mm. Specimens exceeding 5 inches, 125 mm, are rare and highly desirable.\" This is a single specialist field-naturalist source rather than a peer-reviewed population survey, so treat these figures as a commonly cited reference range rather than a verified statistical distribution. These figures are close to, but not identical to, informally reported ranges of 90-153 mm / >120 mm rare; only the figures directly verified here (100 mm average, 153 mm maximum, >125 mm rare) are included."
+    },
+    {
+      "id": "ecology-habitat-reef",
+      "text": "Cypraea tigris is commonly found on or near coral reef structures, including resting in crevices and among coral heads, and individuals are sometimes found clustered together.",
+      "sourceIds": ["marinelifephotography-schilderiana", "reefs-tiger-cowrie"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "marinelifephotography-schilderiana: \"Locally common next to coral heads or within crevices in clear water at any depth. Shells tend to occur in clusters.\" reefs-tiger-cowrie: found \"under rocks or resting on soft corals during the day.\" Both are specialist (non-peer-reviewed) field/aquarium sources; described at the species level since neither source specifically isolates Hawaiian-subspecies habitat data from the wider species."
+    },
+    {
+      "id": "ecology-nocturnal-foraging",
+      "text": "Cypraea tigris individuals are typically more active and forage for food at night, spending daylight hours hidden in crevices or under rocks/corals with the mantle retracted.",
+      "sourceIds": ["marinelifephotography-schilderiana", "reefs-tiger-cowrie"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "marinelifephotography-schilderiana: \"the mantle is usually retracted during the day.\" reefs-tiger-cowrie: found resting during the day, \"foraging for food mostly at night.\" Two independent specialist sources agree on this pattern at the species level; no subspecies-specific behavioral study was located."
+    },
+    {
+      "id": "ecology-diet",
+      "text": "Cypraea tigris is omnivorous/opportunistic: juveniles are reported to graze on algae, while adults are reported to feed on sponges, soft corals, and anemones, as well as scavenging leftover meaty material.",
+      "sourceIds": ["reefs-tiger-cowrie"],
+      "scope": "species",
+      "confidence": "limited",
+      "evidenceNote": "Based on a single aquarium-hobbyist specialist source (reefs-tiger-cowrie) describing captive feeding behavior/diet; this is useful husbandry-based observation but not a peer-reviewed dietary study of wild populations, so confidence is limited and the claim is kept at species level."
+    },
+    {
+      "id": "currency-other-cowries-not-tiger-cowrie",
+      "text": "The cited historical account of cowrie shells used as currency and trade valuables across Africa, South Asia, and parts of the Pacific/Indo-Pacific region documents this monetary role specifically for small cowries — principally the money cowrie (historically placed in Cypraea, now Monetaria moneta) and the ring cowrie (Monetaria annulus) — and does not establish or describe that same monetary role for the much larger tiger cowrie Cypraea tigris or its Hawaiian subspecies.",
+      "sourceIds": ["conchsoc-shell-money"],
+      "scope": "other-cowries",
+      "confidence": "high",
+      "evidenceNote": "conchsoc-shell-money explicitly names \"the Money Cowrie (C. moneta) and Ring Cowrie (C. annulus)\" as the species that \"have circulated as currency in more places in the world than any coin,\" tracing use from China (1200-800 BC) and India to Africa from roughly the 10th century onward. This single source never attributes currency use to Cypraea tigris or any tiger-cowrie subspecies, so the claim is scoped to what this particular account does and does not document (other-cowries), rather than asserting a universal negative that the tiger cowrie was never used as currency anywhere in history — that broader negative was not independently researched."
+    },
+    {
+      "id": "demo-size-not-a-rarity-or-value-signal",
+      "text": "This manifest and the associated demo do not assign a rarity score, monetary valuation, or population-prevalence estimate to any given shell size; none of the sources consulted provide a verified basis for such figures for this subspecies.",
+      "sourceIds": [],
+      "scope": "demo-limitation",
+      "confidence": "high",
+      "evidenceNote": "Methodological statement: no reliable, population-level rarity/valuation data specific to Cypraea tigris schilderiana was found during this research. The only quantitative size notes located (see size-reference-schilderiana) describe a single field reference's reported range and qualitative rarity above ~125 mm, which is not a statistical prevalence study and is not treated as one here."
+    },
+    {
+      "id": "lookalike-pantherina-identity",
+      "text": "A real-world look-alike for tiger cowries is the panther/leopard cowrie, Cypraea pantherina — a distinct, currently accepted species in the same genus, not a Cypraea tigris subspecies.",
+      "sourceIds": ["worms-pantherina"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "WoRMS AphiaRecordsByName confirms Cypraea pantherina (AphiaID 216812) as an accepted species in genus Cypraea, with its own parentNameUsageID (205978, the genus), separate from Cypraea tigris (216843) and Cypraea tigris schilderiana (574019). This narrow taxonomic-acceptance statement is backed only by the WoRMS taxonomic database, hence high confidence."
+    },
+    {
+      "id": "lookalike-pantherina-morphology",
+      "text": "Cypraea pantherina is reported to have a similarly large, heavy, glossy, densely dark-spotted shell and a white, finely tooth-lined aperture to Cypraea tigris, making the two look confusable at a glance despite being different species.",
+      "sourceIds": ["redseacreatures-pantherina"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "redseacreatures-pantherina describes it as 'a heavy glossy oval, pale under a dense pattern of dark brown spots... The base is white, and the narrow opening is lined with fine teeth along its whole length' — a shell plan close enough to Cypraea tigris to require careful comparison rather than a glance. This morphological/confusability description rests on a single specialist field-identification source rather than a peer-reviewed comparative study, so confidence is moderate, distinct from the high-confidence taxonomic-acceptance fact in lookalike-pantherina-identity."
+    },
+    {
+      "id": "lookalike-pantherina-dorsal-seam",
+      "text": "A reported identification cue for Cypraea pantherina is a blurred reddish line running down the middle of the shell's back; this line is not a color marking but the seam where the two halves of the live animal's mantle meet as they fold up and over the shell.",
+      "sourceIds": ["redseacreatures-pantherina"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Direct quote basis: \"A blurred reddish line runs down the middle of the back, which is not a marking but a seam: it is where the two halves of the mantle meet when they fold up over the shell from below.\" Single specialist (non-peer-reviewed) field source, so this is reported as a described cue rather than a verified universal diagnostic across all individuals."
+    },
+    {
+      "id": "lookalike-size-envelope-differs",
+      "text": "Reported size envelopes differ across these look-alike forms: the nominal Cypraea tigris is described as reaching under about 127 mm (5 in), the Hawaiian Cypraea tigris schilderiana as reaching about 100 mm on average and up to about 153 mm, and Cypraea pantherina as usually about 60 mm and occasionally up to about 120 mm — overlapping ranges that make size alone an imperfect single cue.",
+      "sourceIds": [
+        "marinelifephotography-tigris-nominal",
+        "marinelifephotography-schilderiana",
+        "redseacreatures-pantherina"
+      ],
+      "scope": "subspecies",
+      "confidence": "moderate",
+      "evidenceNote": "marinelifephotography-tigris-nominal: nominal form 'Attains less than 5 inches.' marinelifephotography-schilderiana: schilderiana 'attains at least 6 inches, 153 mm, while the average is 4 inches, 100 mm.' redseacreatures-pantherina: pantherina 'usually 6 cm (2.4 in) and occasionally reaching 12 cm (4.7 in).' All three figures come from single specialist field sources rather than population surveys, and their ranges overlap (e.g. a 120 mm shell could plausibly be a large pantherina or a mid-sized schilderiana), so this is reported as an approximate, imperfect cue rather than a strict dividing line."
+    },
+    {
+      "id": "lookalike-range-not-fully-exclusive",
+      "text": "Geographic range is a useful but not fully exclusive identification cue between these look-alikes: WoRMS distribution records place Cypraea pantherina specifically in the Red Sea, Gulf of Aden, Somali, and Eritrean waters, while Cypraea tigris schilderiana's only checked distribution records are in Hawaii — but WoRMS also carries a separate, checked Red Sea distribution record for the nominal species Cypraea tigris itself, so locality alone does not cleanly separate every tiger-cowrie-like shell.",
+      "sourceIds": [
+        "worms-pantherina",
+        "worms-tigris",
+        "worms-schilderiana",
+        "redseacreatures-pantherina"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "WoRMS AphiaDistributionsByAphiaID/216812 (pantherina) lists Red Sea (x2), Somali EEZ, and Eritrean EEZ, all recordStatus:\"valid\". WoRMS AphiaDistributionsByAphiaID/216843 (nominal Cypraea tigris) also lists a Red Sea record with qualityStatus:\"checked\" (the schilderiana-specific distribution list only contains Hawaii records). redseacreatures-pantherina separately states 'Where its close relative the Tiger Cowry turns up in the same waters, the two do not share ground,' suggesting local microhabitat/niche separation even where broad ranges nominally overlap; this nuance is reported rather than resolved, since no source consulted reconciles the two records directly."
+    },
+    {
+      "id": "material-shell-secretion",
+      "text": "A mollusc shell is built by the mantle, a tissue layer lining the inside of the shell: cells in the mantle secrete the proteins (and in some layers chitin) that form an organic scaffold, together with calcium carbonate that mineralizes within that scaffold, and the animal grows its shell incrementally over its lifetime rather than shedding and replacing it.",
+      "sourceIds": [
+        "smithsonian-seashell-formation",
+        "whoi-seashell-formation"
+      ],
+      "scope": "mollusks",
+      "confidence": "high",
+      "evidenceNote": "Direct quote basis, smithsonian-seashell-formation (quoting Chris Meyer, Smithsonian NMNH research zoologist and curator of mollusks): \"It all starts in the mantle, the thin layer of flesh connecting a mollusk to its shell. Cells in the mantle secrete all the proteins, chitin, and minerals necessary to create the shell. Mollusks never shed their shells, so the creatures must increase their shell's size as they grow.\" whoi-seashell-formation independently corroborates: \"Calcium carbonate...binds to the protein... the mantle secretes different proteins for different layers.\" Both are directly fetched, museum/research-institution sources describing molluscs generally (not cowrie- or subspecies-specific), hence scope \"mollusks\"."
+    },
+    {
+      "id": "repair-shell-damage",
+      "text": "Experiments on California mussels (Mytilus californianus) demonstrate repair of shell damage in a living mollusc; microscopy found new shell growth around fractures in some experimentally stressed animals. This is evidence from a bivalve, not a cowrie repair timetable or a diagnosis of this demo's hypothetical mark.",
+      "sourceIds": ["crane-shell-repair-2021"],
+      "scope": "mollusks",
+      "confidence": "high",
+      "evidenceNote": "Crane, Diaz Reyes and Denny (2021), abstract and introduction, directly document mechanical recovery after experimental fatigue and shell deposition around fractures in a subset of Mytilus californianus. Repair mechanisms were only partially explained. No experimental repair times, percentages, or species-specific responses are transferred to cowries, and no observed injury is claimed for the procedural illustration."
+    },
+    {
+      "id": "function-protective-shell",
+      "text": "A mollusc shell is protective armor, not simply an empty container: it helps the living animal withstand physical threats, and accumulated damage can affect its mechanical strength.",
+      "sourceIds": ["crane-shell-repair-2021"],
+      "scope": "mollusks",
+      "confidence": "high",
+      "evidenceNote": "The directly read abstract and introduction of Crane, Diaz Reyes and Denny (2021) frame mollusc shells as protective armor and experimentally show weakening after fatigue in California mussels. This general functional explanation does not assert a measured defensive benefit for specific cowrie teeth, colors, or shell shapes."
+    },
+    {
+      "id": "demo-no-visual-species-discrimination",
+      "text": "This demo's procedural illustration is a simplified, single-subspecies growth visualization and is not sufficient on its own to distinguish Cypraea tigris schilderiana from similar-looking cowries such as Cypraea pantherina or the nominal Cypraea tigris; real-world identification depends on combined evidence such as locality, precise spot pattern, and shell proportions, ideally checked against a reference collection or specialist.",
+      "sourceIds": [],
+      "scope": "demo-limitation",
+      "confidence": "high",
+      "evidenceNote": "Methodological statement about this project's scope: the research above shows that size, dorsal pattern, and even broad geographic range each have exceptions or overlaps (see lookalike-size-envelope-differs and lookalike-range-not-fully-exclusive), so no single cue — and certainly not a procedural illustration built around one reference subspecies — is adequate for confident species/subspecies discrimination."
+    }
+  ]
+}

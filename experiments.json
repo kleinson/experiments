@@ -1,0 +1,12 @@
+[
+  {
+    "id": "the-shell-remembers",
+    "title": "The Shell Remembers",
+    "description": "Hold the architecture of a life. An interactive, scientifically cautious cowrie story.",
+    "path": "/shell-remembers/",
+    "year": 2026,
+    "categories": ["Creative Technology", "Research"],
+    "platforms": ["Web", "iOS"],
+    "preview": "/shell-remembers/shell-mark.svg"
+  }
+]

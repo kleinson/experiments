@@ -1,0 +1,9 @@
+package-lock.json
+dist
+node_modules
+.build
+.swiftpm
+DerivedData
+test-results
+playwright-report
+shell-remembers/ios/Sources/ShellCore/Resources
