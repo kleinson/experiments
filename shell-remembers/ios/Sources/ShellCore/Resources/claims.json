@@ -135,6 +135,69 @@
       "accessedAt": "2026-10-19",
       "kind": "peer-reviewed",
       "accessNote": "Read the abstract and introduction directly from the open-access article. Citation metadata was cross-checked with Europe PMC: Crane RL, Diaz Reyes JL, Denny MW (2021), volume 224, article jeb242681, DOI 10.1242/jeb.242681. The experiment concerns California mussels, not cowries."
+    },
+    {
+      "id": "salinas-2017-crossed-lamellar",
+      "title": "Enhanced toughening of the crossed lamellar structure revealed by nanoscale deformation mapping",
+      "publisher": "Journal of the Mechanical Behavior of Biomedical Materials 76: 58-68 (Elsevier)",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S1751616117302308",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Introduction/background section fetched and read directly (abstract-and-intro view). Salinas, Escobar de Obaldia, Jeong, Hernandez, Zavattieri and Kisailus (2017). The paper's own nanoindentation study concerns the queen conch Strombus gigas, not a cowrie; only its general background statements about gastropod shell composition and crossed-lamellar microstructure are used here, at gastropod-class scope."
+    },
+    {
+      "id": "ucmp-gastropoda-morphology",
+      "title": "Introduction to the Gastropoda: Morphology",
+      "publisher": "University of California Museum of Paleontology (UCMP), UC Berkeley",
+      "url": "https://ucmp.berkeley.edu/mollusca/mollusca/gastropoda/gastropodamm.html",
+      "accessedAt": "2026-10-19",
+      "kind": "university",
+      "accessNote": "Fetched and read directly. General class-level (Gastropoda) anatomical overview, not cowrie- or family-specific."
+    },
+    {
+      "id": "fao-gastropods-leal",
+      "title": "Gastropods (identification chapter)",
+      "publisher": "Food and Agriculture Organization of the United Nations (FAO), chapter by J.H. Leal, The Bailey-Matthews Shell Museum",
+      "url": "https://www.fao.org/4/y4160e/y4160e08.pdf",
+      "accessedAt": "2026-10-19",
+      "kind": "government",
+      "accessNote": "PDF fetched and text extracted directly. A FAO fisheries species-identification guide chapter authored by a shell-museum malacologist; used here for general gastropod (class-level) body-plan and glossary statements, plus one glossary entry naming cowries specifically (the dorsal furrow)."
+    },
+    {
+      "id": "charleston-biol337-mollusca",
+      "title": "Lab E: Ph. Mollusca (Cl. Polyplacophora, Cl. Gastropoda) \u2014 Biology of Invertebrates lab worksheet",
+      "publisher": "College of Charleston, Department of Biology (course BIOL 337, Dr. Bob Podolsky)",
+      "url": "https://podolskyr.people.charleston.edu/biol337/p/lab/LabE.pdf",
+      "accessedAt": "2026-10-19",
+      "kind": "university",
+      "accessNote": "PDF fetched and text extracted directly. A university invertebrate-zoology course lab worksheet; its shell cross-section description is illustrated with a clam/chiton example but is explicitly presented as reflecting general mollusc/gastropod shell and body-plan properties, not a cowrie-specific source."
+    },
+    {
+      "id": "txmarspecies-cypraeidae",
+      "title": "Cypraeidae - Cowries",
+      "publisher": "Texas Marine Species Identification, Texas Parks and Wildlife Department, hosted by Texas A&M University at Galveston",
+      "url": "https://txmarspecies.tamug.edu/invertfamilydetails.cfm?famnameID=Cypraeidae",
+      "accessedAt": "2026-10-19",
+      "kind": "government",
+      "accessNote": "Fetched and read directly (raw HTML). A state-agency/university-hosted species-identification resource describing the family Cypraeidae generally, illustrated with Texas-water species (e.g., Macrocypraea zebra), not Cypraea tigris specifically."
+    },
+    {
+      "id": "nutzel-et-al-2025-cypraeoid-origin",
+      "title": "The earliest cowries: the origin of cypraeoid gastropods",
+      "publisher": "Acta Palaeontologica Polonica 70(2): 213-223",
+      "url": "https://www.app.pan.pl/archive/published/app70/app012452025.pdf",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Open-access (CC-BY) PDF fetched and full text extracted directly. Nutzel, Schneider, Bakayeva and Kaim (2025). Primarily a paleontological taxonomy paper, but its introduction gives directly citable, family-level (Cypraeidae) anatomical statements (convolute shell, taenioglossate radula, siphonate aperture) used here."
+    },
+    {
+      "id": "adw-cypraeidae",
+      "title": "Cypraeidae (family account photo caption)",
+      "publisher": "Animal Diversity Web, University of Michigan Museum of Zoology",
+      "url": "https://animaldiversity.org/accounts/Cypraeidae/",
+      "accessedAt": "2026-10-19",
+      "kind": "university",
+      "accessNote": "Fetched and read directly. The usable text is a photo caption describing Cypraea annulus (the money cowrie, a genus-mate of Cypraea tigris, not the subspecies in question) and general mantle behavior for cowries."
     }
   ],
   "claims": [
@@ -333,6 +396,93 @@
       "scope": "mollusks",
       "confidence": "high",
       "evidenceNote": "The directly read abstract and introduction of Crane, Diaz Reyes and Denny (2021) frame mollusc shells as protective armor and experimentally show weakening after fatigue in California mussels. This general functional explanation does not assert a measured defensive benefit for specific cowrie teeth, colors, or shell shapes."
+    },
+    {
+      "id": "shell-composition-caco3",
+      "text": "Aragonitic gastropod shells, including the crossed-lamellar type common in many sea snails, are described in the biomaterials literature as consisting mostly of aragonite (a calcium carbonate mineral) with only a small organic fraction, cited at roughly 1 to 5 percent by weight.",
+      "sourceIds": ["salinas-2017-crossed-lamellar"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Direct quote basis: \"Both nacre and crossed lamellar based shells primarily consist of aragonitic calcium carbonate and a small fraction of organic (polysaccharide and proteinaceous) material (~1-5% (Addadi et al., 2006)).\" This is a background statement in a materials-science paper whose own experiments are on the queen conch (Strombus gigas), citing an earlier literature figure (Addadi et al. 2006) rather than a new measurement of the paper's own; no Cypraea-specific percentage was found. Schema scope is recorded as \"mollusks\" (the closest available scope value), but the underlying evidence is specifically about gastropods (sea snails), not molluscs generally (e.g., not verified for bivalves or cephalopods), and the figure is presented as a commonly cited range rather than a universal constant."
+    },
+    {
+      "id": "shell-organic-matrix",
+      "text": "In gastropod shells, a small organic matrix of proteins and polysaccharides is not just filler: research describes it as providing a pathway that controls the growth and arrangement of the calcium carbonate mineral crystals, which is part of why biological shell is much tougher than non-living mineral of the same chemical type.",
+      "sourceIds": ["salinas-2017-crossed-lamellar"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Direct quote basis: \"These organics afforded a pathway to control the growth and arrangement of the CaCO3 mineral components... and thus enabled gastropods to evolve numerous shell microstructures with increasing toughness versus its geologic counterpart.\" General gastropod-class statement from a paper about Strombus gigas; not verified specifically for Cypraeidae. Scope is recorded as \"mollusks\" (the closest available schema value), but the evidence is gastropod-specific, not verified across molluscs generally."
+    },
+    {
+      "id": "shell-mantle-secretes",
+      "text": "A gastropod does not grow a new shell from scratch: its existing shell is enlarged by its mantle, which adds new material at the shell's growing margin (the edge nearest the body opening), so the shell gets bigger by extension at that edge rather than by swelling all over.",
+      "sourceIds": ["whoi-seashell-formation", "charleston-biol337-mollusca"],
+      "scope": "mollusks",
+      "confidence": "high",
+      "evidenceNote": "whoi-seashell-formation: \"As the animal grows, its shell must grow along with it. This happens along the outer edges. A snail adds to its shell around the opening, where it pokes its head out.\" charleston-biol337-mollusca independently corroborates: \"a gastropod literally grows out of the aperture of its shell, adding new material to the edge of the shell.\" The specific technical term \"extrapallial space\" was not found in any source fetched directly during this research, so it is not used in this claim; the underlying mechanism (mantle-driven growth at the shell margin) is instead stated in the plain language the sources themselves use. This complements, rather than duplicates, material-shell-secretion, which covers the chemical/cellular secretion mechanism rather than the growth location. Scope is recorded as \"mollusks\" (the closest available schema value); both direct sources describe gastropods specifically, not molluscs generally."
+    },
+    {
+      "id": "shell-periostracum",
+      "text": "The outermost layer of a typical mollusc/gastropod shell is mostly organic (protein, sometimes described as the protein conchiolin) rather than mineral, and it is produced by the mantle at the shell's growing edge as the animal enlarges its shell; in gastropods this organic layer is called the periostracum.",
+      "sourceIds": ["charleston-biol337-mollusca", "whoi-seashell-formation"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Direct quote basis, charleston-biol337-mollusca: \"the thin brown outer periostracum composed of the protein conchiolin\" (illustrated on a prepared clam-shell cross-section slide, but stated to reflect general mollusc shell properties). whoi-seashell-formation independently corroborates that \"the outermost layer is mostly protein\" and that shell growth happens at the outer edge. Neither source explicitly states that the periostracum is laid down chronologically before the mineral layers beneath it at that edge, so this claim is limited to layer identity/composition and growth location rather than deposition sequence; no cowrie-specific periostracum description was found. Scope is recorded as \"mollusks\" (the closest available schema value); the charleston-biol337-mollusca example is illustrated on a clam shell but stated to reflect general mollusc shell properties, while \"periostracum\" as a named layer is specifically a gastropod-shell term."
+    },
+    {
+      "id": "cowrie-mantle-gloss-layer",
+      "text": "In cowries, including Cypraea tigris, the mantle that spreads over the shell deposits new outer shell material (described by one family-level source as \"a coat of enamel\") that keeps the surface glossy, and a dorsal furrow/line is a recognized shell feature on the back of cowries where this mantle coverage is centered.",
+      "sourceIds": [
+        "txmarspecies-cypraeidae",
+        "fao-gastropods-leal",
+        "reefs-tiger-cowrie"
+      ],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "txmarspecies-cypraeidae: \"the snail covers the shell with its mantle which continually deposits a coat of enamel and protects the shell from wear and tear\" (family-level, Cypraeidae). fao-gastropods-leal glossary: \"Furrow - groove in longitudinal direction found on the dorsal region of, among other shells, cowries...\" (names cowries specifically for this dorsal feature). reefs-tiger-cowrie adds species-level (Cypraea tigris) detail that the extended mantle appears \"like a fingerprint of black and gray, with many short papillae over the surface.\" Combined, these support mantle-driven gloss and a dorsal line/furrow feature for cowries generally, with one species-specific (C. tigris) mantle-pattern detail; this is additional corroboration alongside the existing mantle-coating-and-polish claim, not a replacement for it."
+    },
+    {
+      "id": "cowrie-juvenile-bulla-to-adult",
+      "text": "An independent family-level source corroborates that juvenile cowries have a wider aperture and a thin outer lip, that the outer lip thickens and curves inward at maturity, and that cowries can mature (stop lengthening) at different sizes depending on factors such as temperature and food, producing some undersized \"dwarf\" adult shells.",
+      "sourceIds": ["txmarspecies-cypraeidae"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Direct quote basis: \"Juvenile cowries are distinctly different from adults. Their aperture is wider and the outer lip is thin. When the cowrie becomes an adult, its outer lip thickens and curves inward. Cowries can mature at different sizes depending on factors such as temperature and food sources. Those that mature at smaller sizes are called dwarf shells.\" This independently corroborates (from a different, government/university-hosted source) the existing juvenile-to-adult-shape-change, aperture-teeth-at-maturity, and length-finalized-at-maturity claims, which were previously sourced only to marinelifephotography.com; family scope, not subspecies-specific."
+    },
+    {
+      "id": "cowrie-animal-anatomy",
+      "text": "Cowries such as Cypraea tigris have a head-foot like other snails of their kind, with a pair of cephalic tentacles and eyes on the head and a muscular foot for crawling; the family's shell has a narrow siphonate aperture associated with an anterior siphon, and in Cypraea tigris specifically the two extended mantle lobes covering the shell are patterned with short papillae.",
+      "sourceIds": [
+        "ucmp-gastropoda-morphology",
+        "charleston-biol337-mollusca",
+        "nutzel-et-al-2025-cypraeoid-origin",
+        "reefs-tiger-cowrie"
+      ],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "ucmp-gastropoda-morphology and charleston-biol337-mollusca are general, class-level (Gastropoda) descriptions of the head (cephalic tentacles, eyes) and an anteriorly-extended mantle-edge siphon, not cowrie-specific; they are combined here with family-specific evidence. nutzel-et-al-2025-cypraeoid-origin directly states, for Cypraeidae, a \"narrow, slit-like siphonate aperture with anterior and posterior canals.\" reefs-tiger-cowrie directly describes the Cypraea tigris mantle as appearing \"like a fingerprint of black and gray, with many short papillae over the surface.\" The cephalic-tentacle/eye detail is therefore a generalization from typical gastropod anatomy applied to cowries, not independently verified for Cypraeidae in the sources read, and is flagged as such; the siphonate aperture and mantle papillae are directly cowrie/species-sourced."
+    },
+    {
+      "id": "gastropod-internal-anatomy",
+      "text": "In gastropods generally, the mantle cavity houses the ctenidium (gill) and osphradium (a chemosensory organ), while the visceral mass inside the shell's whorls contains the gonad, digestive gland, heart, kidney, and part of the digestive tract; Cypraeidae specifically have a taenioglossate radula (a ribbon of small rasping teeth), and adult cowries, including Cypraea tigris, lack an operculum (the trapdoor-like plate many other snails use to seal the shell opening).",
+      "sourceIds": [
+        "fao-gastropods-leal",
+        "charleston-biol337-mollusca",
+        "nutzel-et-al-2025-cypraeoid-origin",
+        "reefs-tiger-cowrie",
+        "txmarspecies-cypraeidae"
+      ],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "fao-gastropods-leal: \"the mantle cavity...[is] where the ctenidium (or ctenidia), osphradium, anus, nephridiopore, and external genitalia are located. The visceral mass...is the location of the gonads, digestive gland, heart, kidney, and part of the alimentary system.\" charleston-biol337-mollusca independently corroborates the mantle cavity/ctenidia/visceral-mass organization at class level. nutzel-et-al-2025-cypraeoid-origin states Cypraeidae \"have a taenioglossate radula,\" a family-specific, peer-reviewed detail. reefs-tiger-cowrie (species, Cypraea tigris: \"does not have an operculum\") and txmarspecies-cypraeidae (family, Cypraeidae: \"The aperture has no operculum\") independently corroborate operculum absence at two taxonomic levels. The general organ list is class-level (gastropods specifically, not molluscs generally; scope is recorded as \"mollusks\" as the closest available schema value), while the radula and operculum details are specifically cowrie-sourced, as noted."
+    },
+    {
+      "id": "cowrie-inner-whorls",
+      "text": "An adult cowrie shell is convolute: its last whorl grows over and encloses all of the earlier whorls, hiding the juvenile spiral shape inside the smooth adult shell. No directly verified source describes internal resorption of the earlier whorls in cowries, so that process is not claimed here.",
+      "sourceIds": ["nutzel-et-al-2025-cypraeoid-origin"],
+      "scope": "family",
+      "confidence": "high",
+      "evidenceNote": "Direct quote basis: \"Cowries are conspicuous in having a convolute shell, with the last whorl enclosing all previous whorls and forming a narrowly elongate, slit-like aperture...\" This is a peer-reviewed, family-level (Cypraeidae) statement. Internal septum/wall resorption during cowrie growth was searched for specifically but not found in any source read directly during this research, so, per instructions, no resorption claim is made; this is stated as an explicit omission rather than a negative scientific finding."
     },
     {
       "id": "demo-no-visual-species-discrimination",
