@@ -165,7 +165,7 @@
     },
     {
       "id": "charleston-biol337-mollusca",
-      "title": "Lab E: Ph. Mollusca (Cl. Polyplacophora, Cl. Gastropoda) \u2014 Biology of Invertebrates lab worksheet",
+      "title": "Lab E: Ph. Mollusca (Cl. Polyplacophora, Cl. Gastropoda) — Biology of Invertebrates lab worksheet",
       "publisher": "College of Charleston, Department of Biology (course BIOL 337, Dr. Bob Podolsky)",
       "url": "https://podolskyr.people.charleston.edu/biol337/p/lab/LabE.pdf",
       "accessedAt": "2026-10-19",
@@ -198,6 +198,204 @@
       "accessedAt": "2026-10-19",
       "kind": "university",
       "accessNote": "Fetched and read directly. The usable text is a photo caption describing Cypraea annulus (the money cowrie, a genus-mate of Cypraea tigris, not the subspecies in question) and general mantle behavior for cowries."
+    },
+    {
+      "id": "worms-cypraea-tigris",
+      "title": "Cypraea tigris Linnaeus, 1758 (AphiaID 216843)",
+      "publisher": "World Register of Marine Species (WoRMS)",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=216843",
+      "accessedAt": "2026-10-19",
+      "kind": "taxonomic",
+      "accessNote": "AphiaRecord fetched directly; status 'accepted', authority Linnaeus, 1758, family Cypraeidae."
+    },
+    {
+      "id": "worms-monetaria-moneta",
+      "title": "Monetaria moneta (Linnaeus, 1758) (AphiaID 216874)",
+      "publisher": "World Register of Marine Species (WoRMS)",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=216874",
+      "accessedAt": "2026-10-19",
+      "kind": "taxonomic",
+      "accessNote": "AphiaRecord fetched directly; status 'accepted' under genus Monetaria, family Cypraeidae. Older name Cypraea moneta is a synonym."
+    },
+    {
+      "id": "worms-conus-textile",
+      "title": "Conus textile Linnaeus, 1758 (AphiaID 215529)",
+      "publisher": "World Register of Marine Species (WoRMS)",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=215529",
+      "accessedAt": "2026-10-19",
+      "kind": "taxonomic",
+      "accessNote": "AphiaRecord fetched directly; status 'accepted', authority Linnaeus, 1758, family Conidae, order Neogastropoda."
+    },
+    {
+      "id": "tay-2023-cowrie-larvae",
+      "title": "Spawning and larval development of two tropical cowries (Gastropoda: Cypraeidae), Cypraea tigris and Mauritia arabica, under laboratory conditions",
+      "publisher": "Royal Society Open Science (Tay, Lee & Neo, 2023, vol. 10, 221332; PMC10090884)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10090884/",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Full text read directly on PubMed Central; a captive-breeding study specifically on this species (plus Mauritia arabica)."
+    },
+    {
+      "id": "dutertre-lewis-2013-cone-biology",
+      "title": "Cone Snail Biology, Bioprospecting and Conservation",
+      "publisher": "Dutertre & Lewis, The University of Queensland; book chapter in 'Snails: Biology, Ecology and Conservation' (Nova Science Publishers, 2013); open-access via HAL",
+      "url": "https://hal.science/hal-02306901v1/document",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Full PDF downloaded and text-extracted directly. A book chapter (not a journal article) by university venom researchers, reviewing published literature on Conus reproduction, behaviour, diet, and lifespan."
+    },
+    {
+      "id": "kohn-2018-conus-envenomation",
+      "title": "Conus Envenomation of Humans: In Fact and Fiction",
+      "publisher": "Toxins (Kohn, A.J., 2018; PMC6356772)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6356772/",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Full text read directly on PubMed Central; a peer-reviewed review of all documented human Conus stings 1670-2017."
+    },
+    {
+      "id": "mlp-cypraea-tigris",
+      "title": "Tiger Cowry, Cypraea tigris",
+      "publisher": "marinelifephotography.com (Hawaii-based diver/naturalist field guide)",
+      "url": "https://www.marinelifephotography.com/marine/mollusks/gastropods/cowries/cypraea-tigris.htm",
+      "accessedAt": "2026-10-19",
+      "kind": "specialist-guide",
+      "accessNote": "Page text read directly; a single specialist field-guide source, not a population survey or formal taxonomic work."
+    },
+    {
+      "id": "mlp-monetaria-moneta",
+      "title": "Money Cowry, Monetaria moneta",
+      "publisher": "marinelifephotography.com (Hawaii-based diver/naturalist field guide)",
+      "url": "https://www.marinelifephotography.com/marine/mollusks/gastropods/cowries/cypraea-moneta.htm",
+      "accessedAt": "2026-10-19",
+      "kind": "specialist-guide",
+      "accessNote": "Page text read directly (raw HTML), including the species description paragraph."
+    },
+    {
+      "id": "mlp-conus-textile",
+      "title": "Textile Cone, Conus textile",
+      "publisher": "marinelifephotography.com (Hawaii-based diver/naturalist field guide)",
+      "url": "https://www.marinelifephotography.com/marine/mollusks/gastropods/cones/conus-textile.htm",
+      "accessedAt": "2026-10-19",
+      "kind": "specialist-guide",
+      "accessNote": "Page text and photo captions read directly (raw HTML), including a photo captioned 'Octopus bite' on a Hawaii-collected shell."
+    },
+    {
+      "id": "wikipedia-cypraea-tigris",
+      "title": "Cypraea tigris",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Cypraea_tigris",
+      "accessedAt": "2026-10-19",
+      "kind": "reference-book",
+      "accessNote": "Tertiary general reference, read directly; used only for the shell description/size paragraph, cross-checked against the specialist field guide where possible."
+    },
+    {
+      "id": "wikipedia-monetaria-moneta",
+      "title": "Monetaria moneta",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Monetaria_moneta",
+      "accessedAt": "2026-10-19",
+      "kind": "reference-book",
+      "accessNote": "Tertiary general reference, read directly; 'Description and characteristics' and 'Ecology' sections cite Poutiers (1998, FAO species guide), which I could not access directly, so that citation chain is disclosed rather than hidden."
+    },
+    {
+      "id": "meinhardt-scholarpedia-2006",
+      "title": "Gierer-Meinhardt model",
+      "publisher": "Scholarpedia (Hans Meinhardt, 2006), doi:10.4249/scholarpedia.1418",
+      "url": "https://www.scholarpedia.org/article/Gierer-Meinhardt_model",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Raw HTML fetched directly; author confirmed via page citation metadata as Hans Meinhardt, the model's originator. Scholarpedia entries are peer-reviewed/curated encyclopedia articles."
+    },
+    {
+      "id": "williams-mcdermott-2004-hermit-crab",
+      "title": "Hermit crab biocoenoses: a worldwide review of the diversity and natural history of hermit crab associates",
+      "publisher": "Journal of Experimental Marine Biology and Ecology (Williams, J.D. & McDermott, J.J., 2004)",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/0022098183900655",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Abstract read directly; general review of gastropod-shell reuse by hermit crabs, not specific to cowries or cone snails."
+    },
+    {
+      "id": "worms-aliger-gigas",
+      "title": "Aliger gigas (Linnaeus, 1758) (AphiaID 1429769)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=1429769",
+      "accessedAt": "2026-10-19",
+      "kind": "taxonomic",
+      "accessNote": "Verified via the WoRMS REST endpoint AphiaRecordsByName: Aliger gigas is accepted (AphiaID 1429769); Strombus gigas (AphiaID 458661) is a superseded combination pointing to it."
+    },
+    {
+      "id": "worms-nautilus-pompilius",
+      "title": "Nautilus pompilius Linnaeus, 1758 (AphiaID 216384)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=216384",
+      "accessedAt": "2026-10-19",
+      "kind": "taxonomic",
+      "accessNote": "Verified via the WoRMS REST endpoints AphiaRecordsByName (status accepted) and AphiaDistributionsByAphiaID/216384 (records include Madagascar, Chagos, Ambon and the Central Indo-Pacific)."
+    },
+    {
+      "id": "noaa-queen-conch",
+      "title": "Queen Conch",
+      "publisher": "NOAA Fisheries",
+      "url": "https://www.fisheries.noaa.gov/species/queen-conch",
+      "accessedAt": "2026-10-19",
+      "kind": "government",
+      "accessNote": "Species profile read directly: appearance, biology (age, maturity, spawning, egg incubation, larval period), range, habitat and Endangered Species Act status."
+    },
+    {
+      "id": "noaa-chambered-nautilus",
+      "title": "Chambered Nautilus",
+      "publisher": "NOAA Fisheries",
+      "url": "https://www.fisheries.noaa.gov/species/chambered-nautilus",
+      "accessedAt": "2026-10-19",
+      "kind": "government",
+      "accessNote": "Species profile read directly: appearance, behaviour and buoyancy, range, lifespan, maturity, egg incubation, predators, shell trade and Endangered Species Act status."
+    },
+    {
+      "id": "yacobucci-2018-postmortem",
+      "title": "Postmortem transport in fossil and modern shelled cephalopods",
+      "publisher": "PeerJ (Yacobucci, 2018)",
+      "url": "https://doi.org/10.7717/peerj.5909",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Open-access full text read via Europe PMC (PMC6266924). Combines buoyancy experiments with locality data for living nautilids and drift shells."
+    },
+    {
+      "id": "kubicka-2017-pierced-shells",
+      "title": "A systematic review of animal predation creating pierced shells: implications for the archaeological record of the Old World",
+      "publisher": "PeerJ (Kubicka, Rosin, Tryjanowski & Nelson, 2017)",
+      "url": "https://doi.org/10.7717/peerj.2903",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Open-access full text read via Europe PMC (PMC5244880): abstract, introduction on hole-boring predators, and discussion of abrasion experiments."
+    },
+    {
+      "id": "wikipedia-chambered-nautilus",
+      "title": "Chambered nautilus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Chambered_nautilus",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Article source read directly. The size figure is cited there to Pisor (2008), Registry of World Record Size Shells (ConchBooks), which was not read directly, so it is marked limited."
+    },
+    {
+      "id": "wikipedia-mollusca",
+      "title": "Mollusca",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Mollusca",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Lead and anatomy summary read directly. A tertiary source: its figures cite primary literature, so claims built on it are marked moderate confidence."
+    },
+    {
+      "id": "worms-mollusca",
+      "title": "Mollusca (AphiaID 51)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.molluscabase.org/aphia.php?p=taxdetails&id=51",
+      "accessedAt": "2026-10-19",
+      "kind": "taxonomic",
+      "accessNote": "Verified through the WoRMS REST record AphiaRecordByAphiaID/51: status accepted, rank Phylum, kingdom Animalia. MolluscaBase is the mollusc section of WoRMS."
     }
   ],
   "claims": [
@@ -491,6 +689,377 @@
       "scope": "demo-limitation",
       "confidence": "high",
       "evidenceNote": "Methodological statement about this project's scope: the research above shows that size, dorsal pattern, and even broad geographic range each have exceptions or overlaps (see lookalike-size-envelope-differs and lookalike-range-not-fully-exclusive), so no single cue — and certainly not a procedural illustration built around one reference subspecies — is adequate for confident species/subspecies discrimination."
+    },
+    {
+      "id": "tiger-cowrie-taxonomy",
+      "text": "Cypraea tigris Linnaeus, 1758 is the currently accepted name for the tiger cowrie in the family Cypraeidae, per the World Register of Marine Species.",
+      "sourceIds": ["worms-cypraea-tigris"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "WoRMS AphiaRecord (AphiaID 216843) lists the name as accepted, not a synonym, with authority Linnaeus, 1758; checked directly on the AphiaRecord page."
+    },
+    {
+      "id": "tiger-cowrie-size",
+      "text": "Adult Cypraea tigris shells are reported to reach up to about 150 mm (6 in), though one specialist field guide describes the widespread (non-Hawaiian) form as topping out under 127 mm (5 in).",
+      "sourceIds": ["mlp-cypraea-tigris", "wikipedia-cypraea-tigris"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Wikipedia's species account states the shell 'measures up to 15 cm (6in)'; marinelifephotography.com's field page instead gives 'less than 5 inches' for the species generally and 'nearly 6 inches' specifically for the separately-covered Hawaiian subspecies. The two reported maxima do not fully agree, so this is reported as a range of figures rather than one confirmed number."
+    },
+    {
+      "id": "tiger-cowrie-pattern",
+      "text": "The adult dorsal shell surface is white, pale bluish-white, or buff, densely covered with dark brown to blackish rounded spots, with a glossy, polished-looking surface; a faint red line sometimes runs along the dorsal midline.",
+      "sourceIds": ["wikipedia-cypraea-tigris"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Read directly from the Wikipedia species account's description section; a tertiary source, but consistent with the spotted pattern implied by the common name 'tiger cowrie' and with cowrie shell gloss described elsewhere for the family."
+    },
+    {
+      "id": "tiger-cowrie-habitat",
+      "text": "Cypraea tigris is described as common under dead coral in shallow water across the Indo-West Pacific.",
+      "sourceIds": ["mlp-cypraea-tigris"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Short field-guide habitat note read directly from marinelifephotography.com's Cypraea tigris page; a single specialist/diver-naturalist source, not a population survey."
+    },
+    {
+      "id": "tiger-cowrie-brooding",
+      "text": "In a 2023 laboratory study, female Cypraea tigris brooded (sat over) their egg masses for 7 to 17 days, remaining with the capsules until the larvae hatched; disturbed brooders sometimes abandoned or consumed their own egg mass.",
+      "sourceIds": ["tay-2023-cowrie-larvae"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from the 'Brooding and spawning' discussion section of Tay et al. 2023 (PMC10090884), a peer-reviewed captive-breeding study of this exact species."
+    },
+    {
+      "id": "tiger-cowrie-larva-unresolved",
+      "text": "Lab-reared Cypraea tigris veliger larvae survived free-swimming for up to 37 days without completing metamorphosis or settling; the natural length of the planktonic larval stage and any settlement cue remain undetermined.",
+      "sourceIds": ["tay-2023-cowrie-larvae"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Directly confirmed from the same 2023 peer-reviewed study: the authors report their longest-surviving C. tigris larvae 'lasted up to just 37 days' with 'stagnated development,' unlike the related Mauritia arabica reared in the same experiment, which did metamorphose."
+    },
+    {
+      "id": "money-cowrie-taxonomy",
+      "text": "Monetaria moneta (Linnaeus, 1758) is the currently accepted name for the money cowrie; the older, still widely used name Cypraea moneta is now treated as a synonym under the genus Monetaria.",
+      "sourceIds": ["worms-monetaria-moneta"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "WoRMS AphiaRecord (AphiaID 216874) checked directly; genus placement differs from the older 'Cypraea moneta.'"
+    },
+    {
+      "id": "money-cowrie-size",
+      "text": "Reported adult size for Monetaria moneta ranges from about 30 mm per one general reference up to 45 mm (1.8 in) in a Hawaii-based field account; a single consistent typical size is not established.",
+      "sourceIds": ["mlp-monetaria-moneta", "wikipedia-monetaria-moneta"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "marinelifephotography.com states 'Attains 1.8 inches, 45mm'; Wikipedia's species account instead describes it as 'up to 3cm (1.2in).' Both were read directly; the figures disagree, so no single number is asserted as definitive."
+    },
+    {
+      "id": "money-cowrie-pattern",
+      "text": "The small, flattened shell is pale (white to dirty beige), with a dorsum that can look semi-transparent, often greenish-grey with yellowish margins and sometimes darker transverse stripes and a faint yellow ring; the underside is white with pronounced denticles. The living animal's mantle shows a vivid mottled or zebra-like black-and-white pattern.",
+      "sourceIds": ["wikipedia-monetaria-moneta", "mlp-monetaria-moneta"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Shell description read directly from Wikipedia's 'Description and characteristics' section; mantle description cross-checked against marinelifephotography.com's field note calling it an 'attractive zebra-striped' mantle pattern."
+    },
+    {
+      "id": "money-cowrie-habitat-behavior",
+      "text": "Monetaria moneta grazes on algae-covered rocks in broad daylight on shallow reefs and intertidal rocky areas/tide pools, unlike some nocturnal cowrie species; a Hawaii-focused field account describes it as locally uncommon around Hawaii/Maui but abundant elsewhere across its Indo-Pacific range.",
+      "sourceIds": ["mlp-monetaria-moneta", "wikipedia-monetaria-moneta"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Daytime algae-grazing behaviour read directly from marinelifephotography.com; intertidal/tide-pool habitat corroborated by Wikipedia's ecology section, which itself cites Poutiers (1998, FAO guide) that I was not able to access directly."
+    },
+    {
+      "id": "money-cowrie-currency",
+      "text": "Money cowrie shells were historically used as currency (shell money) across many Pacific and Indian Ocean societies, a use that persisted into the 1800s before being displaced by coinage.",
+      "sourceIds": ["mlp-monetaria-moneta", "wikipedia-monetaria-moneta"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Both sources state this directly and consistently: marinelifephotography.com ('Used as currency in many countries until the 1800's') and Wikipedia ('historically widely used...as shell money before coinage was in common usage')."
+    },
+    {
+      "id": "textile-cone-taxonomy",
+      "text": "Conus textile Linnaeus, 1758 is the currently accepted name for the textile cone in the family Conidae.",
+      "sourceIds": ["worms-conus-textile"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "WoRMS AphiaRecord (AphiaID 215529) checked directly; listed as accepted, not a synonym."
+    },
+    {
+      "id": "textile-cone-size-pattern",
+      "text": "Conus textile has a shell with a concave spire that is white with golden blotches and dark brown tent-like markings; the living animal is white mottled with tan, and its siphon is banded black and red. Reported maximum size is about 150 mm (6 in).",
+      "sourceIds": ["mlp-conus-textile"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Description and size figure read directly from marinelifephotography.com's Conus textile page; a single Hawaii-based specialist field account, not a formal taxonomic redescription."
+    },
+    {
+      "id": "textile-cone-diet-behavior",
+      "text": "Conus textile is classified among the molluscivorous (mollusc-eating) cone snails; a review of cone snail venom biology reports it stores about 75 radular harpoon-teeth in its venom apparatus (29 in the short arm, 46 in the long arm of the radular sac), more than the vermivorous and piscivorous species tabulated in the same review.",
+      "sourceIds": ["dutertre-lewis-2013-cone-biology"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Read directly from Table 1 and its surrounding text in Dutertre & Lewis (2013); the larger radular-tooth stock is linked in the text to molluscivorous species' capacity for repeated stinging of armoured prey."
+    },
+    {
+      "id": "textile-cone-egg-genus",
+      "text": "Across the genus Conus, eggs are laid roughly once a year in capsules attached to the substrate; one cited study (on two other cone species, not C. textile) found egg masses of up to 25 capsules with up to 1,000 eggs each, so roughly 25,000 eggs per mass.",
+      "sourceIds": ["dutertre-lewis-2013-cone-biology"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Read directly from the 'Reproductive Biology' section of Dutertre & Lewis (2013); the specific egg-count figures are attributed in the text to Zehra & Perveen (1991), a paper on Conus biliosus and C. coronatus, not C. textile, so this is reported at family/genus level rather than as a confirmed C. textile figure."
+    },
+    {
+      "id": "textile-cone-larva-genus",
+      "text": "The free-swimming (pelagic) veliger stage of Conus species is reported to last between about 1 and 50 days before settlement, based on a study of a different cone species (C. pennaceus); C. textile larvae have, separately, been reared through this planktonic stage in captivity under controlled feeding and water-flow conditions.",
+      "sourceIds": ["dutertre-lewis-2013-cone-biology"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "The 1-50 day pelagic-duration figure is attributed in the review to Perron (1983), a study of Conus pennaceus, so it is reported at genus/family level. The captive-rearing note is specific to C. textile and attributed to Perron (1980), 'Laboratory culture of the larvae of Conus textile,' cited directly in the same review; I could not independently access Perron (1980)'s full text, so no specific day-count is asserted for C. textile itself."
+    },
+    {
+      "id": "textile-cone-lifespan-genus",
+      "text": "A standard reference on living Conidae estimates cone snail lifespan at roughly 10 to 20 years in the wild and in captivity, based on shell growth rate and growth marks; this figure spans the genus and is not confirmed specifically for C. textile.",
+      "sourceIds": ["dutertre-lewis-2013-cone-biology"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Figure attributed to Rockel, Korn & Kohn (1995), Manual of the Living Conidae, as cited and read directly in Dutertre & Lewis (2013)."
+    },
+    {
+      "id": "textile-cone-venom-safety",
+      "text": "Of roughly 700 Conus species, only Conus geographus has been confirmed responsible for multiple human fatalities; a 2018 peer-reviewed review found that older reports attributing human deaths specifically to C. textile have not been adequately verified, and molluscivorous cone species as a group are generally considered far less dangerous to humans than fish-hunting species.",
+      "sourceIds": [
+        "kohn-2018-conus-envenomation",
+        "dutertre-lewis-2013-cone-biology"
+      ],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Directly read from Kohn (2018), 'Conus Envenomation of Humans: In Fact and Fiction,' Toxins (PMC6356772), a peer-reviewed review of all documented human Conus stings 1670-2017; corroborated by Dutertre & Lewis (2013), which separately states 'only Conus geographus has been confirmed as responsible for several human deaths.'"
+    },
+    {
+      "id": "textile-cone-shell-damage-observed",
+      "text": "A photographed Conus textile shell from Hawaii shows a hole captioned by the photographer as an 'octopus bite,' illustrating one way a cone snail shell can be damaged during or after a predation attempt; this is a single photographed specimen, not a population-level predation study.",
+      "sourceIds": ["mlp-conus-textile"],
+      "scope": "species",
+      "confidence": "limited",
+      "evidenceNote": "Caption read directly from a photograph on marinelifephotography.com's Conus textile page; treated as anecdotal single-specimen field evidence, not a verified predation study, and not used to diagnose any particular shell or illustration in this project."
+    },
+    {
+      "id": "meinhardt-pattern-space-time-record",
+      "text": "A mollusc shell can only grow at its growing edge, and in many species new pigment is added only during this growth process at that edge; patterned stripes or markings on a shell therefore record, in space, a patterning process that played out over time at the growing margin.",
+      "sourceIds": ["meinhardt-scholarpedia-2006"],
+      "scope": "mollusks",
+      "confidence": "high",
+      "evidenceNote": "Paraphrased directly from the Scholarpedia article 'Gierer-Meinhardt model,' authored by Hans Meinhardt himself (confirmed via page citation metadata), a peer-reviewed encyclopedia entry describing the general activator-inhibitor model for mollusc shell pigmentation. This is a general mollusc-shell-growth principle, not a Conus textile-specific study, so it is scoped at the mollusks level; it is directly relevant to why cone-shell patterns (like C. textile's) look as they do."
+    },
+    {
+      "id": "hermit-crab-shell-reuse",
+      "text": "After a gastropod dies and its soft tissue is gone, the empty shell is commonly recycled by hermit crabs and other organisms as a portable home or substrate; a 2004 review found over 550 invertebrate species from 16 phyla living in association with hermit-crab-occupied gastropod shells worldwide.",
+      "sourceIds": ["williams-mcdermott-2004-hermit-crab"],
+      "scope": "mollusks",
+      "confidence": "high",
+      "evidenceNote": "Read directly from the abstract of Williams & McDermott (2004), Journal of Experimental Marine Biology and Ecology; a general mollusc-shell-reuse pattern, not specific to cowries or cone snails, so scoped at the mollusks level."
+    },
+    {
+      "id": "queen-conch-taxonomy",
+      "text": "The queen conch is now named Aliger gigas (Linnaeus, 1758) in the World Register of Marine Species; the older name Strombus gigas is a superseded combination.",
+      "sourceIds": ["worms-aliger-gigas", "noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "WoRMS REST records read directly; NOAA's classification also lists genus Aliger, species gigas, family Strombidae."
+    },
+    {
+      "id": "queen-conch-size",
+      "text": "Queen conch grow up to about 12 inches (about 300 mm) long and up to about 5 pounds. Females on average grow faster and larger than males.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Stated directly by NOAA Fisheries. 12 inches converted to about 300 mm. NOAA gives a maximum, not a typical range."
+    },
+    {
+      "id": "queen-conch-appearance",
+      "text": "A large, heavy shell with short spines around the spire and a pink interior to the shell lip. The animal has long eye stalks that move independently, a brown, rough operculum, and a tube-like mouth (proboscis).",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's appearance section."
+    },
+    {
+      "id": "queen-conch-range-habitat",
+      "text": "Queen conch live throughout the Caribbean Sea, the Florida Keys and around Bermuda. Adults favour sandy algal flats, gravel, coral rubble and beach rock; juveniles live mostly in seagrass beds; they are most common in water less than about 30 m (100 ft) deep where unfished.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Range and habitat read directly from NOAA. 100 feet converted to about 30 m."
+    },
+    {
+      "id": "queen-conch-eggs",
+      "text": "After internal fertilisation, a female lays an egg mass over 24 to 36 hours containing on average 500,000 to 750,000 eggs, which hatch after about 5 days.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's biology section. Incubation is given as about 5 days."
+    },
+    {
+      "id": "queen-conch-larva",
+      "text": "The larvae drift in the water for 21 to 30 days, feeding on phytoplankton, before settling to the bottom and changing into the shelled form.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's biology section."
+    },
+    {
+      "id": "queen-conch-maturity",
+      "text": "Queen conch are thought to mature at around 3.5 to 4 years old. Once mature they stop growing in length: the shell lip only grows thicker.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "NOAA says conch are 'believed to reach sexual maturity around 3.5 to 4 years of age' and notes size at maturity varies with environment; hence moderate confidence. The flared, thickening lip is drawn from this."
+    },
+    {
+      "id": "queen-conch-lifespan",
+      "text": "Queen conch are long-lived, generally reaching 25 to 30 years old.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's biology section."
+    },
+    {
+      "id": "queen-conch-protection",
+      "text": "Queen conch are heavily fished for their meat, and in 2024 NOAA Fisheries listed them as threatened under the US Endangered Species Act. Check local rules before taking any conch shell, and never take a live animal.",
+      "sourceIds": ["noaa-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Listing status read directly from NOAA. The advice to check local rules is a responsible-collecting inference, not a statement of any specific law."
+    },
+    {
+      "id": "nautilus-taxonomy",
+      "text": "The chambered nautilus, Nautilus pompilius Linnaeus, 1758, is a cephalopod: a relative of squid and octopus that keeps an external, coiled, chambered shell.",
+      "sourceIds": ["worms-nautilus-pompilius", "noaa-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "WoRMS status accepted; NOAA describes nautiluses as cephalopods related to squids and octopuses, set apart by their coiled shells."
+    },
+    {
+      "id": "nautilus-appearance",
+      "text": "Its coiled shell ranges from white to orange and even purple, with its own pattern of colour; more than 90 tentacles without suckers protrude from the opening.",
+      "sourceIds": ["noaa-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's appearance section. Adult shell length is not given in this source, so the simulator draws it at an illustrative size and says so."
+    },
+    {
+      "id": "nautilus-buoyancy",
+      "text": "The nautilus lives in the newest, largest chamber. It uses the older chambers and a tube running through them to control its buoyancy, and swims backwards by jet propulsion.",
+      "sourceIds": ["noaa-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "NOAA describes buoyancy control with the chambers and a tube running the length of the shell, and backwards jet propulsion. NOAA calls the tube a 'hyponome'; anatomical texts usually call the chamber tube the siphuncle and the jet funnel the hyponome, so the simulator says 'tube' rather than naming it."
+    },
+    {
+      "id": "nautilus-range",
+      "text": "Chambered nautilus live mainly in the western Pacific Ocean and coastal areas of the Indian Ocean, in small, isolated populations limited by depth and temperature.",
+      "sourceIds": ["noaa-chambered-nautilus", "worms-nautilus-pompilius"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Range read directly from NOAA; WoRMS distribution records include Madagascar, Chagos, Ambon and the Central Indo-Pacific. Depth values are not given in these sources."
+    },
+    {
+      "id": "nautilus-life-history",
+      "text": "Unlike other cephalopods, nautiluses live 15 to 20 years or more. They grow slowly, mature at around 10 to 15 years, and lay a small number of eggs that take at least a year to hatch.",
+      "sourceIds": ["noaa-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's lifespan and reproduction section. 'At least a year' is used as a minimum incubation of 365 days."
+    },
+    {
+      "id": "nautilus-predators",
+      "text": "Chambered nautilus have several predators, including sharks, bony fish and octopuses.",
+      "sourceIds": ["noaa-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Read directly from NOAA's species overview."
+    },
+    {
+      "id": "nautilus-drift",
+      "text": "Chambered shells can float after the animal dies. Most nautilus species drift only a little, but Nautilus pompilius shells are found far from known living populations.",
+      "sourceIds": ["yacobucci-2018-postmortem"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "From the abstract of Yacobucci (2018), read in full text: drift shells of N. pompilius are found far from living populations, while most nautilid species show limited drift."
+    },
+    {
+      "id": "nautilus-protection",
+      "text": "Nautilus shells are the main reason the animals are fished: they are traded worldwide for souvenirs, jewellery and decor. In 2018 NOAA listed the chambered nautilus as threatened under the US Endangered Species Act. Avoid buying nautilus shells.",
+      "sourceIds": ["noaa-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Trade as the primary threat and the 2018 listing are read directly from NOAA. The advice not to buy shells is a conservation inference from that threat."
+    },
+    {
+      "id": "predator-drill-holes",
+      "text": "Predators such as moon snails (naticids), murex snails (muricids), octopuses, crabs and birds can leave holes in mollusc shells.",
+      "sourceIds": ["kubicka-2017-pierced-shells"],
+      "scope": "mollusks",
+      "confidence": "high",
+      "evidenceNote": "From the introduction of the systematic review (Kubicka et al., 2017), which lists hole-boring predators and reviews 54 publications on holes made by non-human predators."
+    },
+    {
+      "id": "wave-abrasion-holes",
+      "text": "Rolling in waves and tides wears shells down; experiments show abrasion alone can make holes that look like a predator's.",
+      "sourceIds": ["kubicka-2017-pierced-shells"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Kubicka et al. (2017) summarise shell-rolling experiments by Gorzelak and co-workers (2013) that imitate waves and tides. Read as a secondary account of that experiment."
+    },
+    {
+      "id": "nautilus-size-record",
+      "text": "Exceptionally large Nautilus pompilius shells reach about 254 mm across, recorded from Indonesia and northern Australia; most are smaller.",
+      "sourceIds": ["wikipedia-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "limited",
+      "evidenceNote": "A record size, cited by Wikipedia to a shell-record registry not read directly. The simulator draws the nautilus at an illustrative size well below this record and labels it as such."
+    },
+    {
+      "id": "mollusca-phylum",
+      "text": "Molluscs form an accepted animal phylum, Mollusca, in the global register of marine species; the species names in this simulator follow the same register (WoRMS / MolluscaBase).",
+      "sourceIds": ["worms-mollusca"],
+      "scope": "mollusks",
+      "confidence": "high",
+      "evidenceNote": "Machine-readable WoRMS record for AphiaID 51 returns status accepted and rank Phylum. Each species in the simulator carries its own AphiaID claim."
+    },
+    {
+      "id": "mollusca-diversity",
+      "text": "About 86,600 living mollusc species are recognised, making molluscs the second-largest animal phylum. Gastropods, the snails, account for about 80% of classified mollusc species.",
+      "sourceIds": ["wikipedia-mollusca"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Figures read directly from the article lead, which cites its counts. Species counts change as new species are described, so these are approximate."
+    },
+    {
+      "id": "mollusca-body-plan",
+      "text": "A mollusc's soft body is mostly muscle. Its mantle encloses a cavity used for breathing and excretion and secretes the shell, which is made of proteins and chitin reinforced with calcium carbonate. Most molluscs feed with a rasping radula and move on a single muscular foot.",
+      "sourceIds": ["wikipedia-mollusca"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "From the article's description of the features shared by modern molluscs and its 'hypothetical ancestral mollusc'. Individual groups vary: bivalves lack a radula and cephalopods have arms rather than a crawling foot."
+    },
+    {
+      "id": "mollusca-larvae",
+      "text": "Nearly all molluscs lay eggs. Depending on the group, these hatch as trochophore larvae, as more complex veliger larvae, or as miniature adults.",
+      "sourceIds": ["wikipedia-mollusca"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Read directly from the article's overview of molluscan reproduction. Which route a species takes is given by its own sourced claims where known."
+    },
+    {
+      "id": "death-cause-not-documented",
+      "text": "The sources used for this simulator do not document how this species usually dies, so this ending names no predator.",
+      "sourceIds": [],
+      "scope": "demo-limitation",
+      "confidence": "high",
+      "evidenceNote": "A deliberate gap: predators reported only in unverified summaries were left out rather than presented as fact."
     }
   ]
 }

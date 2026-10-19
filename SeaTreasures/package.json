@@ -23,7 +23,8 @@
     "sync:ios": "node scripts/sync-ios.mjs",
     "icons": "node scripts/render-icons.mjs",
     "test:ios": "npm run sync:ios && bash ios/Scripts/test-core.sh",
-    "check": "npm run format:check && npm run lint && npm run build && npm test"
+    "check": "npm run format:check && npm run lint && npm run build && npm test",
+    "species": "node scripts/build-species.mjs && prettier --write data/species.json data/claims.json"
   },
   "dependencies": {
     "react": "^19.2.7",

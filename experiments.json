@@ -2,7 +2,7 @@
   {
     "id": "seatreasures",
     "title": "SeaTreasures",
-    "description": "Hold the architecture of a life. An interactive, scientifically cautious cowrie story with a 3D shell and anatomy plates.",
+    "description": "One sea-shell simulator: pick a species, see it at true size, see through it, and follow a whole life from egg to the beach.",
     "path": "SeaTreasures/",
     "year": 2026,
     "license": "MIT",
