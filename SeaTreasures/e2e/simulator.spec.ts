@@ -304,3 +304,52 @@ test('the production build works offline after its first visit', async ({
     if (!page.isClosed()) await context.setOffline(false)
   }
 })
+
+test('where it is found: every ocean, recorded places as origins, flagged outliers', async ({
+  page,
+}) => {
+  await page.goto('./?species=queen-conch')
+  const where = page.locator('.where')
+  await expect(where).toContainText('Caribbean & Western Atlantic')
+  await expect(where).toContainText('Indian Ocean & Red Sea')
+  const origin = page.locator('#origin')
+  await expect(origin).not.toHaveValue('red-sea')
+  await where.getByRole('button', { name: /^The Bahamas/ }).click()
+  await expect(origin).toHaveValue('bahamas')
+  await expect(announced(page)).toContainText('The Bahamas')
+  await expect(
+    where.getByRole('button', { name: /^Philippines/ }),
+  ).toHaveAttribute('data-outside', 'true')
+  await expect(
+    where.getByRole('button', { name: /^Madagascar/ }),
+  ).toBeDisabled()
+  await page.getByRole('button', { name: /Chambered nautilus/ }).click()
+  await expect(where.locator('[aria-pressed="true"]')).toContainText(
+    'Great Barrier Reef',
+  )
+  const evidence = where.locator('.fact details').first()
+  await evidence.locator('summary').click()
+  await expect(evidence).toContainText('GBIF')
+})
+
+test('the shell lab builds shells from the published model and responds to its numbers', async ({
+  page,
+}) => {
+  await page.goto('./')
+  const lab = page.locator('.lab')
+  await lab.scrollIntoViewIfNeeded()
+  const view = lab.locator('.lab-view canvas')
+  await expect(view).toBeVisible()
+  await lab.getByRole('button', { name: /^Nautilus/ }).click()
+  await expect(lab).toContainText('as published in Table 1')
+  const before = await view.screenshot()
+  await lab.getByRole('slider', { name: /Spire height/ }).fill('3')
+  await expect(lab).toContainText('Your own shell')
+  await expect
+    .poll(async () => (await view.screenshot()).equals(before))
+    .toBe(false)
+  await lab.getByRole('button', { name: /Reset to nautilus/ }).click()
+  await expect(lab).toContainText('as published in Table 1')
+  await lab.getByRole('button', { name: /^Scallop/ }).click()
+  await expect(lab).toContainText('not taken from the paper')
+})

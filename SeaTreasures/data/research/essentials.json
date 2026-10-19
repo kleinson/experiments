@@ -17,6 +17,15 @@
       "accessedAt": "2026-10-19",
       "kind": "taxonomic",
       "accessNote": "Verified through the WoRMS REST record AphiaRecordByAphiaID/51: status accepted, rank Phylum, kingdom Animalia. MolluscaBase is the mollusc section of WoRMS."
+    },
+    {
+      "id": "contreras-aragon-2023",
+      "title": "A Mathematical Model for Mollusc Shells Based on Parametric Surfaces and the Construction of Theoretical Morphospaces",
+      "publisher": "Diversity (Contreras-Figueroa & Aragón, 2023)",
+      "url": "https://doi.org/10.3390/d15030431",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Open access, CC BY 4.0. Bibliographic and licence data verified via Crossref, OpenAlex and DOAJ; the abstract was read via DOAJ. The publisher site blocked automated full-text access, so the equations and Table 1 parameters were taken from the open-source mollusc3d port, which cites the paper's equations and table."
     }
   ],
   "claims": [
@@ -51,6 +60,14 @@
       "scope": "mollusks",
       "confidence": "moderate",
       "evidenceNote": "Read directly from the article's overview of molluscan reproduction. Which route a species takes is given by its own sourced claims where known."
+    },
+    {
+      "id": "shell-morphospace-model",
+      "text": "A parametric model with six numbers (whorl expansion, distance from the axis, spire translation, aperture ratio, aperture tilt and aperture rotation) reproduces the shell forms of snails, limpets, nautiluses, ammonites and bivalves; the paper gives fitted values for real specimens.",
+      "sourceIds": ["contreras-aragon-2023"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "From the paper's abstract and its published equations. The lab's specimen parameters follow Table 1 as transcribed by the open-source mollusc3d port; the full text could not be fetched automatically to cross-check every value, hence moderate confidence. The model describes shape, not colour."
     }
   ],
   "species": {}

@@ -31,9 +31,12 @@ import { allSpecies, getSpecies, speciesData } from './species.ts'
 import type { Species } from './species.ts'
 import type { Measure, Pulse, StageEvent } from './Stage.tsx'
 import { looks } from './looks.ts'
+import { originsFor, ranges, regionFor } from './ranges.ts'
+import { WhereFound } from './WhereFound.tsx'
 
 const Stage = lazy(() => import('./Stage.tsx'))
 const FieldPlates = lazy(() => import('./FieldPlates.tsx'))
+const ShellLab = lazy(() => import('../lab/ShellLab.tsx'))
 
 type IconName =
   | 'play'
@@ -253,12 +256,22 @@ function CalibrationDialog({
   )
 }
 
+/** Shelf entries name a recorded region, or an origin id from before regions were counted. */
 const known = (speciesId: string, originId: string) =>
   allSpecies.some(
     (species) =>
       species.id === speciesId &&
-      species.origins.some((origin) => origin.id === originId),
+      (originsFor(species.id).some((place) => place.region.id === originId) ||
+        species.origins.some((origin) => origin.id === originId)),
   )
+
+const placeName = (species: Species, originId: string) =>
+  regionFor(originId)?.name ??
+  species.origins.find((origin) => origin.id === originId)?.name ??
+  originId
+
+const firstOrigin = (species: Species) =>
+  originsFor(species.id)[0]?.region.id ?? species.origins[0]!.id
 
 function readShelf(): { shelf: Found[]; error: string | null } {
   try {
@@ -506,14 +519,11 @@ function PhaseStory({
               <ol aria-label="Your shelf">
                 {shelf.map((item, index) => {
                   const found = getSpecies(item.speciesId)
-                  const origin = found.origins.find(
-                    (entry) => entry.id === item.originId,
-                  )
                   return (
                     <li key={`${item.foundAt}-${index}`}>
                       <span>
                         <strong>{found.commonName}</strong> ·{' '}
-                        {origin?.name ?? originName}
+                        {placeName(found, item.originId) || originName}
                         <time dateTime={item.foundAt}>
                           {new Date(item.foundAt).toLocaleDateString()}
                         </time>
@@ -544,9 +554,15 @@ export function Simulator() {
       : allSpecies[0]!.id
   })
   const species = getSpecies(speciesId)
-  const [originId, setOriginId] = useState(species.origins[0]!.id)
-  const origin =
-    species.origins.find((item) => item.id === originId) ?? species.origins[0]!
+  const [originId, setOriginId] = useState(() => firstOrigin(species))
+  const origins = originsFor(species.id)
+  const habitat = species.origins[0]!
+  const origin = {
+    id: origins.some((place) => place.region.id === originId)
+      ? originId
+      : firstOrigin(species),
+    name: placeName(species, originId),
+  }
   const [t, setT] = useState(startOf('adult') + 0.06)
   const [playing, setPlaying] = useState(false)
   const [deathId, setDeathId] = useState(species.deaths[0]?.id ?? '')
@@ -757,7 +773,7 @@ export function Simulator() {
   function chooseSpecies(id: string) {
     const next = getSpecies(id)
     setSpeciesId(id)
-    setOriginId(next.origins[0]!.id)
+    setOriginId(firstOrigin(next))
     setDeathId(next.deaths[0]?.id ?? '')
     setAnnouncement(`${next.commonName}, ${next.scientificName}.`)
     const url = new URL(location.href)
@@ -862,17 +878,31 @@ export function Simulator() {
             value={origin.id}
             onChange={(event) => setOriginId(event.target.value)}
           >
-            {species.origins.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
+            {Object.entries(ranges.oceans).map(([ocean, label]) => {
+              const here = origins.filter(
+                (place) => place.region.ocean === ocean,
+              )
+              return here.length ? (
+                <optgroup key={ocean} label={label}>
+                  {here.map((place) => (
+                    <option key={place.region.id} value={place.region.id}>
+                      {place.region.name} · {place.count.n} record
+                      {place.count.n === 1 ? '' : 's'}
+                      {place.outside ? ' · outside range' : ''}
+                    </option>
+                  ))}
+                </optgroup>
+              ) : null
+            })}
           </select>
-          <Fact claim={origin.claim}>
-            {origin.habitat}
-            {origin.depthM &&
-              ` · ${origin.depthM[0]}–${origin.depthM[1]} m deep`}
+          <Fact claim={habitat.claim}>
+            {habitat.habitat}
+            {habitat.depthM &&
+              ` · ${habitat.depthM[0]}–${habitat.depthM[1]} m deep`}
           </Fact>
+          <a className="text-button where-link" href="#where">
+            See it on the map
+          </a>
           <div className="picker-note">
             <Fact claim="mollusca-diversity">
               Five of about 86,600 living mollusc species. Snails make up about
@@ -1047,6 +1077,18 @@ export function Simulator() {
         </aside>
       </main>
 
+      <div id="where">
+        <WhereFound
+          species={species}
+          originId={origin.id}
+          onOrigin={(id) => {
+            setOriginId(id)
+            setAnnouncement(`Origin: ${placeName(species, id)}.`)
+          }}
+          fact={(claim, children) => <Fact claim={claim}>{children}</Fact>}
+        />
+      </div>
+
       <section className="timeline" id="timeline" aria-label="Life timeline">
         <button
           className="play"
@@ -1090,6 +1132,18 @@ export function Simulator() {
           </ol>
         </div>
       </section>
+
+      <div id="lab">
+        <Suspense
+          fallback={
+            <p className="model-note" role="status">
+              Preparing the shell lab…
+            </p>
+          }
+        >
+          <ShellLab reducedMotion={reducedMotion} />
+        </Suspense>
+      </div>
 
       {species.id === 'tiger-cowrie' && (
         <details className="field-plates">

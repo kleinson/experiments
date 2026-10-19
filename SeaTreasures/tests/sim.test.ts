@@ -260,3 +260,85 @@ test('the shelf keeps found shells strictly and never accepts unknown or broken 
     full = addToShelf(full, { speciesId: 'tiger-cowrie', originId: 'hawaii' })
   assert.equal(full.length, SHELF_LIMIT)
 })
+
+test('the shell lab model is finite, centred and sized for every preset', async () => {
+  const { presets, shellSurface, surfacePoint } =
+    await import('../src/lab/morphospace.ts')
+  for (const preset of presets) {
+    const { geometry } = shellSurface(preset.params, 100, 0.4)
+    const position = geometry.getAttribute('position')
+    let max = 0
+    for (let i = 0; i < position.count; i++) {
+      for (const value of [
+        position.getX(i),
+        position.getY(i),
+        position.getZ(i),
+      ]) {
+        assert.ok(Number.isFinite(value), `${preset.id} is finite`)
+        max = Math.max(max, Math.abs(value))
+      }
+    }
+    assert.ok(max <= 50.0001 && max > 20, `${preset.id} fits a 100-unit box`)
+  }
+  const flat = presets.find((preset) => preset.id === 'nautilus')!.params
+  const tall = presets.find((preset) => preset.id === 'asperiscala')!.params
+  // The tube's centreline, γ(t) = e^{bt}(d sin t, d cos t, z), is the mean of its
+  // outline: with z = 0 every whorl lies in one plane; a positive z lifts it into a spire.
+  const centreHeight = (p: typeof flat, t: number) => {
+    let sum = 0
+    for (let k = 0; k < 64; k++)
+      sum += surfacePoint({ ...p, n: 0, c: 0 }, t, (k / 64) * Math.PI * 2)[2]
+    return sum / 64
+  }
+  assert.ok(
+    Math.abs(centreHeight(flat, 20)) < 1e-6 * Math.exp(flat.b * 20),
+    'z = 0 is planispiral',
+  )
+  assert.ok(
+    centreHeight(tall, 20) > centreHeight(tall, 10),
+    'a positive z builds a spire',
+  )
+  assert.ok(
+    presets.every(
+      (preset) =>
+        preset.fromPaper || /not in the paper/.test(preset.scientificName),
+    ),
+  )
+})
+
+test('ranges come from GBIF counts in named regions and stay honest about them', async () => {
+  const { ranges, placesFor, originsFor, levelOf } =
+    await import('../src/sim/ranges.ts')
+  assert.ok(ranges.regions.length >= 40)
+  const oceans = new Set(ranges.regions.map((region) => region.ocean))
+  assert.ok(oceans.size >= 6, 'every ocean basin is covered')
+  for (const id of [
+    'tiger-cowrie',
+    'money-cowrie',
+    'textile-cone',
+    'queen-conch',
+    'chambered-nautilus',
+  ]) {
+    const origins = originsFor(id)
+    assert.ok(origins.length >= 8, `${id} is recorded in many places`)
+    assert.ok(origins.every((place) => place.count.n > 0))
+    assert.equal(placesFor(id).length, ranges.regions.length)
+  }
+  const conch = originsFor('queen-conch')
+  assert.ok(
+    conch.every((place) => place.region.ocean === 'atlantic' || place.outside),
+  )
+  assert.ok(
+    conch.some((place) => place.outside),
+    'Indo-Pacific conch records are flagged',
+  )
+  assert.equal(conch.at(-1)!.outside, true, 'flagged records are listed last')
+  assert.deepEqual([0, 1, 4, 5, 49, 50].map(levelOf), [
+    'none',
+    'isolated',
+    'isolated',
+    'recorded',
+    'recorded',
+    'often',
+  ])
+})
