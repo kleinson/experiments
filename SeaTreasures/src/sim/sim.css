@@ -1,6 +1,9 @@
 /* One-screen simulator. Colours come only from the --cp-* theme tokens. */
 .sim {
   --sim-gap: 20px;
+  /* Figures are printed plates: ink outlines and one flat shadow colour. */
+  --sim-ink: var(--cp-text);
+  --sim-shadow: color-mix(in srgb, var(--cp-link) 55%, var(--cp-text));
   min-height: 100dvh;
   display: grid;
   grid-template-rows: auto 1fr auto auto auto;
@@ -8,6 +11,8 @@
 }
 html[data-theme='dark'] .sim {
   --cp-text-muted: var(--cp-text-soft);
+  --sim-ink: var(--cp-surface);
+  --sim-shadow: color-mix(in srgb, var(--cp-link) 30%, var(--cp-surface));
 }
 .sim-top {
   display: grid;
@@ -138,25 +143,58 @@ html[data-theme='dark'] .sim {
   margin-bottom: 12px;
 }
 .sim-view {
+  --sim-paper: var(--cp-bg-elevated);
+  --sim-tools: 64px;
   position: relative;
-  min-height: 520px;
+  min-height: 560px;
   border-radius: 16px;
-  background:
-    radial-gradient(ellipse at 50% 35%, var(--cp-surface), transparent 70%),
-    var(--cp-bg-elevated);
+  background: var(--sim-paper);
   box-shadow: 0 0 0 1px var(--cp-border);
   overflow: hidden;
+  font-family: Consolas, 'Courier New', monospace;
 }
+/* The page itself says where we are: a cool wash in the sea, sand on the beach. */
 .sim[data-phase='egg'] .sim-view,
 .sim[data-phase='larva'] .sim-view,
+.sim[data-phase='growth'] .sim-view,
+.sim[data-phase='adult'] .sim-view,
+.sim[data-phase='death'] .sim-view,
 .sim[data-phase='remains'] .sim-view {
-  background:
-    radial-gradient(ellipse at 50% 30%, var(--cp-accent-soft), transparent 70%),
-    var(--cp-bg-elevated);
+  --sim-paper: color-mix(in srgb, var(--cp-link) 7%, var(--cp-bg-elevated));
+}
+.sim[data-phase='beach'] .sim-view,
+.sim[data-phase='found'] .sim-view {
+  --sim-paper: color-mix(in srgb, var(--cp-warning) 13%, var(--cp-bg-elevated));
+}
+.sim-view::after {
+  /* Paper tooth: fixed fibres, multiplied over the page colour. */
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.45;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.1 .62'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+}
+html[data-theme='dark'] .sim-view::after {
+  mix-blend-mode: soft-light;
+}
+.sim-probe {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.sim-probe-ink {
+  color: var(--sim-ink);
+}
+.sim-probe-shadow {
+  color: var(--sim-shadow);
 }
 .sim-stage {
   position: absolute;
-  inset: 0;
+  inset: 0 0 var(--sim-tools);
+  z-index: 1;
 }
 .sim-stage canvas {
   position: absolute;
@@ -183,23 +221,23 @@ html[data-theme='dark'] .sim {
 }
 .view-badge {
   position: absolute;
-  top: 16px;
-  left: 16px;
-  padding: 4px 10px;
-  border-radius: 100px;
-  background: var(--cp-panel-strong);
-  box-shadow: 0 0 0 1px var(--cp-border);
+  z-index: 2;
+  top: 18px;
+  left: 20px;
   font:
     11px Consolas,
     'Courier New',
     monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--cp-text-muted);
   pointer-events: none;
 }
 .scale-bar {
   position: absolute;
-  left: 16px;
-  bottom: 16px;
+  z-index: 2;
+  left: 20px;
+  bottom: calc(var(--sim-tools) + 16px);
   display: grid;
   gap: 4px;
   font:
@@ -217,34 +255,185 @@ html[data-theme='dark'] .sim {
 }
 .view-controls {
   position: absolute;
-  right: 12px;
-  bottom: 12px;
+  z-index: 3;
+  right: 16px;
+  top: 14px;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 6px;
+  max-width: 60%;
 }
-.view-controls button {
+/* Pill buttons drawn like the figure: an ink outline, filled when on. */
+.view-controls button,
+.figure-views button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   min-height: 40px;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 100px;
-  border: 1px solid var(--cp-border);
-  background: var(--cp-panel-strong);
-  font-size: 12px;
+  border: 1.5px solid var(--cp-text);
+  background: var(--sim-paper);
+  color: var(--cp-text);
+  font:
+    13px Consolas,
+    'Courier New',
+    monospace;
 }
-.view-controls button[aria-pressed='true'] {
-  border-color: var(--cp-accent);
-  background: var(--cp-accent-soft);
+.view-controls button:hover:not(:disabled):not([aria-pressed='true']),
+.figure-views button:hover:not(:disabled):not([aria-pressed='true']) {
+  background: var(--cp-surface-soft);
 }
-.view-controls button:disabled {
-  opacity: 0.5;
+.view-controls button[aria-pressed='true'],
+.figure-views button[aria-pressed='true'] {
+  background: var(--cp-text);
+  color: var(--cp-bg-elevated);
+}
+.view-controls button:disabled,
+.figure-views button:disabled {
+  opacity: 0.45;
 }
 .view-controls .text-button {
   border: 0;
   background: none;
+}
+.figure-tools {
+  position: absolute;
+  z-index: 3;
+  inset: auto 0 0;
+  height: var(--sim-tools);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding: 0 16px 0 20px;
+  border-top: 1px solid var(--cp-border);
+  background: var(--sim-paper);
+}
+.look-slider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cp-text-muted);
+}
+.look-slider input {
+  width: 150px;
+  min-height: 24px;
+  accent-color: var(--cp-text);
+}
+.figure-views {
+  display: flex;
+  gap: 6px;
+}
+.figure-views button {
+  min-height: 36px;
+  padding: 4px 12px;
+  font-size: 12px;
+}
+.sim-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.sim-labels[hidden] {
+  display: none;
+}
+.sim-labels svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.sim-labels line {
+  stroke: var(--cp-text);
+  stroke-width: 1.25;
+}
+.sim-labels circle {
+  fill: var(--cp-text);
+}
+.sim-labels ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sim-labels li {
+  position: absolute;
+  transform: translateY(-50%);
+}
+.sim-labels li[data-side='left'] {
+  transform: translate(-100%, -50%);
+}
+.sim-labels li[hidden] {
+  display: none;
+}
+.sim-labels button {
+  pointer-events: auto;
+  min-height: 28px;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--sim-paper) 82%, transparent);
+  color: var(--cp-text);
+  font:
+    600 11px Consolas,
+    'Courier New',
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.sim-labels button:hover,
+.sim-labels button[aria-pressed='true'] {
+  background: var(--cp-text);
+  color: var(--cp-bg-elevated);
+}
+.part-card {
+  position: absolute;
+  z-index: 4;
+  right: 16px;
+  bottom: calc(var(--sim-tools) + 16px);
+  width: min(320px, calc(100% - 32px));
+  padding: 12px 14px 10px;
+  border: 1.5px solid var(--cp-text);
+  border-radius: 12px;
+  background: var(--sim-paper);
+  font-family:
+    'Segoe UI',
+    Aptos,
+    Calibri,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+.part-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.part-card h3 {
+  margin: 0;
+  font:
+    600 12px Consolas,
+    'Courier New',
+    monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.part-card .icon-button {
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+}
+.part-card .fact p {
+  font-size: 14px;
 }
 .life-panel h2 {
   margin: 0;
@@ -537,12 +726,32 @@ html[data-theme='dark'] .sim {
     min-height: 62vh;
     order: -1;
   }
+  .sim-view {
+    --sim-tools: 100px;
+  }
   .view-controls {
     left: 12px;
+    right: 12px;
+    top: 12px;
+    max-width: none;
     justify-content: flex-start;
   }
-  .scale-bar {
-    bottom: 64px;
+  .view-badge {
+    top: 112px;
+    left: 14px;
+  }
+  .figure-tools {
+    padding: 10px 12px;
+    align-content: center;
+  }
+  .look-slider input {
+    width: 96px;
+  }
+  .sim-labels button {
+    min-height: 24px;
+    padding: 2px 5px;
+    font-size: 10px;
+    letter-spacing: 0.06em;
   }
   .phase-ticks button {
     font-size: 0;
@@ -562,18 +771,18 @@ html[data-theme='dark'] .sim {
 /* Interaction cues */
 .action-hint {
   position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
+  z-index: 2;
+  top: 40px;
+  left: 20px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  max-width: calc(100% - 200px);
-  padding: 8px 14px;
-  border-radius: 100px;
-  background: var(--cp-panel-strong);
-  box-shadow: var(--cp-shadow);
-  font-size: 13px;
+  max-width: 40%;
+  font:
+    13px Consolas,
+    'Courier New',
+    monospace;
+  color: var(--cp-text);
   pointer-events: none;
   white-space: nowrap;
   overflow: hidden;
@@ -585,8 +794,9 @@ html[data-theme='dark'] .sim {
 }
 .take-apart {
   position: absolute;
-  right: 12px;
-  top: 56px;
+  z-index: 3;
+  right: 16px;
+  top: 112px;
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
@@ -622,82 +832,17 @@ html[data-theme='dark'] .sim {
   color: var(--cp-text-muted);
 }
 
-/* Where the life is happening: water light in the sea, sand and sky on the beach. */
-.sim-view::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 600ms ease;
-}
-.sim[data-phase='egg'] .sim-view,
-.sim[data-phase='larva'] .sim-view,
-.sim[data-phase='growth'] .sim-view,
-.sim[data-phase='adult'] .sim-view,
-.sim[data-phase='death'] .sim-view,
-.sim[data-phase='remains'] .sim-view {
-  background:
-    radial-gradient(
-      ellipse at 50% 0%,
-      color-mix(in srgb, var(--cp-link) 16%, transparent),
-      transparent 70%
-    ),
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--cp-link) 10%, var(--cp-bg-elevated)),
-      var(--cp-bg-elevated) 75%
-    );
-}
-.sim[data-phase='egg'] .sim-view::before,
-.sim[data-phase='larva'] .sim-view::before,
-.sim[data-phase='growth'] .sim-view::before,
-.sim[data-phase='adult'] .sim-view::before,
-.sim[data-phase='remains'] .sim-view::before {
-  opacity: 0.5;
-  background:
-    repeating-radial-gradient(
-      circle at 30% -10%,
-      transparent 0 22px,
-      color-mix(in srgb, var(--cp-surface) 40%, transparent) 23px 25px,
-      transparent 26px 48px
-    ),
-    repeating-radial-gradient(
-      circle at 75% -20%,
-      transparent 0 30px,
-      color-mix(in srgb, var(--cp-surface) 30%, transparent) 31px 33px,
-      transparent 34px 60px
-    );
-  mask-image: linear-gradient(180deg, var(--cp-text), transparent 55%);
-  animation: sim-caustics 9s ease-in-out infinite alternate;
-}
-.sim[data-phase='beach'] .sim-view,
-.sim[data-phase='found'] .sim-view {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--cp-warning) 10%, var(--cp-bg-elevated)),
-    var(--cp-bg-elevated) 45%,
-    color-mix(in srgb, var(--cp-warning) 14%, var(--cp-bg-elevated))
-  );
-}
-@keyframes sim-caustics {
-  to {
-    transform: translate3d(-24px, 10px, 0) scale(1.06);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .sim-view::before {
-    animation: none !important;
-  }
-}
 @media (max-width: 760px) {
   .action-hint {
-    max-width: calc(100% - 24px);
-    top: 10px;
+    max-width: calc(100% - 28px);
+    top: 132px;
+    left: 14px;
     font-size: 12px;
   }
   .take-apart {
-    top: 52px;
+    top: auto;
+    right: 12px;
+    bottom: calc(var(--sim-tools) + 12px);
     width: 160px;
   }
 }
@@ -993,9 +1138,7 @@ html[data-theme='dark'] .sim {
   position: relative;
   min-height: 480px;
   border-radius: 12px;
-  background:
-    radial-gradient(ellipse at 50% 35%, var(--cp-surface), transparent 70%),
-    var(--cp-bg);
+  background: var(--cp-bg);
   box-shadow: inset 0 0 0 1px var(--cp-border);
   overflow: hidden;
 }

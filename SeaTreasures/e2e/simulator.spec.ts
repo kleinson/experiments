@@ -125,16 +125,57 @@ test('see through, cut open and take apart all change the drawing', async ({
     expect
       .poll(async () => (await canvas.screenshot()).equals(plain))
       .toBe(false)
-  await page.getByRole('button', { name: 'X-ray' }).click()
+  await page.getByRole('button', { name: 'See-through' }).click()
   await changed()
-  await page.getByRole('button', { name: 'X-ray' }).click()
+  await page.getByRole('button', { name: 'See-through' }).click()
   await page.getByRole('button', { name: 'Cut open' }).click()
   await changed()
   await page.getByRole('button', { name: 'Cut open' }).click()
   await page.getByRole('slider', { name: 'Take apart' }).fill('100')
   await changed()
   await phase(page, 'Egg')
-  await expect(page.getByRole('button', { name: 'X-ray' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'See-through' })).toBeDisabled()
+})
+
+test('labels name the parts and each opens a sourced explanation', async ({
+  page,
+}) => {
+  await page.goto('./?species=queen-conch')
+  await phase(page, 'Adult')
+  const parts = page.getByRole('list', { name: 'Labelled parts' })
+  for (const name of ['Foot', 'Operculum', 'Eye stalk', 'Aperture'])
+    await expect(parts.getByRole('button', { name })).toBeVisible()
+  await parts.getByRole('button', { name: 'Operculum' }).click()
+  const card = page.getByRole('region', { name: 'Operculum' })
+  await expect(card).toContainText('seal the opening')
+  await card.locator('summary').click()
+  await expect(card.getByRole('link').first()).toHaveAttribute(
+    'href',
+    /^https:/,
+  )
+  await expect(parts.getByRole('button', { name: 'Columella' })).toBeHidden()
+  await page.getByRole('button', { name: 'Cut open' }).click()
+  await expect(parts.getByRole('button', { name: 'Columella' })).toBeVisible()
+  await page.getByRole('button', { name: 'Labels' }).click()
+  await expect(parts).toBeHidden()
+})
+
+test('the drawing-to-realistic slider and the views change the figure', async ({
+  page,
+}) => {
+  await page.goto('./?species=textile-cone')
+  await phase(page, 'Adult')
+  const canvas = page.locator('[data-sim-canvas]')
+  const changedFrom = async (before: Buffer) =>
+    expect
+      .poll(async () => (await canvas.screenshot()).equals(before))
+      .toBe(false)
+  let before = await canvas.screenshot()
+  await page.getByRole('slider', { name: 'Drawing or realistic' }).fill('100')
+  await changedFrom(before)
+  before = await canvas.screenshot()
+  await page.getByRole('button', { name: 'Front view' }).click()
+  await changedFrom(before)
 })
 
 test('actual size draws the shell at a millimetre scale and can be calibrated', async ({

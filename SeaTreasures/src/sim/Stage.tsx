@@ -6,23 +6,32 @@ import {
   useSyncExternalStore,
 } from 'react'
 import {
-  ACESFilmicToneMapping,
   AmbientLight,
   Box3,
+  Color,
   DirectionalLight,
   HemisphereLight,
+  Mesh,
+  NoToneMapping,
   Object3D,
   OrthographicCamera,
+  PCFSoftShadowMap,
   Plane,
+  PlaneGeometry,
   Quaternion,
   Raycaster,
   Scene,
+  ShadowMaterial,
   SRGBColorSpace,
   Vector2,
   Vector3,
   WebGLRenderer,
 } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { InkPass, inkify, LIGHTS } from './ink.ts'
+import type { Look } from './ink.ts'
+import { labelsIn } from './labels.ts'
+import type { Label } from './labels.ts'
 import type { LifeFrame } from './life.ts'
 import { buildScene } from './scene.ts'
 import type { Built } from './scene.ts'
@@ -46,26 +55,45 @@ export type StageEvent =
 
 /** Actions the page asks the stage to perform, so buttons and taps do the same thing. */
 export type Pulse = {
-  kind: 'poke' | 'tumble' | 'pickup' | 'hatch' | 'settle'
+  kind: 'poke' | 'tumble' | 'pickup' | 'hatch' | 'settle' | 'front' | 'iso'
   at: number
 }
 
-function failureStore() {
-  let message: string | null = null
+function store<T>(initial: T) {
+  let value = initial
   const listeners = new Set<() => void>()
   return {
-    snapshot: () => message,
+    snapshot: () => value,
     subscribe(listener: () => void) {
       listeners.add(listener)
       return () => void listeners.delete(listener)
     },
-    report(next: string | null) {
-      if (message === next) return
-      message = next
+    report(next: T) {
+      if (Object.is(value, next)) return
+      value = next
       listeners.forEach((listener) => listener())
     },
   }
 }
+const failureStore = () => store<string | null>(null)
+const partStore = () => store<Label[]>([])
+
+/** Reads a CSS colour (any syntax the browser resolves) into a three.js colour. */
+function cssColour(probe: HTMLElement, into: Color) {
+  const value = getComputedStyle(probe).color
+  const numbers = value.match(/[\d.]+/g)?.map(Number) ?? []
+  if (numbers.length < 3) return into
+  const unit = value.startsWith('color(') ? 1 : 255
+  return into.setRGB(
+    numbers[0]! / unit,
+    numbers[1]! / unit,
+    numbers[2]! / unit,
+    SRGBColorSpace,
+  )
+}
+
+/** Where the light comes from: high and to the right, so the flat shadow falls to the left. */
+const SUN = new Vector3(1, 0.8, 0.3).normalize()
 
 const ease = (t: number) => (t < 0 ? 0 : t > 1 ? 1 : t * t * (3 - 2 * t))
 
@@ -79,6 +107,11 @@ export default function Stage({
   pxPerMm,
   reducedMotion,
   pulse,
+  labels,
+  look,
+  turntable,
+  selected,
+  onPart,
   onMeasure,
   onEvent,
 }: {
@@ -91,10 +124,20 @@ export default function Stage({
   pxPerMm: number
   reducedMotion: boolean
   pulse: Pulse | null
+  /** Show leader-line labels on the parts. */
+  labels: boolean
+  /** 0 draws the specimen as an educational figure, 1 shows it realistically. */
+  look: number
+  /** Slowly turn the figure. */
+  turntable: boolean
+  /** The label the reader opened, if any. */
+  selected: string | null
+  onPart: (text: string) => void
   onMeasure: (measure: Measure) => void
   onEvent: (event: StageEvent) => void
 }) {
   const host = useRef<HTMLDivElement>(null)
+  const layer = useRef<HTMLDivElement>(null)
   const api = useRef<{
     update: () => void
     nudge: () => void
@@ -110,9 +153,14 @@ export default function Stage({
     apart,
     pxPerMm,
     reducedMotion,
+    labels,
+    look,
+    turntable,
   })
   const [status] = useState(failureStore)
   const failure = useSyncExternalStore(status.subscribe, status.snapshot)
+  const [partList] = useState(partStore)
+  const parts = useSyncExternalStore(partList.subscribe, partList.snapshot)
   const measure = useEffectEvent(onMeasure)
   const emit = useEffectEvent(onEvent)
 
@@ -134,6 +182,11 @@ export default function Stage({
     latest.current = { ...latest.current, apart }
     api.current?.nudge()
   }, [apart])
+
+  useEffect(() => {
+    latest.current = { ...latest.current, labels, look, turntable }
+    api.current?.nudge()
+  }, [labels, look, turntable, parts, cut, xray])
 
   useEffect(() => {
     api.current?.reset()
@@ -159,21 +212,51 @@ export default function Stage({
     status.report(null)
     renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75))
     renderer.outputColorSpace = SRGBColorSpace
-    renderer.toneMapping = ACESFilmicToneMapping
+    renderer.toneMapping = NoToneMapping
     renderer.localClippingEnabled = true
+    renderer.shadowMap.enabled = true
+    renderer.shadowMap.type = PCFSoftShadowMap
     renderer.domElement.setAttribute('aria-hidden', 'true')
     renderer.domElement.setAttribute('data-sim-canvas', '')
     container.prepend(renderer.domElement)
 
     const scene = new Scene()
-    scene.add(new HemisphereLight(0xffffff, 0x8a7f74, 1.6))
-    scene.add(new AmbientLight(0xffffff, 0.5))
-    const key = new DirectionalLight(0xffffff, 2.6)
-    key.position.set(-120, 220, 160)
-    scene.add(key)
-    const rim = new DirectionalLight(0xffffff, 1.1)
-    rim.position.set(160, 60, -140)
-    scene.add(rim)
+    const ambient = new AmbientLight(0xffffff, LIGHTS.drawn.ambient)
+    const sky = new HemisphereLight(0xffffff, 0x8a7f74, 0)
+    const key = new DirectionalLight(0xffffff, LIGHTS.drawn.key)
+    key.castShadow = true
+    key.shadow.mapSize.set(2048, 2048)
+    const rim = new DirectionalLight(0xffffff, 0)
+    scene.add(ambient, sky, key, key.target, rim)
+    // A soft cast shadow on the paper: tinted in the drawing, neutral when realistic.
+    const paper = new Mesh(new PlaneGeometry(1, 1), new ShadowMaterial())
+    const shadowTint = new Color()
+    const black = new Color(0, 0, 0)
+    const light = (look: Look) => {
+      const set = LIGHTS[look]
+      ambient.intensity = set.ambient
+      sky.intensity = set.hemisphere
+      key.intensity = set.key
+      rim.intensity = set.rim
+      paper.material.color.copy(look === 'drawn' ? shadowTint : black)
+      paper.material.opacity = look === 'drawn' ? 0.42 : 0.3
+    }
+    paper.rotation.x = -Math.PI / 2
+    paper.receiveShadow = true
+    scene.add(paper)
+    const ink = new InkPass()
+    const inkColour = new Color()
+    const probe = (name: string) => {
+      const element = document.createElement('span')
+      element.className = `sim-probe sim-probe-${name}`
+      element.setAttribute('aria-hidden', 'true')
+      container.append(element)
+      return element
+    }
+    const inkProbe = probe('ink')
+    const shadowProbe = probe('shadow')
+    let undoInk: (() => void) | null = null
+    let labelled: Label[] = []
 
     const camera = new OrthographicCamera(-1, 1, 1, -1, -5000, 5000)
     const controls = new OrbitControls(camera, renderer.domElement)
@@ -251,6 +334,7 @@ export default function Stage({
       controls.enableZoom = !latest.current.actual
       if (latest.current.actual) camera.zoom = 1
       camera.updateProjectionMatrix()
+      ink.setSize(width, height, renderer.getPixelRatio())
       measure({ pxPerMm: (height / mm) * camera.zoom, magnified })
     }
 
@@ -269,10 +353,41 @@ export default function Stage({
       const { species, frame, cut, xray } = latest.current
       if (built) {
         scene.remove(built.group)
+        undoInk?.()
         built.dispose()
       }
+      ink.forget()
       built = buildScene(species, frame, { cut, xray })
+      undoInk = inkify(built.group)
       scene.add(built.group)
+      const extent = built.extent
+      // The shadow falls on paper just under whatever is shown, so swimmers and larvae keep theirs close.
+      const span = built.close
+        ? Math.max(built.close.width, built.close.height)
+        : extent
+      const lowest = new Box3().setFromObject(built.specimen).min.y
+      const ground = Number.isFinite(lowest)
+        ? Math.max(built.floor, lowest - span * 0.08)
+        : built.floor
+      paper.scale.setScalar(Math.max(extent, span) * 10)
+      paper.position.y = ground + span * 0.002
+      key.target.position.set(0, ground, 0)
+      key.target.updateMatrixWorld()
+      key.position
+        .copy(SUN)
+        .multiplyScalar(span * 4)
+        .add(key.target.position)
+      rim.position.set(-span * 2, span * 0.8, -span * 2)
+      const shade = key.shadow.camera
+      shade.left = shade.bottom = -span * 2.2
+      shade.right = shade.top = span * 2.2
+      shade.near = span * 0.5
+      shade.far = span * 9
+      shade.updateProjectionMatrix()
+      key.shadow.bias = -0.0005
+      key.shadow.normalBias = span * 0.002
+      labelled = labelsIn(built.group)
+      partList.report(labelled)
       if (frame.beach) {
         built.specimen.quaternion.multiply(motion.resting)
         rest(built)
@@ -389,13 +504,114 @@ export default function Stage({
       return moving
     }
 
+    const screen = new Vector3()
+    const scaleOf = new Vector3()
+    /** Places each label beside its part, with a leader line, without overlaps. */
+    const placeLabels = () => {
+      const root = layer.current
+      if (!root || !built) return
+      const { labels, cut, xray } = latest.current
+      const width = container.clientWidth
+      const height = container.clientHeight
+      const toScreen = (point: Vector3) => {
+        screen.copy(point).project(camera)
+        return {
+          x: (screen.x * 0.5 + 0.5) * width,
+          y: (-screen.y * 0.5 + 0.5) * height,
+        }
+      }
+      const centre = toScreen(
+        new Box3().setFromObject(built.specimen).getCenter(new Vector3()),
+      )
+      const placed: {
+        text: string
+        x: number
+        y: number
+        lx: number
+        ly: number
+        side: number
+      }[] = []
+      for (const label of labelled) {
+        if (!labels || (label.inside && !cut && !xray)) continue
+        label.anchor.getWorldScale(scaleOf)
+        if (scaleOf.x < 0.3 * (label.anchor.userData.scale0 ??= scaleOf.x))
+          continue
+        const at = toScreen(label.anchor.getWorldPosition(new Vector3()))
+        if (at.x < 0 || at.y < 0 || at.x > width || at.y > height) continue
+        const side = at.x >= centre.x ? 1 : -1
+        placed.push({
+          text: label.text,
+          x: at.x,
+          y: at.y,
+          lx: at.x + side * 48,
+          ly: at.y + (at.y - centre.y) * 0.18,
+          side,
+        })
+      }
+      for (const side of [-1, 1]) {
+        const column = placed
+          .filter((item) => item.side === side)
+          .sort((a, b) => a.ly - b.ly)
+        for (let i = 1; i < column.length; i++)
+          column[i]!.ly = Math.max(column[i]!.ly, column[i - 1]!.ly + 30)
+        const overflow = (column.at(-1)?.ly ?? 0) - (height - 24)
+        if (overflow > 0) column.forEach((item) => (item.ly -= overflow))
+        column.forEach((item) => (item.ly = Math.max(24, item.ly)))
+      }
+      const shown = new Map(placed.map((item) => [item.text, item]))
+      const near = width < 560 ? 26 : 48
+      root.querySelectorAll<HTMLElement>('[data-part]').forEach((element) => {
+        const item = shown.get(element.dataset.part ?? '')
+        element.hidden = !item
+        if (!item) return
+        element.dataset.side = item.side > 0 ? 'right' : 'left'
+        // Keep the whole label on the plate, even when its part sits near an edge.
+        const wide = element.offsetWidth
+        item.lx = item.x + item.side * near
+        item.lx =
+          item.side > 0
+            ? Math.min(item.lx, width - 6 - wide)
+            : Math.max(item.lx, 6 + wide)
+        element.style.left = `${item.lx}px`
+        element.style.top = `${item.ly}px`
+      })
+      root.querySelectorAll<SVGLineElement>('[data-leader]').forEach((line) => {
+        const item = shown.get(line.dataset.leader ?? '')
+        line.style.display = item ? '' : 'none'
+        if (!item) return
+        line.setAttribute('x1', String(item.x))
+        line.setAttribute('y1', String(item.y))
+        line.setAttribute('x2', String(item.lx - item.side * 4))
+        line.setAttribute('y2', String(item.ly))
+      })
+      root.querySelectorAll<SVGCircleElement>('[data-dot]').forEach((dot) => {
+        const item = shown.get(dot.dataset.dot ?? '')
+        dot.style.display = item ? '' : 'none'
+        if (!item) return
+        dot.setAttribute('cx', String(item.x))
+        dot.setAttribute('cy', String(item.y))
+      })
+    }
+
     const draw = () => {
       frameId = 0
       if (disposed || !visible || document.hidden) return
-      const moving = animate()
+      let moving = animate()
+      const { turntable, reducedMotion, look } = latest.current
+      controls.autoRotate = turntable && !reducedMotion
+      controls.autoRotateSpeed = 1.2
+      if (controls.autoRotate) moving = true
       controls.update()
-      renderer.render(scene, camera)
-      if (moving) frameId = requestAnimationFrame(draw)
+      cssColour(shadowProbe, shadowTint)
+      ink.render(renderer, scene, camera, {
+        style: look,
+        ink: cssColour(inkProbe, inkColour),
+        depthEdge: ((camera.top - camera.bottom) / camera.zoom) * 0.02,
+        light,
+      })
+      placeLabels()
+      // controls.update() may already have asked for the next frame through its change event.
+      if (moving && !frameId) frameId = requestAnimationFrame(draw)
     }
     const request = () => {
       if (!disposed && !frameId && visible && !document.hidden)
@@ -414,14 +630,26 @@ export default function Stage({
     sight.observe(container)
     const visibility = () => request()
     document.addEventListener('visibilitychange', visibility)
+    // Ink and shadow colours follow the light or dark theme.
+    const themeWatch = new MutationObserver(() => request())
+    themeWatch.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme', 'class', 'style'],
+    })
+    const scheme = matchMedia('(prefers-color-scheme: dark)')
+    scheme.addEventListener('change', visibility)
+    let reported = ''
     controls.addEventListener('change', () => {
       if (!latest.current.actual) {
         const height = container.clientHeight || 1
         const size = frameSize()
-        measure({
-          pxPerMm: (height / size.mm) * camera.zoom,
-          magnified: size.magnified,
-        })
+        const pxPerMm = (height / size.mm) * camera.zoom
+        // Turning (and the turntable) fire this every frame; only zooming changes the scale.
+        const key = `${pxPerMm.toFixed(4)}:${size.magnified}`
+        if (key !== reported) {
+          reported = key
+          measure({ pxPerMm, magnified: size.magnified })
+        }
       }
       request()
     })
@@ -503,6 +731,19 @@ export default function Stage({
         motion.resting.multiply(turn)
         motion.tumble = now()
         emit({ type: 'tumble' })
+        request()
+      },
+      front() {
+        // Straight from the side, like a plate in a field guide.
+        const offset = camera.position.clone().sub(controls.target)
+        camera.position
+          .copy(controls.target)
+          .add(new Vector3(0, offset.length() * 0.08, offset.length()))
+        controls.update()
+        request()
+      },
+      iso() {
+        home()
         request()
       },
       pickup() {
@@ -637,12 +878,21 @@ export default function Stage({
       renderer.domElement.removeEventListener('pointermove', pointermove)
       renderer.domElement.removeEventListener('pointercancel', pointercancel)
       renderer.domElement.removeEventListener('webglcontextlost', lost)
+      themeWatch.disconnect()
+      scheme.removeEventListener('change', visibility)
       controls.dispose()
+      key.dispose()
+      undoInk?.()
       if (built) built.dispose()
+      ink.dispose()
+      paper.geometry.dispose()
+      paper.material.dispose()
+      inkProbe.remove()
+      shadowProbe.remove()
       renderer.dispose()
       renderer.domElement.remove()
     }
-  }, [status])
+  }, [status, partList])
 
   return (
     <div
@@ -659,6 +909,29 @@ export default function Stage({
           {failure}
         </p>
       )}
+      <div className="sim-labels" ref={layer} hidden={!labels}>
+        <svg aria-hidden="true">
+          {parts.map((part) => (
+            <g key={part.text}>
+              <line data-leader={part.text} />
+              <circle data-dot={part.text} r="2.5" />
+            </g>
+          ))}
+        </svg>
+        <ul aria-label="Labelled parts">
+          {parts.map((part) => (
+            <li key={part.text} data-part={part.text} hidden>
+              <button
+                type="button"
+                aria-pressed={selected === part.text}
+                onClick={() => onPart(part.text)}
+              >
+                {part.text}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }

@@ -1,15 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ACESFilmicToneMapping,
   AmbientLight,
   CanvasTexture,
   Color,
   DirectionalLight,
   DoubleSide,
   Group,
-  HemisphereLight,
   Mesh,
-  MeshPhysicalMaterial,
+  MeshStandardMaterial,
+  NoToneMapping,
   OrthographicCamera,
   RepeatWrapping,
   Scene,
@@ -17,6 +16,7 @@ import {
   WebGLRenderer,
 } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { InkPass, inkify, LIGHTS } from '../sim/ink.ts'
 import { paramInfo, presets, shellSurface } from './morphospace.ts'
 import type { Preset, ShellParams } from './morphospace.ts'
 
@@ -72,17 +72,23 @@ function Viewer({
     }
     renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75))
     renderer.outputColorSpace = SRGBColorSpace
-    renderer.toneMapping = ACESFilmicToneMapping
+    renderer.toneMapping = NoToneMapping
     renderer.domElement.setAttribute('aria-hidden', 'true')
     container.prepend(renderer.domElement)
     const scene = new Scene()
-    scene.add(
-      new HemisphereLight(0xffffff, 0x8a7f74, 1.6),
-      new AmbientLight(0xffffff, 0.4),
-    )
-    const key = new DirectionalLight(0xffffff, 2.6)
-    key.position.set(-120, 220, 160)
+    const ambient = new AmbientLight(0xffffff, LIGHTS.drawn.ambient)
+    scene.add(ambient)
+    const key = new DirectionalLight(0xffffff, LIGHTS.drawn.key)
+    key.position.set(160, 140, 120)
     scene.add(key)
+    // Drawn like the simulator's figures: flat tones and ink outlines.
+    const ink = new InkPass()
+    const probe = document.createElement('span')
+    probe.className = 'sim-probe sim-probe-ink'
+    probe.setAttribute('aria-hidden', 'true')
+    container.append(probe)
+    const inkColour = new Color()
+    let undoInk: (() => void) | null = null
     const camera = new OrthographicCamera(-70, 70, 70, -70, -1000, 1000)
     camera.position.set(140, 90, 220)
     const controls = new OrbitControls(camera, renderer.domElement)
@@ -91,15 +97,9 @@ function Viewer({
     controls.autoRotateSpeed = 1.2
     controls.addEventListener('start', () => (controls.autoRotate = false))
     const map = growthTexture()
-    const outer = new MeshPhysicalMaterial({
-      map,
-      roughness: 0.4,
-      clearcoat: 0.35,
-      side: DoubleSide,
-    })
-    const inner = new MeshPhysicalMaterial({
+    const outer = new MeshStandardMaterial({ map, side: DoubleSide })
+    const inner = new MeshStandardMaterial({
       color: new Color(0.94, 0.84, 0.78),
-      roughness: 0.25,
       side: DoubleSide,
     })
     let shell: Group | null = null
@@ -108,6 +108,8 @@ function Viewer({
         scene.remove(shell)
         shell.traverse((object) => (object as Mesh).geometry?.dispose())
       }
+      undoInk?.()
+      ink.forget()
       shell = new Group()
       const { geometry } = shellSurface(
         p,
@@ -150,6 +152,7 @@ function Viewer({
         shell.add(top, bottom)
         shell.rotation.set(0.2, 0.6, 0)
       }
+      undoInk = inkify(shell)
       scene.add(shell)
     }
     const fit = () => {
@@ -163,6 +166,7 @@ function Viewer({
       camera.top = half
       camera.bottom = -half
       camera.updateProjectionMatrix()
+      ink.setSize(width, height, renderer.getPixelRatio())
     }
     const observer = new ResizeObserver(fit)
     observer.observe(container)
@@ -176,7 +180,25 @@ function Viewer({
       frame = requestAnimationFrame(loop)
       if (!visible || document.hidden) return
       controls.update()
-      renderer.render(scene, camera)
+      const colour = getComputedStyle(probe)
+        .color.match(/[\d.]+/g)
+        ?.map(Number)
+      if (colour && colour.length >= 3) {
+        const unit = getComputedStyle(probe).color.startsWith('color(')
+          ? 1
+          : 255
+        inkColour.setRGB(
+          colour[0]! / unit,
+          colour[1]! / unit,
+          colour[2]! / unit,
+          SRGBColorSpace,
+        )
+      }
+      ink.render(renderer, scene, camera, {
+        style: 0,
+        ink: inkColour,
+        depthEdge: 3,
+      })
     }
     loop()
     api.current = { set }
@@ -188,6 +210,9 @@ function Viewer({
       controls.dispose()
       if (shell)
         shell.traverse((object) => (object as Mesh).geometry?.dispose())
+      undoInk?.()
+      ink.dispose()
+      probe.remove()
       outer.dispose()
       inner.dispose()
       map.dispose()
