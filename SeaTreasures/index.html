@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      ;(() => {
+        const param = new URLSearchParams(window.location.search).get(
+          'scoutTheme',
+        )
+        const theme =
+          param === 'dark' || param === 'light'
+            ? param
+            : window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+        document.documentElement.setAttribute('data-theme', theme)
+      })()
+    </script>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#f7f4ef" />
+    <meta
+      name="description"
+      content="A shell is the architecture of a life. Meet its builder, explore its growth, and discover what remains unknown."
+    />
+    <link rel="icon" type="image/svg+xml" href="./shell-mark.svg" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./shell-icon-180.png" />
+    <title>SeaTreasures · An experiment by Andreas Kleiner</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <main
+        style="
+          max-width: 36rem;
+          margin: 4rem auto;
+          padding: 1.5rem;
+          font-family: 'Segoe UI', sans-serif;
+        "
+      >
+        <h1>SeaTreasures</h1>
+        <p>
+          A cowrie shell is built by a living mollusk. Its mantle secretes shell
+          material and can cover the shell's exterior.
+        </p>
+        <p>
+          This is a selected Hawaiian tiger cowrie demo, not a photo
+          identification. Growth stages are conceptual. Shell size alone does
+          not give a defensible exact age.
+        </p>
+        <p>
+          Enable JavaScript for the interactive specimen. No camera, account,
+          upload, or paid service is required.
+        </p>
+        <p>
+          Reference: <a href="https://www.molluscabase.org/">MolluscaBase</a>.
+        </p>
+      </main>
+    </noscript>
+    <script type="module" src="./src/main.tsx"></script>
+  </body>
+</html>

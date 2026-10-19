@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "specimen": {
+    "id": "hawaiian-tiger-cowrie-demo",
+    "commonName": "Hawaiian tiger cowrie",
+    "scientificName": "Cypraea tigris schilderiana",
+    "defaultLengthMm": 110,
+    "identificationNotice": "A selected demo specimen, not a photo identification.",
+    "measurementNotice": "An adjustable example, not a measurement of a real specimen.",
+    "artworkNotice": "Original procedural illustration. Growth is conceptual, not an age simulation."
+  },
+  "measurement": {
+    "minMm": 50,
+    "maxMm": 160,
+    "stepMm": 1,
+    "comparisonLengthsMm": [90, 120, 150],
+    "comparisonNotice": "These are chosen comparison lengths, not population percentiles or age estimates."
+  },
+  "sizeGuide": {
+    "claimId": "size-reference-schilderiana",
+    "reportedAverageMm": 100,
+    "largeAboveMm": 125,
+    "nearMaximumFromMm": 150,
+    "reportedMaximumMm": 153,
+    "notice": "One specialist field reference, not a population study. Near-maximum is a comparison label, not a rarity score."
+  },
+  "stages": [
+    {
+      "id": "juvenile",
+      "label": "Juvenile",
+      "startsAt": 0,
+      "caption": "An open, coiled beginning.",
+      "description": "The illustration exposes the coiled form. It is a conceptual life stage, not a dated reconstruction."
+    },
+    {
+      "id": "developing",
+      "label": "Developing",
+      "startsAt": 25,
+      "caption": "Building at the opening.",
+      "description": "The changing form emphasizes the shell opening, where extension occurs. The slider does not represent elapsed time."
+    },
+    {
+      "id": "subadult",
+      "label": "Subadult",
+      "startsAt": 50,
+      "caption": "The adult form emerges.",
+      "description": "The opening narrows and the lip becomes more prominent in this simplified illustration."
+    },
+    {
+      "id": "mature",
+      "label": "Mature adult",
+      "startsAt": 75,
+      "caption": "A familiar form. An unknown age.",
+      "description": "Adult form is a maturity cue, not a birthday. The shell does not give this demo a defensible exact age."
+    }
+  ],
+  "ageNotice": "Size is not a clock. This demo has no validated length-to-age model for this subspecies.",
+  "collectionNotice": "Saved only on this device. No account, location, photograph, or upload."
+}
