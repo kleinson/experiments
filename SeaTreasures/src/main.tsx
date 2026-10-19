@@ -1,10 +1,9 @@
 import { StrictMode, Component } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { Simulator } from './sim/Simulator.tsx'
-import './theme.css'
-import './styles.css'
-import './sim/sim.css'
+import './index.css'
 
 class ExperienceBoundary extends Component<
   { children: ReactNode },
@@ -43,7 +42,9 @@ if (!root) throw new Error('The simulator is missing its root element.')
 createRoot(root).render(
   <StrictMode>
     <ExperienceBoundary>
-      <Simulator />
+      <TooltipProvider delayDuration={300}>
+        <Simulator />
+      </TooltipProvider>
     </ExperienceBoundary>
   </StrictMode>,
 )

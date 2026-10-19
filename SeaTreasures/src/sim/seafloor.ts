@@ -50,6 +50,8 @@ const rgb = ([r, g, b]: Rgb) => new Color(r / 255, g / 255, b / 255)
 const UP = new Vector3(0, 1, 0)
 /** Horizontal direction toward the default camera: tall things stay out of this corridor. */
 const TOWARD_VIEWER = new Vector2(260, 520).normalize()
+/** How far the seabed reaches from the specimen; beyond it the water takes over. */
+const REACH = 14
 
 function track() {
   const geometries: BufferGeometry[] = []
@@ -77,35 +79,41 @@ function track() {
 }
 type Own = ReturnType<typeof track>
 
-/** Sand with ripples and grains, in the setting's ground colour. */
+/** Sand with wind-and-wave ripples and grains, in the setting's ground colour. */
 function groundTexture(colour: Rgb, ripples: number, own: Own) {
   const size = 256
   const canvas = document.createElement('canvas')
   canvas.width = canvas.height = size
   const context = canvas.getContext('2d')
   if (!context) throw new Error('The seabed could not be drawn.')
-  context.fillStyle = `rgb(${colour.join(',')})`
-  context.fillRect(0, 0, size, size)
+  const image = context.createImageData(size, size)
   const random = seeded(97)
-  for (let y = 0; y < size; y += 1) {
-    const wave = Math.sin((y / size) * Math.PI * 2 * 6)
-    if (ripples && wave > 0.6) {
-      context.fillStyle = `rgba(0,0,0,${0.06 * ripples})`
-      context.fillRect(0, y, size, 1)
-    } else if (ripples && wave < -0.85) {
-      context.fillStyle = `rgba(255,255,255,${0.08 * ripples})`
-      context.fillRect(0, y, size, 1)
+  const TAU = Math.PI * 2
+  for (let y = 0; y < size; y++)
+    for (let x = 0; x < size; x++) {
+      // Ripple crests bend and fork a little, as they do on real sand.
+      const u = x / size
+      const v = y / size
+      const bend =
+        Math.sin(u * TAU * 2 + Math.sin(v * TAU) * 1.3) * 0.045 +
+        Math.sin(u * TAU * 5 + v * TAU * 3) * 0.012
+      const crest = Math.sin((v + bend) * TAU * 7)
+      const ridge = Math.pow(Math.max(0, crest), 3) - 0.35 * Math.max(0, -crest)
+      const patch =
+        0.06 * Math.sin(u * TAU * 3 + 1.2) * Math.cos(v * TAU * 2 + 0.4)
+      const grain = (random() - 0.5) * 0.16
+      const light = 1 + ridge * 0.16 * ripples + patch + grain
+      const i = (y * size + x) * 4
+      image.data[i] = Math.min(255, colour[0] * light)
+      image.data[i + 1] = Math.min(255, colour[1] * light)
+      image.data[i + 2] = Math.min(255, colour[2] * light)
+      image.data[i + 3] = 255
     }
-  }
-  for (let i = 0; i < 2600; i++) {
-    const light = random() > 0.5
-    context.fillStyle = light ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.12)'
-    context.fillRect(random() * size, random() * size, 1.3, 1.3)
-  }
+  context.putImageData(image, 0, 0)
   const map = own.texture(new CanvasTexture(canvas))
   map.colorSpace = SRGBColorSpace
   map.wrapS = map.wrapT = RepeatWrapping
-  map.anisotropy = 4
+  map.anisotropy = 8
   return map
 }
 
@@ -191,7 +199,7 @@ export function buildSeafloor(
   }
 
   if (setting.scene !== 'open-water') {
-    const size = E * 60
+    const size = E * REACH * 2
     const geometry = new PlaneGeometry(size, size, 64, 64)
     geometry.rotateX(-Math.PI / 2)
     const position = geometry.getAttribute('position')
@@ -201,11 +209,20 @@ export function buildSeafloor(
     const sandy =
       setting.scene === 'beach' ? 1 : weight('sand') + weight('seagrass') * 0.5
     const map = groundTexture(setting.ground, Math.min(1, sandy * 1.4), own)
-    map.repeat.set(size / (E * 1.4), size / (E * 1.4))
+    map.repeat.set(size / (E * 2.2), size / (E * 2.2))
+    // The texture already carries the sand colour; it also lifts the ripples as relief.
     const ground = new Mesh(
       own.geometry(geometry),
-      standard(setting.ground, 1, { map }),
+      standard([255, 255, 255], 1, {
+        map,
+        bumpMap: map,
+        bumpScale: 2.5,
+        transparent: true,
+      }),
     )
+    // Only the ground fades out at its rim, so it alone needs blending.
+    ;(ground.material as Material).userData.horizon = true
+    ground.renderOrder = -1
     ground.receiveShadow = true
     ground.userData.ground = true
     ground.userData.inkGround = true
@@ -213,13 +230,15 @@ export function buildSeafloor(
   }
 
   // Coral heads: branching, brain, table, fan and soft corals in reef colours.
+  // Living reef colours: mostly browns, ochres and olives from their algae, with a few purples and pinks.
   const coralColours: Rgb[] = [
-    [236, 150, 140],
-    [240, 190, 120],
-    [190, 160, 220],
-    [150, 200, 170],
-    [245, 210, 160],
-    [214, 122, 142],
+    [150, 104, 70],
+    [190, 140, 86],
+    [128, 92, 128],
+    [112, 128, 82],
+    [204, 120, 96],
+    [222, 182, 108],
+    [176, 96, 116],
   ]
   const branch = (
     parts: BufferGeometry[],
@@ -620,11 +639,11 @@ export function buildSeafloor(
   }
 
   // Kelp and brown algae: tall stipes with blades and floats, and bushy Sargassum-like clumps.
-  const plants = Math.round(12 * weight('kelp'))
+  const plants = Math.round(22 * weight('kelp'))
   for (let i = 0; i < plants; i++) {
     const tall = random() > 0.45
     const height = E * (tall ? between(3, 7) : between(0.8, 1.8))
-    const at = spot(E * 1.6, E * 7.5, true, E * 0.4)
+    const at = spot(E * 1.3, E * 8, true, E * 0.3)
     if (!at) continue
     const plant = new Group()
     plant.position.copy(at)

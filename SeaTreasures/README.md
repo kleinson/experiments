@@ -136,6 +136,19 @@ Browsers guess 96 pixels per inch, so “Calibrate” lets you match an on-scree
 outline to any bank card (ISO/IEC 7810 ID-1, 85.60 × 53.98 mm) and remembers the
 result on your device.
 
+**One ocean floor.** The whole simulator is a full-screen sea with floating
+panels (built with [shadcn/ui](https://ui.shadcn.com/) on Radix and Tailwind,
+themed with the page's own tokens). The seabed is drawn from each species'
+sourced habitat and the chosen place (`src/sim/seabed.ts`,
+`src/sim/seafloor.ts`): coral heads, rubble, rippled sand, seagrass meadows,
+kelp and brown algae, rocky and volcanic reefs, a deep reef slope, the beach,
+or open water for drifting larvae. Under water (`src/sim/water.ts`) sunlight
+is focused into moving caustics on everything facing up, red light fades
+first, and the far seabed dissolves into the water colour; a small school of
+generic reef fish and suspended particles drift past. The scenery is an
+illustration, not a survey of what lives at that place, and says so. The
+shell menu shows every species as its empty shell and its living animal.
+
 **Drawing or realistic.** The 3D scene is real geometry you can turn, shown
 two ways (`src/sim/ink.ts`) and blended by the “Drawing ↔ Realistic” slider.
 The drawing is an educational plate: soft tonal washes on a smooth light ramp,

@@ -12,6 +12,11 @@ const species = [
 const phase = (page: Page, name: string) =>
   page.locator('.phase-ticks button', { hasText: name }).click()
 const announced = (page: Page) => page.locator('.sim > [role="status"]')
+/** Picks an option from one of the floating selects. */
+async function choose(page: Page, trigger: string, value: string) {
+  await page.locator(trigger).click()
+  await page.locator(`[role="option"][data-value="${value}"]`).click()
+}
 /** Opens the floating shell menu and picks a species from it. */
 async function chooseShell(page: Page, name: string) {
   await page.getByRole('button', { name: 'Shells', exact: true }).click()
@@ -65,7 +70,7 @@ test('every species can be chosen and is drawn with its sourced name', async ({
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(name)
     await expect(page).toHaveURL(new RegExp(`species=${id}`))
     await expect.poll(() => drawn(page)).toBeGreaterThan(0.02)
-    await expect(page.locator('#origin option').first()).toBeAttached()
+    await expect(page.locator('#origin')).toHaveAttribute('data-value', /.+/)
   }
   expect(errors).toEqual([])
 })
@@ -139,7 +144,8 @@ test('see through, cut open and take apart all change the drawing', async ({
   await page.getByRole('button', { name: 'Cut open' }).click()
   await changed()
   await page.getByRole('button', { name: 'Cut open' }).click()
-  await page.getByRole('slider', { name: 'Take apart' }).fill('100')
+  await page.getByRole('slider', { name: 'Take apart' }).focus()
+  await page.keyboard.press('End')
   await changed()
   await phase(page, 'Egg')
   await expect(page.getByRole('button', { name: 'See-through' })).toBeDisabled()
@@ -179,7 +185,8 @@ test('the drawing-to-realistic slider and the views change the figure', async ({
       .poll(async () => (await canvas.screenshot()).equals(before))
       .toBe(false)
   let before = await canvas.screenshot()
-  await page.getByRole('slider', { name: 'Drawing or realistic' }).fill('100')
+  await page.getByRole('slider', { name: 'Drawing or realistic' }).focus()
+  await page.keyboard.press('Home')
   await changedFrom(before)
   before = await canvas.screenshot()
   await page.getByRole('button', { name: 'Front view' }).click()
@@ -203,10 +210,10 @@ test('the ocean floor changes with the species, the place and the reader', async
     .toBe(false)
   await chooseShell(page, 'Tiger cowrie')
   await expect(ocean).toHaveAttribute('data-bed', 'coral')
-  await page.locator('#origin').selectOption('hawaiian-islands')
+  await choose(page, '#origin', 'hawaiian-islands')
   await expect(page.locator('.setting-note')).toContainText('volcanic rock')
   before = await canvas.screenshot()
-  await page.locator('#seabed').selectOption('kelp')
+  await choose(page, '#seabed', 'kelp')
   await expect(ocean).toHaveAttribute('data-bed', 'kelp')
   await expect(page.locator('.setting-note')).toContainText(
     'not where this species lives',
@@ -323,6 +330,7 @@ test('the stage turns from the keyboard and the timeline is keyboard operable', 
 }) => {
   await page.goto('./?species=tiger-cowrie')
   const canvas = page.locator('[data-sim-canvas]')
+  await expect.poll(() => drawn(page)).toBeGreaterThan(0.02)
   await page.locator('.sim-stage').focus()
   const before = await canvas.screenshot()
   await page.keyboard.press('ArrowRight')
@@ -435,9 +443,9 @@ test('where it is found: every ocean, recorded places as origins, flagged outlie
   await expect(where).toContainText('Caribbean & Western Atlantic')
   await expect(where).toContainText('Indian Ocean & Red Sea')
   const origin = page.locator('#origin')
-  await expect(origin).not.toHaveValue('red-sea')
+  await expect(origin).not.toHaveAttribute('data-value', 'red-sea')
   await where.getByRole('button', { name: /^The Bahamas/ }).click()
-  await expect(origin).toHaveValue('bahamas')
+  await expect(origin).toHaveAttribute('data-value', 'bahamas')
   await expect(announced(page)).toContainText('The Bahamas')
   await expect(
     where.getByRole('button', { name: /^Philippines/ }),

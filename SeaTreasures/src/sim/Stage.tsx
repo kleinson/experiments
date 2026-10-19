@@ -35,6 +35,7 @@ import type { Label } from './labels.ts'
 import type { LifeFrame } from './life.ts'
 import type { Setting } from './seabed.ts'
 import { buildSeafloor } from './seafloor.ts'
+import { buildWater, submerge, water, waterFor } from './water.ts'
 import type { Scenery } from './seafloor.ts'
 import { buildScene } from './scene.ts'
 import type { Built } from './scene.ts'
@@ -268,8 +269,22 @@ export default function Stage({
       sky.intensity = set.hemisphere
       key.intensity = set.key
       rim.intensity = set.rim
+      // Under water the sun is filtered from above and tinted by the water; the drawing stays neutral.
+      const wet = look === 'real' && Boolean(scenery?.ground)
+      const submerged = wet && latest.current.setting.scene !== 'beach'
+      key.color.setRGB(1, submerged ? 0.97 : 1, submerged ? 0.9 : 1)
+      sky.color.setRGB(submerged ? 0.75 : 1, submerged ? 0.92 : 1, 1)
+      sky.groundColor.setRGB(0.55, 0.5, 0.45)
+      if (submerged) {
+        key.intensity = set.key * 0.62
+        sky.intensity = set.hemisphere * 0.55
+        ambient.intensity = set.ambient * 0.6
+        rim.intensity = set.rim * 0.2
+      }
       paper.material.color.copy(look === 'drawn' ? shadowTint : black)
       paper.material.opacity = look === 'drawn' ? 0.42 : 0.3
+      // Light rays, fish and drifting particles belong to the realistic water only.
+      if (waterParts) waterParts.group.visible = look === 'real'
     }
     paper.rotation.x = -Math.PI / 2
     paper.receiveShadow = true
@@ -297,16 +312,23 @@ export default function Stage({
     controls.maxZoom = 6
     const home = () => {
       const target = controls.target.clone()
-      camera.position.set(target.x + 260, target.y + 220, target.z + 520)
+      // Over a seabed the view sits low, a diver's eye, so the floor runs back into open water.
+      const low = Boolean(scenery?.ground) && !built?.close
+      camera.position.set(
+        target.x + 260,
+        target.y + (low ? 130 : 220),
+        target.z + 520,
+      )
       camera.zoom = 1
       camera.updateProjectionMatrix()
       controls.update()
     }
-    home()
 
     let built: Built | null = null
     let scenery: Scenery | null = null
     let undoScenery: (() => void) | null = null
+    let waterParts: ReturnType<typeof buildWater> | null = null
+    let waterCss = ''
     let sceneryKey = ''
     let ambientTimer = 0
     /** Room taken by the floating panels, in CSS pixels: the specimen is framed in what is left. */
@@ -320,6 +342,7 @@ export default function Stage({
       safe.top = read('--safe-top')
       safe.bottom = read('--safe-bottom')
     }
+    home()
     let frameId = 0
     let visible = true
     let disposed = false
@@ -416,9 +439,17 @@ export default function Stage({
         undoScenery?.()
         scenery.dispose()
       }
+      if (waterParts) {
+        scene.remove(waterParts.group)
+        waterParts.dispose()
+      }
       ink.forget()
       scenery = buildSeafloor(setting, built.extent, seedOf(key))
       undoScenery = inkify(scenery.group)
+      submerge(scenery.group)
+      waterParts = buildWater(setting, built.extent, seedOf(key) + 1)
+      scene.add(waterParts.group)
+      home()
       // Only the specimen casts a shadow: the scenery's own would cost more than it shows.
       scenery.group.traverse((object) => (object.castShadow = false))
       scene.add(scenery.group)
@@ -448,6 +479,7 @@ export default function Stage({
       ink.forget()
       built = buildScene(species, frame, { cut, xray })
       undoInk = inkify(built.group)
+      submerge(built.group, true)
       scene.add(built.group)
       const extent = built.extent
       // The shadow falls on paper just under whatever is shown, so swimmers and larvae keep theirs close.
@@ -694,8 +726,25 @@ export default function Stage({
       controls.autoRotate = turntable && !reducedMotion
       controls.autoRotateSpeed = 1.2
       if (controls.autoRotate) moving = true
-      const ambient = Boolean(scenery?.animated) && !reducedMotion
-      if (ambient) scenery!.sway(now())
+      const ambient = Boolean(scenery?.animated || waterParts) && !reducedMotion
+      if (ambient) {
+        scenery?.sway(now())
+        waterParts?.animate(now())
+        water.time.value = now()
+      }
+      water.centre.value.copy(controls.target)
+      if (built) {
+        const tone = waterFor(
+          latest.current.setting,
+          built.extent,
+          document.documentElement.dataset.theme === 'dark',
+        )
+        const css = `rgb(${tone.join(' ')})`
+        if (css !== waterCss) {
+          waterCss = css
+          container.parentElement?.style.setProperty('--water', css)
+        }
+      }
       controls.update()
       cssColour(shadowProbe, shadowTint)
       ink.render(renderer, scene, camera, {
@@ -708,10 +757,10 @@ export default function Stage({
             ? {
                 from:
                   camera.position.distanceTo(controls.target) +
-                  built.extent * 1.4,
+                  built.extent * 3,
                 to:
                   camera.position.distanceTo(controls.target) +
-                  built.extent * 6.5,
+                  built.extent * 14,
               }
             : null,
       })
@@ -1011,6 +1060,7 @@ export default function Stage({
         undoScenery?.()
         scenery.dispose()
       }
+      waterParts?.dispose()
       themeWatch.disconnect()
       scheme.removeEventListener('change', visibility)
       controls.dispose()

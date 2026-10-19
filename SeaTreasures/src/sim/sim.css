@@ -194,51 +194,7 @@ html[data-theme='dark'] .sim-view::after {
   border: 1px solid var(--cp-text-muted);
   border-top: 0;
 }
-.view-controls {
-  position: absolute;
-  z-index: 3;
-  right: 16px;
-  top: 14px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 6px;
-  max-width: 60%;
-}
 /* Pill buttons drawn like the figure: an ink outline, filled when on. */
-.view-controls button,
-.figure-views button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 40px;
-  padding: 6px 14px;
-  border-radius: 100px;
-  border: 1.5px solid var(--cp-text);
-  background: var(--sim-paper);
-  color: var(--cp-text);
-  font:
-    13px Consolas,
-    'Courier New',
-    monospace;
-}
-.view-controls button:hover:not(:disabled):not([aria-pressed='true']),
-.figure-views button:hover:not(:disabled):not([aria-pressed='true']) {
-  background: var(--cp-surface-soft);
-}
-.view-controls button[aria-pressed='true'],
-.figure-views button[aria-pressed='true'] {
-  background: var(--cp-text);
-  color: var(--cp-bg-elevated);
-}
-.view-controls button:disabled,
-.figure-views button:disabled {
-  opacity: 0.45;
-}
-.view-controls .text-button {
-  border: 0;
-  background: none;
-}
 .figure-tools {
   position: absolute;
   z-index: 3;
@@ -266,15 +222,6 @@ html[data-theme='dark'] .sim-view::after {
   width: 150px;
   min-height: 24px;
   accent-color: var(--cp-text);
-}
-.figure-views {
-  display: flex;
-  gap: 6px;
-}
-.figure-views button {
-  min-height: 36px;
-  padding: 4px 12px;
-  font-size: 12px;
 }
 .sim-labels {
   position: absolute;
@@ -334,44 +281,6 @@ html[data-theme='dark'] .sim-view::after {
 .sim-labels button[aria-pressed='true'] {
   background: var(--cp-text);
   color: var(--cp-bg-elevated);
-}
-.part-card {
-  position: absolute;
-  z-index: 4;
-  right: 16px;
-  bottom: calc(var(--sim-tools) + 16px);
-  width: min(320px, calc(100% - 32px));
-  padding: 12px 14px 10px;
-  border: 1.5px solid var(--cp-text);
-  border-radius: 12px;
-  background: var(--sim-paper);
-  font-family:
-    'Segoe UI',
-    Aptos,
-    Calibri,
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
-}
-.part-card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.part-card h3 {
-  margin: 0;
-  font:
-    600 12px Consolas,
-    'Courier New',
-    monospace;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.part-card .icon-button {
-  width: 32px;
-  height: 32px;
-  min-height: 32px;
 }
 .part-card .fact p {
   font-size: 14px;
@@ -1093,35 +1002,21 @@ html[data-theme='dark'] .sim-view::after {
     -apple-system,
     BlinkMacSystemFont,
     sans-serif;
-  /* Water: what the seabed fades into with distance. */
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--cp-link) 30%, var(--cp-bg-elevated)) 0%,
-    color-mix(in srgb, var(--cp-link) 14%, var(--cp-bg-elevated)) 58%,
-    color-mix(in srgb, var(--cp-link) 10%, var(--cp-bg-elevated)) 100%
-  );
-}
-.sim .sim-view.ocean[data-bed='deep'] {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--cp-link) 48%, var(--cp-text)) 0%,
-    color-mix(in srgb, var(--cp-link) 34%, var(--cp-bg-elevated)) 60%,
-    color-mix(in srgb, var(--cp-link) 22%, var(--cp-bg-elevated)) 100%
-  );
-}
-.sim .sim-view.ocean[data-scene='open-water'] {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--cp-link) 22%, var(--cp-bg-elevated)) 0%,
-    color-mix(in srgb, var(--cp-link) 34%, var(--cp-bg-elevated)) 100%
-  );
-}
-.sim .sim-view.ocean[data-scene='beach'] {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--cp-link) 16%, var(--cp-bg-elevated)) 0%,
-    color-mix(in srgb, var(--cp-warning) 12%, var(--cp-bg-elevated)) 70%
-  );
+  /* The water itself: the stage sets --water from the setting, so the seabed fades into it. */
+  --water: color-mix(in srgb, var(--cp-link) 40%, var(--cp-bg-elevated));
+  background:
+    radial-gradient(
+      ellipse 60% 40% at 45% -5%,
+      color-mix(in srgb, var(--water) 70%, white),
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--water) 88%, white) 0%,
+      var(--water) 40%,
+      color-mix(in srgb, var(--water) 70%, black) 100%
+    );
+  transition: background-color 600ms ease;
 }
 .ocean .sim-stage {
   inset: 0;
@@ -1133,10 +1028,6 @@ html[data-theme='dark'] .sim-view::after {
 .float {
   position: absolute;
   z-index: 5;
-  background: var(--cp-panel-strong);
-  border-radius: 16px;
-  box-shadow: var(--float-shadow);
-  color: var(--cp-text);
 }
 
 /* Title, shell menu, place and seabed: top left, with the view toolbar under it. */
@@ -1157,12 +1048,6 @@ html[data-theme='dark'] .sim-view::after {
 }
 .float-left .float {
   position: relative;
-}
-.float-title {
-  width: 100%;
-  display: grid;
-  gap: 10px;
-  padding: 14px 16px 12px;
 }
 .title-row {
   display: flex;
@@ -1186,57 +1071,9 @@ html[data-theme='dark'] .sim-view::after {
   font-size: 13px;
   color: var(--cp-text-muted);
 }
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-}
-.chip-select {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 40px;
-  max-width: 100%;
-  padding: 0 4px 0 12px;
-  border: 1px solid var(--cp-border);
-  border-radius: 100px;
-  background: var(--cp-surface);
-  font:
-    10px Consolas,
-    'Courier New',
-    monospace;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--cp-text-soft);
-}
-.chip-select select {
-  width: auto;
-  max-width: 230px;
-  min-height: 38px;
-  margin: 0;
-  padding: 0 6px;
-  border: 0;
-  background: transparent;
-  color: var(--cp-text);
-  font:
-    13px 'Segoe UI',
-    Aptos,
-    Calibri,
-    sans-serif;
-  letter-spacing: 0;
-  text-transform: none;
-  cursor: pointer;
-}
-.chip-select select:focus-visible {
-  outline: 2px solid var(--cp-accent);
-  border-radius: 100px;
-}
 .setting-note {
   display: grid;
   gap: 4px;
-  padding-top: 8px;
-  border-top: 1px solid var(--cp-border);
 }
 .setting-note .fact p {
   font-size: 13px;
@@ -1250,153 +1087,10 @@ html[data-theme='dark'] .sim-view::after {
   font-size: 12px;
 }
 
-/* The shell menu: one button that opens every species as shell and animal. */
-.shell-menu {
-  position: relative;
-}
-.shell-menu-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 2px 14px 2px 4px;
-  border: 1.5px solid var(--cp-text);
-  border-radius: 100px;
-  background: var(--cp-surface);
-  color: var(--cp-text);
-  font-weight: 600;
-  font-size: 13px;
-}
-.shell-menu-button img {
-  width: 44px;
-  height: 30px;
-  object-fit: contain;
-}
-.shell-menu-button .swatch {
-  width: 30px;
-  height: 30px;
-}
-.shell-menu-button .chevron {
-  width: 7px;
-  height: 7px;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  transform: translateY(-2px) rotate(45deg);
-}
-.shell-menu-button[aria-expanded='true'] .chevron {
-  transform: translateY(2px) rotate(225deg);
-}
-.shell-tray {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 8px);
-  left: -10px;
-  width: min(620px, calc(100vw - 32px));
-  max-height: min(70dvh, 620px);
-  overflow: auto;
-  padding: 14px;
-  border-radius: 16px;
-  background: var(--cp-panel-strong);
-  box-shadow: var(--float-shadow);
-}
-.shell-tray ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
-  gap: 8px;
-}
-.shell-tray li button {
-  width: 100%;
-  display: grid;
-  gap: 2px;
-  padding: 8px 10px 10px;
-  text-align: left;
-  border: 1px solid var(--cp-border);
-  border-radius: 12px;
-  background: var(--cp-surface);
-  color: var(--cp-text);
-}
-.shell-tray li button:hover {
-  border-color: var(--cp-border-strong);
-}
-.shell-tray li button[aria-pressed='true'] {
-  border-color: var(--cp-accent);
-  box-shadow: 0 0 0 1px var(--cp-accent);
-}
-.tray-pictures {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px;
-  height: 78px;
-  margin-bottom: 6px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--cp-link) 9%, var(--cp-bg-elevated));
-}
-html[data-theme='dark'] .tray-pictures {
-  background: color-mix(in srgb, var(--cp-text) 82%, var(--cp-link));
-}
-.tray-pictures img {
-  width: 100%;
-  height: 78px;
-  object-fit: contain;
-}
-.tray-pictures .swatch {
-  grid-column: 1 / -1;
-  margin: auto;
-}
-.shell-tray strong {
-  font-size: 14px;
-  font-weight: 600;
-}
-.shell-tray i {
-  font-size: 12px;
-  color: var(--cp-text-muted);
-}
-.tray-meta {
-  font:
-    11px Consolas,
-    'Courier New',
-    monospace;
-  color: var(--cp-text-soft);
-}
-.shell-tray .picker-note {
-  margin-top: 12px;
-}
-
 /* View toolbar: one row of tools under the title. */
 .sim .ocean .view-controls {
   position: relative;
-  inset: auto;
   max-width: 100%;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 2px;
-  padding: 4px;
-}
-.sim .ocean .view-controls button {
-  min-height: 36px;
-  padding: 4px 10px;
-  font-size: 12px;
-}
-.sim .ocean .view-controls button {
-  justify-content: flex-start;
-  border-color: transparent;
-  background: transparent;
-}
-.sim
-  .ocean
-  .view-controls
-  button:hover:not(:disabled):not([aria-pressed='true']) {
-  background: var(--cp-surface-soft);
-}
-.sim .ocean .view-controls button[aria-pressed='true'] {
-  background: var(--cp-text);
-  color: var(--cp-bg-elevated);
 }
 
 /* Actions: top right. */
@@ -1404,12 +1098,6 @@ html[data-theme='dark'] .tray-pictures {
   z-index: 8;
   top: 16px;
   right: 16px;
-  padding: 4px 6px;
-}
-.float-actions .header-actions {
-  display: flex;
-  align-items: center;
-  gap: 2px;
 }
 
 /* The life panel floats on the right. */
@@ -1418,9 +1106,6 @@ html[data-theme='dark'] .tray-pictures {
   right: 16px;
   bottom: 176px;
   width: 360px;
-  padding: 18px 18px 14px;
-  overflow: auto;
-  overscroll-behavior: contain;
 }
 
 /* The timeline and figure tools float along the bottom. */
@@ -1428,9 +1113,6 @@ html[data-theme='dark'] .tray-pictures {
   left: 16px;
   right: 16px;
   bottom: 16px;
-  display: grid;
-  gap: 4px;
-  padding: 10px 16px 8px;
 }
 .ocean .timeline {
   position: static;
@@ -1441,9 +1123,9 @@ html[data-theme='dark'] .tray-pictures {
 .ocean .figure-tools {
   position: static;
   height: auto;
-  min-height: 44px;
-  padding: 6px 0 0;
-  border-top: 1px solid var(--cp-border);
+  min-height: 40px;
+  padding: 0;
+  border-top: 0;
   background: none;
   justify-content: flex-start;
   gap: 8px 24px;
@@ -1454,6 +1136,8 @@ html[data-theme='dark'] .tray-pictures {
 .ocean .take-apart {
   position: static;
   display: flex;
+  align-items: center;
+  gap: 8px;
   width: auto;
   padding: 0;
   background: none;
@@ -1462,9 +1146,6 @@ html[data-theme='dark'] .tray-pictures {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--cp-text-muted);
-}
-.ocean .take-apart input {
-  width: 140px;
 }
 .ocean .action-hint {
   top: auto;
@@ -1498,6 +1179,8 @@ html[data-theme='dark'] .tray-pictures {
   background: var(--cp-panel-strong);
 }
 .ocean .part-card {
+  position: absolute;
+  width: min(330px, calc(100% - 32px));
   right: auto;
   left: 220px;
   bottom: 184px;
@@ -1506,29 +1189,6 @@ html[data-theme='dark'] .tray-pictures {
   max-height: max(160px, calc(100% - 184px - 330px));
   overflow: auto;
   overscroll-behavior: contain;
-  box-shadow: var(--float-shadow);
-  border-color: var(--cp-text);
-}
-.part-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-.part-actions button {
-  min-height: 34px;
-  padding: 4px 12px;
-  border: 1.5px solid var(--cp-text);
-  border-radius: 100px;
-  background: transparent;
-  color: var(--cp-text);
-  font:
-    12px Consolas,
-    'Courier New',
-    monospace;
-}
-.part-actions button:hover {
-  background: var(--cp-surface-soft);
 }
 
 /* Short screens: keep the title panel compact so it clears the timeline. */
@@ -1574,7 +1234,7 @@ html[data-theme='dark'] .tray-pictures {
     max-width: 100%;
     overflow-x: auto;
   }
-  .sim .ocean .view-controls button {
+  .sim .ocean .view-controls > * {
     flex: none;
   }
   .float-bottom {
@@ -1623,7 +1283,7 @@ html[data-theme='dark'] .tray-pictures {
   }
   .sim .sim-view.ocean {
     --stage: 86dvh;
-    --safe-top: 290px;
+    --safe-top: 250px;
     --safe-bottom: 210px;
   }
   .ocean .action-hint,
@@ -1640,53 +1300,35 @@ html[data-theme='dark'] .tray-pictures {
     font-size: 10px;
     letter-spacing: 0.06em;
   }
-  .ocean .figure-views button {
-    min-height: 34px;
-    padding: 2px 10px;
-  }
   .float-left {
     top: 10px;
     left: 10px;
     width: calc(100% - 20px);
   }
-  .float-title {
-    padding: 10px 12px;
-    gap: 8px;
-  }
   .title-row {
     padding-right: 96px;
+  }
+  /* On a phone the setting note is read below, in the life panel's place list. */
+  .ocean .setting-note,
+  .ocean .float-title [data-slot='separator'] {
+    display: none;
   }
   .title-row .brand {
     display: none;
   }
-  .chip-select select {
-    max-width: 120px;
-  }
   .float-actions {
     top: 14px;
     right: 14px;
-    box-shadow: none;
-    background: transparent;
-  }
-  .float-actions .header-actions > .text-button:first-child {
-    display: none;
   }
   .float-bottom {
     left: 10px;
     right: 10px;
-    padding: 8px 10px 6px;
   }
   .ocean .figure-tools {
     gap: 6px 12px;
   }
   .ocean .figure-views {
     margin-left: 0;
-  }
-  .ocean .take-apart input {
-    width: 96px;
-  }
-  .look-slider input {
-    width: 96px;
   }
   .sim-labels button {
     min-height: 24px;
