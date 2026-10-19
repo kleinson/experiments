@@ -450,6 +450,42 @@
       "accessedAt": "2026-10-19",
       "kind": "peer-reviewed",
       "accessNote": "Open access, CC BY 4.0. Bibliographic and licence data verified via Crossref, OpenAlex and DOAJ; the abstract was read via DOAJ. The publisher site blocked automated full-text access, so the equations and Table 1 parameters were taken from the open-source mollusc3d port, which cites the paper's equations and table."
+    },
+    {
+      "id": "wikipedia-gastropod-shell",
+      "title": "Gastropod shell",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Gastropod_shell",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Anatomy and terminology sections read directly. A tertiary source used for part names only, so claims built on it are marked moderate confidence."
+    },
+    {
+      "id": "wikipedia-veliger",
+      "title": "Veliger",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Veliger",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Description and metamorphosis sections read directly. Tertiary source; moderate confidence."
+    },
+    {
+      "id": "wikipedia-nautilus",
+      "title": "Nautilus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Nautilus",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Shell, anatomy and buoyancy sections read directly. Tertiary source; moderate confidence."
+    },
+    {
+      "id": "wikipedia-septum-cephalopod",
+      "title": "Septum (cephalopod)",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Septum_(cephalopod)",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Article read in full. Tertiary source; moderate confidence."
     }
   ],
   "claims": [
@@ -1162,6 +1198,30 @@
       "scope": "mollusks",
       "confidence": "moderate",
       "evidenceNote": "From the paper's abstract and its published equations. The lab's specimen parameters follow Table 1 as transcribed by the open-source mollusc3d port; the full text could not be fetched automatically to cross-check every value, hence moderate confidence. The model describes shape, not colour."
+    },
+    {
+      "id": "term-gastropod-shell-parts",
+      "text": "A coiled snail shell begins with the larval shell (protoconch), which forms the apex of the spire; the whorls grow larger from there to the last and largest, the body whorl, which ends at the opening (aperture). The coil turns around a central pillar, the columella, and in some shells the aperture is drawn out into a siphonal canal.",
+      "sourceIds": ["wikipedia-gastropod-shell"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Part names used by the figure's labels. The article states the protoconch forms the apex of the spire, the spire is the part above the body whorl, and the central axis passes through the columella, the central pillar of the shell."
+    },
+    {
+      "id": "term-veliger-velum",
+      "text": "A veliger larva swims and gathers food with a ciliated velum that extends beyond its shell, and can pull the velum and foot back into the shell; it loses the velum at metamorphosis into a juvenile.",
+      "sourceIds": ["wikipedia-veliger"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Applies to veliger larvae in general. The tiger cowrie's own larva is not documented (see tiger-cowrie-larva-unresolved), so the figure's velum is generic."
+    },
+    {
+      "id": "term-nautilus-chambers",
+      "text": "A nautilus shell is divided into chambers by thin walls called septa, each pierced in the middle by a tube, the siphuncle. As the animal grows it moves forward into a new living chamber and builds a septum behind it. It can close the opening with a leathery hood formed from two folded tentacles, and swims by pushing water out through its funnel (hyponome).",
+      "sourceIds": ["wikipedia-nautilus", "wikipedia-septum-cephalopod"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Nautilus: septa pierced by the siphuncle, the hood from two folded tentacles, jet propulsion with the hyponome. Septum (cephalopod): the body moves forward to a new living chamber, secreting septa behind it."
     }
   ]
 }

@@ -32,6 +32,7 @@ import {
   septumAngles,
 } from './coil.ts'
 import { cap, footGeometry, limb, papillae, skinMaterials } from './bodies.ts'
+import { marker, markMesh } from './labels.ts'
 import type { LifeFrame } from './life.ts'
 import { looks } from './looks.ts'
 import { coilGeometry, lipGeometry, septumGeometry, toThree } from './meshes.ts'
@@ -317,6 +318,43 @@ function shellMeshes(
         )
       }
     }
+    const at = (
+      theta: number,
+      s: number,
+      options: { inset?: number; flare?: number } = {},
+    ) =>
+      new Vector3(...toThree(coilPoint(shape.coil, theta, s, options), scale))
+    if (shape.chambers) {
+      const septa = septumAngles(
+        end,
+        shape.chambers.perTurn,
+        shape.chambers.bodyChamber,
+      )
+      group.add(marker('Living chamber', at(end - 0.7, 0, { inset: 0.55 })))
+      if (septa.length > 1) {
+        const last = septa[septa.length - 1]!
+        group.add(marker('Septum', at(last, 0.6, { inset: 0.5 }), true))
+        group.add(
+          marker(
+            'Siphuncle',
+            at(septa[Math.floor(septa.length / 2)]!, Math.PI, { inset: 0.75 }),
+            true,
+          ),
+        )
+      }
+    } else {
+      group.add(marker('Apex', at(0.05, 0)))
+      group.add(marker('Aperture', at(end, 0, { inset: 1, flare })))
+      if (end > TAU * 1.5) {
+        group.add(marker('Body whorl', at(end - Math.PI * 0.8, 0)))
+        const axis = at(end - TAU, 0, { inset: 1 })
+        group.add(marker('Columella', new Vector3(0, axis.y, 0), true))
+      }
+      if (shape.coil.flare && flare > 0.5)
+        group.add(
+          marker('Thick lip', at(end - 0.15, shape.coil.flare.at, { flare })),
+        )
+    }
     return { group, scale, end, flare, coil: shape.coil, wall: shape.wall }
   }
   const progress = Math.min(100, size * 100)
@@ -332,7 +370,19 @@ function shellMeshes(
     const spire = new Mesh(own.geometry(createSpireGeometry()), outer)
     spire.scale.setScalar(now.scale)
     body.add(spire)
+    if (now.coilVisibility > 0.3) markMesh(spire, 'Young spire')
   }
+  const outerShell = body.children[0] as Mesh
+  outerShell.geometry.computeBoundingBox()
+  const bounds = outerShell.geometry.boundingBox!
+  const middle = bounds.getCenter(new Vector3())
+  body.add(marker('Dorsum', new Vector3(middle.x, bounds.max.y, middle.z)))
+  body.add(
+    marker(
+      progress >= 95 ? 'Toothed aperture' : 'Aperture',
+      new Vector3(middle.x, bounds.min.y, middle.z),
+    ),
+  )
   group.add(body)
   return { group, unit, progress, cowrie: shape, now }
 }
@@ -362,37 +412,6 @@ function adultBox(species: Species) {
   framing.set(species.id, result)
   return result
 }
-
-/** A soft, rounded substrate: sea floor or sand. */
-function ground(radius: number, colour: Rgb, own: Own) {
-  const side = 128
-  const pixels: Pixels = {
-    width: side,
-    height: side,
-    data: new Uint8ClampedArray(side * side * 4),
-  }
-  let seed = 11
-  for (let i = 0; i < pixels.data.length; i += 4) {
-    seed = (seed * 16807) % 2147483647
-    const grain = 0.86 + ((seed % 1000) / 1000) * 0.22
-    pixels.data[i] = colour[0] * grain
-    pixels.data[i + 1] = colour[1] * grain
-    pixels.data[i + 2] = colour[2] * grain
-    pixels.data[i + 3] = 255
-  }
-  const map = own.texture(textureFrom(pixels))
-  map.wrapS = RepeatWrapping
-  map.repeat.set(6, 6)
-  const mesh = new Mesh(
-    own.geometry(new CircleGeometry(radius, 72)),
-    own.material(new MeshStandardMaterial({ map, roughness: 1 })),
-  )
-  mesh.rotation.x = -Math.PI / 2
-  return mesh
-}
-
-const SAND: Rgb = [214, 196, 160]
-const SEAFLOOR: Rgb = [154, 160, 152]
 
 type BodyMaterials = ReturnType<typeof skinMaterials>
 
@@ -454,10 +473,10 @@ function snailBody(
   const conch = speciesId === 'queen-conch'
   const cowrie = speciesId.endsWith('cowrie')
   const pivot = new Vector3(front - L * 0.3, box.min.y + H * 0.15, mid)
-  const add = (mesh: Mesh) => {
-    mesh.position.sub(pivot)
-    outside.add(mesh)
-    return mesh
+  const add = <T extends Object3D>(part: T) => {
+    part.position.sub(pivot)
+    outside.add(part)
+    return part
   }
   const geo = <T extends BufferGeometry>(g: T) => own.geometry(g)
 
@@ -535,6 +554,16 @@ function snailBody(
     ),
   )
   sole.position.add(new Vector3(footX, -footTop * 0.02, mid))
+  add(
+    marker(
+      'Foot',
+      new Vector3(
+        footX + footLength * 0.36,
+        footTop * 0.55,
+        mid + footWidth * 0.3,
+      ),
+    ),
+  )
 
   // The head rises from the front of the foot on a short neck.
   const headAt = new Vector3(footX + footLength * 0.42, footTop * 1.15, mid)
@@ -575,6 +604,7 @@ function snailBody(
         new Mesh(geo(limb([base, bend, tip], L * 0.012, 0.75, 20)), skin.flesh),
       )
       add(new Mesh(geo(cap(tip, L * 0.016)), skin.eye))
+      if (sign > 0) add(marker('Eye stalk', bend))
       const ring = add(
         new Mesh(
           geo(
@@ -604,6 +634,8 @@ function snailBody(
       add(
         new Mesh(geo(limb([base, bend, tip], L * 0.011, 0.12, 22)), skin.flesh),
       )
+      if (cowrie && sign > 0)
+        add(marker('Tentacle', base.clone().lerp(tip, 0.7)))
       add(
         new Mesh(
           geo(
@@ -639,6 +671,12 @@ function snailBody(
         skin.flesh,
       ),
     )
+    add(
+      marker(
+        'Proboscis',
+        mouth.clone().add(new Vector3(L * 0.08, -footTop * 0.3, 0)),
+      ),
+    )
     const operculum = add(
       new Mesh(
         geo(new SphereGeometry(1, 24, 12)),
@@ -660,6 +698,7 @@ function snailBody(
       ),
     )
     operculum.rotation.set(0.5, 0.3, 0.6)
+    markMesh(operculum, 'Operculum')
   }
 
   // The inhalant siphon: a soft tube rising from the front of the opening.
@@ -695,8 +734,10 @@ function snailBody(
       )
     }
     add(new Mesh(geo(cap(siphonTip, siphonRadius * 0.55)), skin.bands[1]!))
+    add(marker('Banded siphon', siphonTip.clone()))
   } else {
     add(new Mesh(geo(limb(siphonPath, siphonRadius, 0.6, 18)), skin.flesh))
+    if (cowrie) add(marker('Siphon', siphonTip.clone()))
   }
   outside.position.copy(pivot)
   return outside
@@ -718,9 +759,9 @@ function nautilusBody(
   const geo = <T extends BufferGeometry>(g: T) => own.geometry(g)
   const up = new Vector3(0, 1, 0)
   const side = new Vector3().crossVectors(ahead, up).normalize()
-  const add = (mesh: Mesh) => {
-    mesh.position.sub(mouth)
-    outside.add(mesh)
+  const add = (part: Object3D) => {
+    part.position.sub(mouth)
+    outside.add(part)
   }
   const hood = new Mesh(
     geo(new SphereGeometry(1, 32, 20, 0, Math.PI * 2, 0, Math.PI * 0.62)),
@@ -736,6 +777,16 @@ function nautilusBody(
     up.clone().addScaledVector(ahead, 0.35).normalize(),
   )
   add(hood)
+  markMesh(hood, 'Hood')
+  add(
+    marker(
+      'Tentacles',
+      mouth
+        .clone()
+        .addScaledVector(ahead, size * 0.24)
+        .addScaledVector(up, -size * 0.05),
+    ),
+  )
   const count = 92
   for (let i = 0; i < count; i++) {
     const angle = (i / count) * TAU * 3.1
@@ -804,6 +855,15 @@ function nautilusBody(
         ),
       ),
       skin.flesh,
+    ),
+  )
+  add(
+    marker(
+      'Funnel',
+      funnelFrom
+        .clone()
+        .addScaledVector(ahead, size * 0.1)
+        .addScaledVector(up, -size * 0.03),
     ),
   )
   outside.position.copy(mouth)
@@ -898,18 +958,18 @@ export function buildScene(
       if (built.coil) {
         const turns = swims ? 0.45 : 1.6
         const start = Math.max(0.05, built.end - TAU * turns)
-        body.add(
-          new Mesh(
-            own.geometry(
-              coilGeometry(built.coil, built.scale, built.end, {
-                start,
-                inset: built.wall + 0.12,
-                detail: 0.6,
-              }),
-            ),
-            tissue,
+        const soft = new Mesh(
+          own.geometry(
+            coilGeometry(built.coil, built.scale, built.end, {
+              start,
+              inset: built.wall + 0.12,
+              detail: 0.6,
+            }),
           ),
+          tissue,
         )
+        if (!swims) markMesh(soft, 'Visceral mass', true)
+        body.add(soft)
       } else if (built.cowrie) {
         const cowrieBody = new Group()
         cowrieBody.scale.copy(built.group.children[0]!.scale)
@@ -921,6 +981,7 @@ export function buildScene(
               tissue,
             ),
           )
+        markMesh(cowrieBody.children[0] as Mesh, 'Mantle')
         cowrieBody.add(
           new Mesh(
             own.geometry(createShellGeometry(built.progress, 'inner')),
@@ -987,6 +1048,7 @@ export function buildScene(
         )
         hole.position.copy(spot)
         hole.quaternion.setFromUnitVectors(new Vector3(0, 0, 1), normal)
+        markMesh(hole, 'Drill hole')
         built.group.add(hole)
       } else {
         for (let i = 0; i < 3; i++) {
@@ -996,6 +1058,7 @@ export function buildScene(
             markMaterial,
           )
           nick.position.copy(at(built.end, 0.3 + i * 0.35, -0.02))
+          if (i === 1) markMesh(nick, 'Broken lip')
           built.group.add(nick)
         }
       }
@@ -1011,6 +1074,7 @@ export function buildScene(
       )
       hole.position.set(0.4 * built.now.scale, 0.92 * built.now.scale, 0.2)
       hole.rotation.x = -Math.PI / 2.2
+      markMesh(hole, 'Drill hole')
       built.group.children[0]!.add(hole)
     }
 
@@ -1100,6 +1164,7 @@ export function buildScene(
         claw.position
           .copy(mouthAt)
           .add(new Vector3(L * 0.1, -H * 0.05, sign * L * 0.035))
+        if (sign > 0) markMesh(claw, 'Hermit crab')
         crab.add(claw)
         const eyeAt = mouthAt
           .clone()
@@ -1136,6 +1201,13 @@ export function buildScene(
     }
 
     if (frame.larva > 0 && !swims) {
+      // A larva is too small for the adult's part names: name the whole first shell instead.
+      const named: Object3D[] = []
+      specimen.traverse((part) => {
+        if (part.userData.label) named.push(part)
+      })
+      named.forEach((part) => part.removeFromParent())
+      specimen.add(marker('Larval shell', seated.getCenter(new Vector3())))
       const velum = own.material(
         new MeshPhysicalMaterial({
           color: rgb([232, 216, 196]),
@@ -1155,6 +1227,7 @@ export function buildScene(
           0,
         )
         disc.rotation.set(-Math.PI / 2.4, 0, sign * 0.4)
+        if (sign > 0) markMesh(disc, 'Velum')
         specimen.add(disc)
       }
       const rimMaterial = own.material(
@@ -1239,6 +1312,7 @@ export function buildScene(
         Math.sin(angle) * ring,
       )
       egg.userData.egg = i
+      if (i === 0) markMesh(egg, 'Egg capsule')
       const dot = blob(
         [eggSize * 0.16, eggSize * 0.16, eggSize * 0.16],
         own,
@@ -1255,15 +1329,6 @@ export function buildScene(
       width: spread * 1.4,
       height: spread,
     }
-  }
-
-  const sand = frame.beach
-  const showFloor =
-    (!swims && frame.larva === 0) || frame.beach || frame.phase === 'egg'
-  if (showFloor) {
-    const floorMesh = ground(adult.length * 2.2, sand ? SAND : SEAFLOOR, own)
-    floorMesh.position.y = floor - 0.05
-    group.add(floorMesh)
   }
 
   if (frame.beach) {

@@ -12,6 +12,11 @@ that pulls back when you poke it, its death, the empty shell a hermit crab moves
 into or that floats away, waves that roll and wear it on the beach, and finally
 the moment you pick it up.
 
+Everything is drawn as an educational figure, not a photograph: flat colour in
+three tones, dark ink outlines, a flat printed shadow on warm paper and leader
+labels you can tap, in the spirit of hand-inked isometric explainers such as
+April Zhu's [Colorfigures](https://april-zhu.com/colorfigures-demo).
+
 Every fact on screen links to a source. Where a time or size is not known, the
 simulator says so rather than guessing. There are no stock photographs, remote
 fonts, camera requests, uploads, accounts or paid APIs.
@@ -131,8 +136,28 @@ Browsers guess 96 pixels per inch, so “Calibrate” lets you match an on-scree
 outline to any bank card (ISO/IEC 7810 ID-1, 85.60 × 53.98 mm) and remembers the
 result on your device.
 
+**Drawing or realistic.** The 3D scene is real geometry you can turn, shown
+two ways (`src/sim/ink.ts`) and blended by the “Drawing ↔ Realistic” slider.
+The drawing is an educational plate: soft tonal washes on a smooth light ramp,
+crisp patterns, a fine anti-aliased ink outline around silhouettes and
+overlaps, lighter lines along folds, and a soft tinted shadow on the paper. The
+realistic end keeps the physical materials, filmic response and a neutral
+shadow. In between, the two are mixed and the ink fades out. Ink and shadow
+colours come from the page theme, so the figure follows light and dark.
+
+**Labels that teach.** “Labels” draws leader lines to the parts present in the
+current moment: apex, body whorl, aperture and columella on a snail shell; the
+dorsum and toothed aperture on a cowrie; septum, siphuncle and living chamber
+on a nautilus; foot, mantle, siphon, eye stalks, proboscis, operculum, hood,
+tentacles and funnel on the animals; egg capsules, the velum and the larval
+shell early in life; and drill holes or a hermit crab later. Parts inside the
+shell appear only when it is cut open or seen through. Tapping a label opens a
+short explanation with its evidence (`src/sim/glossary.ts`). Part names come
+from the Gastropod shell, Veliger, Nautilus and Septum articles, recorded as
+claims in `data/research/figure-terms.json`.
+
 **The animals.** Each living mollusc has one soft head-foot that carries the
-shell, with a wet, mottled skin coloured from its sourced description: the
+shell, with a mottled skin coloured from its sourced description: the
 textile cone is white mottled with tan and has a black-and-red banded siphon;
 the money cowrie's mantle is zebra-like; the tiger cowrie's mantle carries
 short papillae; the queen conch has long eye stalks, a proboscis and a brown
@@ -149,7 +174,9 @@ tone is used.
 | Growing      | Press and hold the shell        | It grows at its opening while you hold                |
 | Adult        | Tap the animal                  | It pulls back into its shell, then slowly comes out   |
 | Adult        | “Take apart” slider             | Lifts the shell off the soft body inside              |
-| Any          | “X-ray”, “Cut open”             | See through the shell, or slice it open               |
+| Any          | “See-through”, “Cut open”       | See through the shell, or slice it open               |
+| Any          | “Labels”, then a label          | Names each part; a tap explains it, with its source   |
+| Any          | Style slider, views, turntable  | Drawing to realistic, a side-on plate, or a slow turn |
 | Death        | Choose an ending                | Only sourced causes; otherwise “not documented”       |
 | Empty shell  | Tap the shell                   | A hermit crab moves in, or a nautilus shell floats    |
 | Beach        | Tap the shell                   | A wave rolls it; each wave wears it paler             |
@@ -204,7 +231,8 @@ small surface painter (`src/anatomy/surface.ts`) in the kit's isometric camera.
   slider with Home and End.
 - A live region announces what happened after each action; a hidden summary
   describes the current scene.
-- Reduced motion stops bobbing, swimming and tumbling animations; actions jump
+- Labels are real buttons in a list; each opens its explanation and evidence.
+- Reduced motion stops bobbing, swimming, tumbling and the turntable; actions jump
   straight to their result.
 - If WebGL is unavailable, the timeline, facts, sources and shelf still work.
 - Light and dark appearance, a manual toggle, and `?scoutTheme=light|dark`.
@@ -220,7 +248,9 @@ npm run test:ios         # portable Swift core tests
 
 Browser tests cover choosing every species, the map and place list, the shell
 lab, a whole life from egg to shelf,
-hatching eggs by tapping the stage, X-ray, cut open and take apart, actual size
+hatching eggs by tapping the stage, see-through, cut open and take apart, part
+labels and their sourced explanations, the drawing-to-realistic slider and
+views, actual size
 and calibration, sourced and unknown durations, the sources dialog, keyboard
 turning and timeline, text contrast in both themes, 320 and 390 pixel phones,
 no-WebGL operation, offline reload, and WebKit touch at 320, 375 and 430 pixels.
@@ -239,8 +269,11 @@ offline use.
 | Location                 | Purpose                                                       |
 | ------------------------ | ------------------------------------------------------------- |
 | `src/sim/Simulator.tsx`  | The one-screen simulator: species, timeline, facts and shelf  |
-| `src/sim/Stage.tsx`      | The 3D stage: camera, true size, taps and transient motion    |
-| `src/sim/scene.ts`       | Builds each frame: shell, animal, eggs, larva, crab, sand     |
+| `src/sim/Stage.tsx`      | The 3D stage: camera, true size, taps, motion and labels      |
+| `src/sim/ink.ts`         | Drawn and realistic looks, ink outlines and the blend         |
+| `src/sim/labels.ts`      | Named points on parts, and collecting them for the figure     |
+| `src/sim/glossary.ts`    | What each label means, and the claim it rests on              |
+| `src/sim/scene.ts`       | Builds each frame: shell, animal, eggs, larva, crab, labels   |
 | `src/sim/coil.ts`        | Raup coiling model and accretionary growth                    |
 | `src/sim/patterns.ts`    | Seeded pattern generators and weathering                      |
 | `src/sim/life.ts`        | The eight-part life timeline and its sourced clock            |

@@ -12,6 +12,7 @@ const fragments = [
   'research/gastropods.json',
   'research/conch-nautilus.json',
   'research/essentials.json',
+  'research/figure-terms.json',
 ]
   .filter((file) => existsSync(root + file))
   .map((file) => ({

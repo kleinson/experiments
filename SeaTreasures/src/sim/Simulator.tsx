@@ -24,6 +24,7 @@ import {
   phases,
   startOf,
 } from './life.ts'
+import { glossary } from './glossary.ts'
 import type { PhaseId } from './life.ts'
 import { addToShelf, parseShelf, shelfKey } from './shelf.ts'
 import type { Found } from './shelf.ts'
@@ -50,6 +51,7 @@ type IconName =
   | 'ruler'
   | 'hand'
   | 'apart'
+  | 'label'
 
 function Icon({ name }: { name: IconName }) {
   const paths: Record<IconName, ReactNode> = {
@@ -76,6 +78,12 @@ function Icon({ name }: { name: IconName }) {
       <path d="M8 13V5a1.5 1.5 0 0 1 3 0v6m0-1V4a1.5 1.5 0 0 1 3 0v6m0-1V5.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-3l-2.5-4a1.5 1.5 0 0 1 2.5-1.6L8 15" />
     ),
     apart: <path d="M4 12h5m6 0h5M9 8l-3 4 3 4m6-8 3 4-3 4" />,
+    label: (
+      <>
+        <circle cx="6" cy="17" r="2" />
+        <path d="m7.5 15.5 5-5H20" />
+      </>
+    ),
   }
   return (
     <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -568,6 +576,10 @@ export function Simulator() {
   const [deathId, setDeathId] = useState(species.deaths[0]?.id ?? '')
   const [cut, setCut] = useState(false)
   const [xray, setXray] = useState(false)
+  const [labels, setLabels] = useState(true)
+  const [look, setLook] = useState(0)
+  const [turntable, setTurntable] = useState(false)
+  const [part, setPart] = useState<string | null>(null)
   const [actual, setActual] = useState(false)
   const [calibration, setCalibration] = useState(() =>
     readCalibration(localStorage),
@@ -805,7 +817,7 @@ export function Simulator() {
     frame.size > 0
       ? `Shell ${Math.round(species.lengthMm.drawn * frame.size * 10) / 10} millimetres long${actual ? ', shown at actual size' : ''}.`
       : 'No shell yet.'
-  }${cut ? ' Cut open.' : ''}${xray ? ' X-ray view.' : ''}`
+  }${cut ? ' Cut open.' : ''}${xray ? ' See-through view.' : ''}`
 
   return (
     <div className="sim" data-phase={frame.phase}>
@@ -929,6 +941,11 @@ export function Simulator() {
               pxPerMm={calibration.pxPerMm}
               reducedMotion={reducedMotion}
               pulse={pulse}
+              labels={labels}
+              look={look}
+              turntable={turntable}
+              selected={part}
+              onPart={(text) => setPart(part === text ? null : text)}
               onMeasure={setMeasure}
               onEvent={onStage}
             />
@@ -965,7 +982,11 @@ export function Simulator() {
               disabled={frame.size === 0}
             >
               <Icon name="xray" />
-              X-ray
+              See-through
+            </button>
+            <button aria-pressed={labels} onClick={() => setLabels(!labels)}>
+              <Icon name="label" />
+              Labels
             </button>
             <button aria-pressed={actual} onClick={() => setActual(!actual)}>
               <Icon name="ruler" />
@@ -998,6 +1019,67 @@ export function Simulator() {
               />
             </label>
           )}
+          {labels && part && glossary[part] && (
+            <div className="part-card" role="region" aria-label={part}>
+              <div className="part-card-head">
+                <h3>{part}</h3>
+                <button
+                  className="icon-button"
+                  aria-label={`Close ${part}`}
+                  onClick={() => setPart(null)}
+                >
+                  <Icon name="close" />
+                </button>
+              </div>
+              <Fact claim={glossary[part].claim}>{glossary[part].text}</Fact>
+            </div>
+          )}
+          <div className="figure-tools">
+            <label className="look-slider">
+              <span aria-hidden="true">Drawing</span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                aria-label="Drawing or realistic"
+                value={Math.round(look * 100)}
+                onChange={(event) => setLook(Number(event.target.value) / 100)}
+                aria-valuetext={
+                  look < 0.15
+                    ? 'Educational drawing'
+                    : look > 0.85
+                      ? 'Realistic'
+                      : `${Math.round(look * 100)}% realistic`
+                }
+              />
+              <span aria-hidden="true">Realistic</span>
+            </label>
+            <div className="figure-views" role="group" aria-label="Turn">
+              <button
+                onClick={() => {
+                  setTurntable(false)
+                  act('front')
+                }}
+              >
+                Front view
+              </button>
+              <button
+                onClick={() => {
+                  setTurntable(false)
+                  act('iso')
+                }}
+              >
+                Isometric
+              </button>
+              <button
+                aria-pressed={turntable}
+                onClick={() => setTurntable(!turntable)}
+                disabled={reducedMotion}
+              >
+                Turntable
+              </button>
+            </div>
+          </div>
           <p className="sr-only" id="sim-summary">
             {summary}
           </p>
