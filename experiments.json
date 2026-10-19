@@ -1,12 +1,13 @@
 [
   {
-    "id": "the-shell-remembers",
-    "title": "The Shell Remembers",
-    "description": "Hold the architecture of a life. An interactive, scientifically cautious cowrie story.",
-    "path": "/shell-remembers/",
+    "id": "seatreasures",
+    "title": "SeaTreasures",
+    "description": "Hold the architecture of a life. An interactive, scientifically cautious cowrie story with a 3D shell and anatomy plates.",
+    "path": "SeaTreasures/",
     "year": 2026,
+    "license": "MIT",
     "categories": ["Creative Technology", "Research"],
     "platforms": ["Web", "iOS"],
-    "preview": "/shell-remembers/shell-mark.svg"
+    "preview": "SeaTreasures/public/shell-mark.svg"
   }
 ]
