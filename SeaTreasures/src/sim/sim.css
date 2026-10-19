@@ -701,3 +701,372 @@ html[data-theme='dark'] .sim {
     width: 160px;
   }
 }
+
+/* Where it's found */
+#where {
+  scroll-margin-top: 16px;
+}
+.where {
+  margin: 8px 0 24px;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--cp-bg-elevated);
+  box-shadow: 0 0 0 1px var(--cp-border);
+}
+.where-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+.where-head h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+.where-head .fact {
+  max-width: 52ch;
+}
+.where-head .fact p {
+  font-size: 13px;
+  color: var(--cp-text-muted);
+}
+.where-map {
+  position: relative;
+}
+.where-map svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+.where-sea {
+  fill: color-mix(in srgb, var(--cp-link) 9%, var(--cp-surface));
+}
+.where-land {
+  fill: color-mix(in srgb, var(--cp-text) 13%, var(--cp-surface));
+  stroke: color-mix(in srgb, var(--cp-text) 22%, var(--cp-surface));
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+}
+.where-pin {
+  cursor: pointer;
+}
+.where-pin circle {
+  fill: var(--cp-accent);
+  fill-opacity: 0.75;
+  stroke: var(--cp-surface);
+  stroke-width: 1;
+  transition: fill-opacity 160ms ease;
+}
+.where-pin[data-level='recorded'] circle {
+  fill-opacity: 0.55;
+}
+.where-pin[data-level='isolated'] circle {
+  fill: var(--cp-surface);
+  fill-opacity: 1;
+  stroke: var(--cp-accent);
+  stroke-dasharray: 1.5 1.5;
+}
+.where-pin[data-level='none'] circle {
+  fill: color-mix(in srgb, var(--cp-text) 30%, var(--cp-surface));
+  fill-opacity: 0.6;
+  stroke: none;
+  cursor: default;
+}
+.where-pin[data-outside] circle {
+  fill: var(--cp-warning);
+}
+.where-pin .where-hit {
+  fill: transparent !important;
+  stroke: none !important;
+}
+.where-pin .where-ring {
+  fill: none !important;
+  stroke: var(--cp-text);
+  stroke-width: 1.4;
+  stroke-dasharray: none;
+}
+.where-pin:hover circle:not(.where-hit, .where-ring) {
+  fill-opacity: 1;
+}
+.where-readout {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: var(--cp-panel-strong);
+  box-shadow: 0 0 0 1px var(--cp-border);
+  font-size: 12px;
+  max-width: calc(100% - 24px);
+}
+.where-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 10px 0 20px;
+  font-size: 11px;
+  color: var(--cp-text-soft);
+}
+.where-legend span::before {
+  content: '';
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: -1px;
+  background: var(--cp-accent);
+}
+.where-legend [data-level='recorded']::before {
+  opacity: 0.6;
+}
+.where-legend [data-level='isolated']::before {
+  background: none;
+  box-shadow: inset 0 0 0 1.5px var(--cp-accent);
+}
+.where-legend [data-level='none']::before {
+  background: color-mix(in srgb, var(--cp-text) 30%, var(--cp-surface));
+}
+.where-legend [data-outside]::before {
+  background: var(--cp-warning);
+}
+.where-lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px 24px;
+}
+.where-group h3 {
+  margin: 0 0 6px;
+  font:
+    10px Consolas,
+    'Courier New',
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cp-text-soft);
+}
+.where-group ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.where-group button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  text-align: left;
+  font-size: 13px;
+}
+.where-group button:hover:not(:disabled) {
+  background: var(--cp-surface);
+}
+.where-group button[aria-pressed='true'] {
+  background: var(--cp-accent-soft);
+  color: var(--cp-text);
+  font-weight: 600;
+}
+.where-group button:disabled {
+  color: var(--cp-text-soft);
+  opacity: 0.7;
+}
+.where-group button[data-outside] .where-count::after {
+  content: ' ⚠';
+  color: var(--cp-warning);
+}
+.where-count {
+  font-variant-numeric: tabular-nums;
+  color: var(--cp-text-muted);
+}
+.where-notes {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cp-border);
+}
+.where-notes .fact p {
+  font-size: 13px;
+}
+.where-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 13px;
+}
+@media (max-width: 760px) {
+  .where {
+    padding: 16px;
+  }
+  .where-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .where-readout {
+    position: static;
+    margin-top: 8px;
+  }
+}
+
+/* Shell lab */
+.lab {
+  margin: 8px 0 24px;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--cp-bg-elevated);
+  box-shadow: 0 0 0 1px var(--cp-border);
+}
+.lab-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+.lab-head h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+.lab-head p {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--cp-text-muted);
+}
+.lab-body {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 280px;
+  gap: 20px;
+}
+.lab-presets {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+.lab-presets h3 {
+  margin: 0 0 4px;
+  font:
+    10px Consolas,
+    'Courier New',
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cp-text-soft);
+}
+.lab-presets button {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  background: var(--cp-surface);
+  text-align: left;
+}
+.lab-presets button[aria-pressed='true'] {
+  border-color: var(--cp-accent);
+  background: var(--cp-accent-soft);
+}
+.lab-presets strong {
+  display: block;
+  font-size: 13px;
+}
+.lab-presets i {
+  display: block;
+  font-size: 11px;
+  color: var(--cp-text-muted);
+}
+.lab-view {
+  position: relative;
+  min-height: 480px;
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse at 50% 35%, var(--cp-surface), transparent 70%),
+    var(--cp-bg);
+  box-shadow: inset 0 0 0 1px var(--cp-border);
+  overflow: hidden;
+}
+.lab-view canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  touch-action: none;
+}
+.lab-controls {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+.lab-slider {
+  display: grid;
+  gap: 2px;
+}
+.lab-slider-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+}
+.lab-slider output {
+  font:
+    11px Consolas,
+    'Courier New',
+    monospace;
+  color: var(--cp-accent);
+}
+.lab-slider input {
+  accent-color: var(--cp-accent);
+  width: 100%;
+}
+.lab-help {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--cp-text-soft);
+}
+.lab .model-note {
+  margin-top: 16px;
+}
+@media (max-width: 1100px) {
+  .lab-body {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+  .lab-presets {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .lab {
+    padding: 16px;
+  }
+  .lab-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .lab-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lab-view {
+    min-height: 340px;
+  }
+}
+
+.lab-evidence {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--cp-text-soft);
+}

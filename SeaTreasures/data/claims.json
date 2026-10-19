@@ -396,6 +396,60 @@
       "accessedAt": "2026-10-19",
       "kind": "taxonomic",
       "accessNote": "Verified through the WoRMS REST record AphiaRecordByAphiaID/51: status accepted, rank Phylum, kingdom Animalia. MolluscaBase is the mollusc section of WoRMS."
+    },
+    {
+      "id": "gbif-tiger-cowrie",
+      "title": "GBIF occurrence records: Cypraea tigris (taxon key 4360773)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=4360773&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-19",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-19: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "gbif-money-cowrie",
+      "title": "GBIF occurrence records: Monetaria moneta (taxon key 5724968)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=5724968&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-19",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-19: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "gbif-textile-cone",
+      "title": "GBIF occurrence records: Conus textile (taxon key 5728235)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=5728235&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-19",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-19: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "gbif-queen-conch",
+      "title": "GBIF occurrence records: Aliger gigas (taxon key 10903982)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=10903982&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-19",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-19: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "gbif-chambered-nautilus",
+      "title": "GBIF occurrence records: Nautilus pompilius (taxon key 2289202)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=2289202&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-19",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-19: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "contreras-aragon-2023",
+      "title": "A Mathematical Model for Mollusc Shells Based on Parametric Surfaces and the Construction of Theoretical Morphospaces",
+      "publisher": "Diversity (Contreras-Figueroa & Aragón, 2023)",
+      "url": "https://doi.org/10.3390/d15030431",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Open access, CC BY 4.0. Bibliographic and licence data verified via Crossref, OpenAlex and DOAJ; the abstract was read via DOAJ. The publisher site blocked automated full-text access, so the equations and Table 1 parameters were taken from the open-source mollusc3d port, which cites the paper's equations and table."
     }
   ],
   "claims": [
@@ -1060,6 +1114,54 @@
       "scope": "demo-limitation",
       "confidence": "high",
       "evidenceNote": "A deliberate gap: predators reported only in unverified summaries were left out rather than presented as fact."
+    },
+    {
+      "id": "tiger-cowrie-gbif-records",
+      "text": "GBIF holds 4,193 located records of Cypraea tigris: museum specimens and observations, leaving out fossils and automated tag detections. 30 of the 46 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-tiger-cowrie"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "money-cowrie-gbif-records",
+      "text": "GBIF holds 4,135 located records of Monetaria moneta: museum specimens and observations, leaving out fossils and automated tag detections. 33 of the 46 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-money-cowrie"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "textile-cone-gbif-records",
+      "text": "GBIF holds 2,648 located records of Conus textile: museum specimens and observations, leaving out fossils and automated tag detections. 31 of the 46 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-textile-cone"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "queen-conch-gbif-records",
+      "text": "GBIF holds 4,774 located records of Aliger gigas: museum specimens and observations, leaving out fossils and automated tag detections. 11 of the 46 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "chambered-nautilus-gbif-records",
+      "text": "GBIF holds 722 located records of Nautilus pompilius: museum specimens and observations, leaving out fossils and automated tag detections. 25 of the 46 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "shell-morphospace-model",
+      "text": "A parametric model with six numbers (whorl expansion, distance from the axis, spire translation, aperture ratio, aperture tilt and aperture rotation) reproduces the shell forms of snails, limpets, nautiluses, ammonites and bivalves; the paper gives fitted values for real specimens.",
+      "sourceIds": ["contreras-aragon-2023"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "From the paper's abstract and its published equations. The lab's specimen parameters follow Table 1 as transcribed by the open-source mollusc3d port; the full text could not be fetched automatically to cross-check every value, hence moderate confidence. The model describes shape, not colour."
     }
   ]
 }

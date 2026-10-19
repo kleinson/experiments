@@ -4,7 +4,8 @@
 experiment by Andreas Kleiner, part of
 [kleinson/experiments](https://github.com/kleinson/experiments).
 
-Pick a species and where it lives. Turn the shell, see through it, cut it open,
+Pick a species and one of the seas and islands where it has really been
+recorded. Turn the shell, see through it, cut it open,
 or lift it off the animal that built it. Then scrub through a whole life: eggs
 you can hatch, a larva you can steer, a shell you grow by holding it, an animal
 that pulls back when you poke it, its death, the empty shell a hermit crab moves
@@ -69,6 +70,39 @@ renderer and its sources are cached. Original source websites still need a
 connection. The default deployment path is `/seatreasures/`; set `BASE_PATH`
 to change it, then serve `dist/`.
 
+## Where it is found
+
+Each species has a world map and a list of 46 named seas and famous islands,
+from the Red Sea, Maldives and Great Barrier Reef to Hawaii, Tahiti, Rapa Nui,
+the Galápagos, the Bahamas and the Mediterranean. Every place shows how many
+located records [GBIF](https://www.gbif.org/) holds there: museum specimens and
+observations, leaving out fossils and automated tag detections. Picking a place
+sets the shell's origin.
+
+- **Records are not abundance.** They show where people have looked, collected
+  and photographed. A place with none may simply be unsurveyed.
+- **Outliers are flagged.** Where a species' native range is sourced, records
+  outside it (a queen conch in the Philippines) are marked, because they may be
+  errors, imports, or shells moved by people or currents.
+- **Fewer than 5 records** in a place are shown as isolated.
+- `npm run ranges` refreshes the counts from GBIF (network needed) and rewrites
+  `data/ranges.json` and the GBIF claims. Region outlines are simple
+  latitude/longitude boxes; the coastline is Natural Earth (public domain) via
+  `world-atlas`.
+
+## Shell lab
+
+Under the simulator, the shell lab grows any shell from six numbers using the
+parametric model of Contreras-Figueroa & Aragón (2023),
+[_Diversity_ 15(3), 431](https://doi.org/10.3390/d15030431) (CC BY 4.0). Start
+from a published specimen (a wentletrap, top snail, whelk, keyhole limpet,
+nautilus, ammonite or clam) and change the whorl expansion, spire height or
+aperture, or add ribs and fluted edges, to make shells that may never have
+lived. The model is written here from the paper's equations; the specimen
+values follow Table 1 as transcribed by
+[mollusc3d](https://github.com/ludi317/mollusc3d), which inspired the lab. The
+scallop is tuned here and is labelled as not from the paper.
+
 ## How it works
 
 **One timeline, eight parts of a life.** Egg, larva, growing, adult, death,
@@ -96,6 +130,15 @@ same pattern fades and chalks as waves wear it.
 Browsers guess 96 pixels per inch, so “Calibrate” lets you match an on-screen
 outline to any bank card (ISO/IEC 7810 ID-1, 85.60 × 53.98 mm) and remembers the
 result on your device.
+
+**The animals.** Each living mollusc has one soft head-foot that carries the
+shell, with a wet, mottled skin coloured from its sourced description: the
+textile cone is white mottled with tan and has a black-and-red banded siphon;
+the money cowrie's mantle is zebra-like; the tiger cowrie's mantle carries
+short papillae; the queen conch has long eye stalks, a proboscis and a brown
+operculum; the nautilus has a hood, more than 90 slender tentacles, large eyes
+and a funnel. Where no colour is sourced (conch and nautilus skin) a neutral
+tone is used.
 
 **Things to touch.**
 
@@ -175,7 +218,8 @@ npm run test:e2e         # Chromium and WebKit, against the production build
 npm run test:ios         # portable Swift core tests
 ```
 
-Browser tests cover choosing every species, a whole life from egg to shelf,
+Browser tests cover choosing every species, the map and place list, the shell
+lab, a whole life from egg to shelf,
 hatching eggs by tapping the stage, X-ray, cut open and take apart, actual size
 and calibration, sourced and unknown durations, the sources dialog, keyboard
 turning and timeline, text contrast in both themes, 320 and 390 pixel phones,
@@ -192,20 +236,24 @@ offline use.
 
 ## Map of the implementation
 
-| Location                | Purpose                                                      |
-| ----------------------- | ------------------------------------------------------------ |
-| `src/sim/Simulator.tsx` | The one-screen simulator: species, timeline, facts and shelf |
-| `src/sim/Stage.tsx`     | The 3D stage: camera, true size, taps and transient motion   |
-| `src/sim/scene.ts`      | Builds each frame: shell, animal, eggs, larva, crab, sand    |
-| `src/sim/coil.ts`       | Raup coiling model and accretionary growth                   |
-| `src/sim/patterns.ts`   | Seeded pattern generators and weathering                     |
-| `src/sim/life.ts`       | The eight-part life timeline and its sourced clock           |
-| `src/sim/species.ts`    | Typed, validated species data                                |
-| `src/anatomy/`          | Tiger cowrie field plates, surface painter and vendored kit  |
-| `data/`                 | Claims, research fragments, species and cowrie experience    |
-| `ios/`                  | Native SwiftUI project and portable Swift package            |
-| `tests/`, `e2e/`        | Unit and production-browser tests                            |
-| `scripts/`              | Species build, native sync, icons and offline bundling       |
+| Location                 | Purpose                                                       |
+| ------------------------ | ------------------------------------------------------------- |
+| `src/sim/Simulator.tsx`  | The one-screen simulator: species, timeline, facts and shelf  |
+| `src/sim/Stage.tsx`      | The 3D stage: camera, true size, taps and transient motion    |
+| `src/sim/scene.ts`       | Builds each frame: shell, animal, eggs, larva, crab, sand     |
+| `src/sim/coil.ts`        | Raup coiling model and accretionary growth                    |
+| `src/sim/patterns.ts`    | Seeded pattern generators and weathering                      |
+| `src/sim/life.ts`        | The eight-part life timeline and its sourced clock            |
+| `src/sim/species.ts`     | Typed, validated species data                                 |
+| `src/sim/ranges.ts`      | GBIF records per sea and island, levels and outliers          |
+| `src/sim/WhereFound.tsx` | World map and place list; picking a place sets the origin     |
+| `src/sim/bodies.ts`      | Soft bodies: skins, head-foot, tapered limbs, papillae        |
+| `src/lab/`               | Shell lab: the six-parameter morphospace model and its viewer |
+| `src/anatomy/`           | Tiger cowrie field plates, surface painter and vendored kit   |
+| `data/`                  | Claims, research fragments, species and cowrie experience     |
+| `ios/`                   | Native SwiftUI project and portable Swift package             |
+| `tests/`, `e2e/`         | Unit and production-browser tests                             |
+| `scripts/`               | Species and GBIF range builds, native sync, icons, offline    |
 
 ## Next steps
 

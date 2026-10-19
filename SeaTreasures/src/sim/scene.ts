@@ -4,11 +4,13 @@ import {
   CanvasTexture,
   CatmullRomCurve3,
   CircleGeometry,
+  Float32BufferAttribute,
   Color,
   DoubleSide,
   Group,
   Material,
   Mesh,
+  Object3D,
   MeshPhysicalMaterial,
   MeshStandardMaterial,
   Plane,
@@ -21,6 +23,7 @@ import {
 } from 'three'
 import { createShellGeometry, createSpireGeometry } from '../geometry.ts'
 import { getShape } from '../model.ts'
+import { shellPoint } from '../shellform.ts'
 import {
   adultAngle,
   builtAngle,
@@ -28,6 +31,7 @@ import {
   coilScale,
   septumAngles,
 } from './coil.ts'
+import { cap, footGeometry, limb, papillae, skinMaterials } from './bodies.ts'
 import type { LifeFrame } from './life.ts'
 import { looks } from './looks.ts'
 import { coilGeometry, lipGeometry, septumGeometry, toThree } from './meshes.ts'
@@ -390,18 +394,56 @@ function ground(radius: number, colour: Rgb, own: Own) {
 const SAND: Rgb = [214, 196, 160]
 const SEAFLOOR: Rgb = [154, 160, 152]
 
+type BodyMaterials = ReturnType<typeof skinMaterials>
+
+/** Height of the shell's underside along its length (x), in `stations` steps: where the foot must reach. */
+function underside(shell: Object3D, stations: number) {
+  const points: Vector3[] = []
+  const v = new Vector3()
+  shell.traverse((object) => {
+    const mesh = object as Mesh
+    if (!mesh.isMesh) return
+    const position = mesh.geometry.getAttribute('position')
+    for (let i = 0; i < position.count; i += 2)
+      points.push(
+        v
+          .fromBufferAttribute(position, i)
+          .applyMatrix4(mesh.matrixWorld)
+          .clone(),
+      )
+  })
+  let minX = Infinity
+  let maxX = -Infinity
+  for (const p of points) {
+    minX = Math.min(minX, p.x)
+    maxX = Math.max(maxX, p.x)
+  }
+  const low = new Array<number>(stations).fill(Infinity)
+  for (const p of points) {
+    const k = Math.min(
+      stations - 1,
+      Math.floor(((p.x - minX) / (maxX - minX || 1)) * stations),
+    )
+    low[k] = Math.min(low[k]!, p.y)
+  }
+  for (let k = 0; k < stations; k++)
+    if (!Number.isFinite(low[k]!)) low[k] = low[k - 1] ?? 0
+  return { minX, maxX, low }
+}
+
 /**
- * A snail's outside, built around the seated shell `box`: a broad foot under
- * the shell, a head with tentacles and eyes at the front, and a siphon. Parts
- * hang from a pivot at the shell's opening so they can withdraw into it.
+ * A snail's outside, built around the seated shell `box`: one continuous
+ * head-foot with a creeping sole, a head with tapered tentacles and eyes, and
+ * species features (siphon, eye stalks and operculum, proboscis). It hangs
+ * from a pivot at the shell's opening so it can withdraw into it.
  */
 function snailBody(
   box: Box3,
   footTop: number,
-  tissue: Material,
-  eye: Material,
+  skin: BodyMaterials,
   own: Own,
-  cowrie: boolean,
+  speciesId: string,
+  under: ReturnType<typeof underside>,
 ) {
   const outside = new Group()
   const L = box.max.x - box.min.x
@@ -409,60 +451,362 @@ function snailBody(
   const H = box.max.y - box.min.y
   const mid = (box.min.z + box.max.z) / 2
   const front = box.max.x
+  const conch = speciesId === 'queen-conch'
+  const cowrie = speciesId.endsWith('cowrie')
   const pivot = new Vector3(front - L * 0.3, box.min.y + H * 0.15, mid)
-  const place = (mesh: Mesh) => {
+  const add = (mesh: Mesh) => {
     mesh.position.sub(pivot)
     outside.add(mesh)
+    return mesh
   }
-  const foot = blob(
-    [L * 0.62, footTop * 0.55, Math.max(W * 0.45, L * 0.17)],
-    own,
-    tissue,
+  const geo = <T extends BufferGeometry>(g: T) => own.geometry(g)
+
+  // The foot: a long, soft slug shape with a flat sole, reaching beyond the shell at both ends.
+  const footLength = L * (conch ? 0.95 : 1.18)
+  const footWidth = Math.max(W * 0.72, L * 0.3)
+  const footX = box.min.x + L * 0.5 + L * (conch ? 0.12 : 0.1)
+  const foot = add(
+    new Mesh(
+      geo(footGeometry(footLength, footWidth, footTop * 1.15)),
+      skin.flesh,
+    ),
   )
-  foot.position.set(box.min.x + L * 0.58, footTop * 0.5, mid)
-  place(foot)
-  const headAt = new Vector3(front + L * 0.04, footTop * 1.5, mid)
-  const head = blob([L * 0.09, footTop * 0.9, L * 0.08], own, tissue)
-  head.position.copy(headAt)
-  place(head)
+  foot.position.add(new Vector3(footX, 0, mid))
+
+  // The body between foot and shell: one smooth mass whose top follows the underside of the
+  // shell along its length, so the shell rests on the animal instead of floating.
+  const stations = under.low.length
+  const rows = 40
+  const around = 24
+  const positions: number[] = []
+  const uvs: number[] = []
+  const indices: number[] = []
+  const tops: number[] = []
+  for (let k = 0; k < stations; k++)
+    tops.push(Math.max(footTop * 0.9, under.low[k]! + footTop * 0.15))
+  const topAt = (t: number) => {
+    const x = t * (stations - 1)
+    const i = Math.min(stations - 2, Math.floor(x))
+    const f = x - i
+    const smooth = f * f * (3 - 2 * f)
+    return tops[i]! + (tops[i + 1]! - tops[i]!) * smooth
+  }
+  const halfWidth = Math.min(footWidth * 0.36, W * 0.34)
+  for (let r = 0; r <= rows; r++) {
+    const t = r / rows
+    const x = under.minX + (under.maxX - under.minX) * (0.04 + 0.9 * t)
+    const end = Math.sin(Math.PI * (0.04 + 0.92 * t))
+    const top = footTop * 0.4 + (topAt(t) - footTop * 0.4) * Math.pow(end, 0.35)
+    const w = halfWidth * Math.pow(end, 0.5)
+    for (let j = 0; j <= around; j++) {
+      const a = (j / around) * Math.PI
+      positions.push(
+        x,
+        footTop * 0.4 + (top - footTop * 0.4) * Math.sin(a),
+        mid + Math.cos(a) * w,
+      )
+      uvs.push(t * 3, j / around)
+      if (r < rows && j < around) {
+        const i0 = r * (around + 1) + j
+        indices.push(
+          i0,
+          i0 + around + 1,
+          i0 + 1,
+          i0 + around + 1,
+          i0 + around + 2,
+          i0 + 1,
+        )
+      }
+    }
+  }
+  const massGeometry = new BufferGeometry()
+  massGeometry.setAttribute(
+    'position',
+    new Float32BufferAttribute(positions, 3),
+  )
+  massGeometry.setAttribute('uv', new Float32BufferAttribute(uvs, 2))
+  massGeometry.setIndex(indices)
+  massGeometry.computeVertexNormals()
+  add(new Mesh(geo(massGeometry), skin.flesh))
+  const sole = add(
+    new Mesh(
+      geo(footGeometry(footLength * 0.985, footWidth * 0.97, footTop * 0.12)),
+      skin.sole,
+    ),
+  )
+  sole.position.add(new Vector3(footX, -footTop * 0.02, mid))
+
+  // The head rises from the front of the foot on a short neck.
+  const headAt = new Vector3(footX + footLength * 0.42, footTop * 1.15, mid)
+  const neck = add(
+    new Mesh(
+      geo(
+        limb(
+          [
+            new Vector3(footX + footLength * 0.18, footTop * 0.9, mid),
+            new Vector3(footX + footLength * 0.32, footTop * 1.2, mid),
+            headAt,
+          ],
+          footTop * 0.62,
+          0.8,
+          12,
+        ),
+      ),
+      skin.flesh,
+    ),
+  )
+  void neck
+  add(new Mesh(geo(cap(headAt, footTop * 0.5)), skin.flesh))
+
   for (const sign of [-1, 1]) {
     const base = headAt
       .clone()
-      .add(new Vector3(L * 0.03, footTop * 0.3, sign * L * 0.035))
-    const tip = base
-      .clone()
-      .add(new Vector3(L * 0.2, L * 0.07, sign * L * 0.12))
-    const middle = base
-      .clone()
-      .lerp(tip, 0.5)
-      .add(new Vector3(0, L * 0.03, 0))
-    place(tube([base, middle, tip], L * 0.011, own, tissue, true))
-    const eyeBall = blob([L * 0.012, L * 0.012, L * 0.012], own, eye)
-    eyeBall.position.copy(base).add(new Vector3(0, L * 0.004, sign * L * 0.018))
-    place(eyeBall)
+      .add(new Vector3(L * 0.01, footTop * 0.25, sign * footTop * 0.35))
+    if (conch) {
+      // Long eye stalks that move independently (queen-conch-appearance), eyes at their tips.
+      const tip = base
+        .clone()
+        .add(new Vector3(L * 0.14, L * 0.09, sign * L * 0.07))
+      const bend = base
+        .clone()
+        .lerp(tip, 0.5)
+        .add(new Vector3(-L * 0.01, L * 0.03, 0))
+      add(
+        new Mesh(geo(limb([base, bend, tip], L * 0.012, 0.75, 20)), skin.flesh),
+      )
+      add(new Mesh(geo(cap(tip, L * 0.016)), skin.eye))
+      const ring = add(
+        new Mesh(
+          geo(
+            cap(
+              tip
+                .clone()
+                .addScaledVector(
+                  new Vector3(-1, -0.4, 0).normalize(),
+                  L * 0.006,
+                ),
+              L * 0.019,
+            ),
+          ),
+          skin.flesh,
+        ),
+      )
+      void ring
+    } else {
+      // Cephalic tentacles that taper to a point, with an eye near the base of each.
+      const tip = base
+        .clone()
+        .add(new Vector3(L * 0.18, L * 0.08, sign * L * 0.11))
+      const bend = base
+        .clone()
+        .lerp(tip, 0.45)
+        .add(new Vector3(0, L * 0.035, 0))
+      add(
+        new Mesh(geo(limb([base, bend, tip], L * 0.011, 0.12, 22)), skin.flesh),
+      )
+      add(
+        new Mesh(
+          geo(
+            cap(
+              base
+                .clone()
+                .add(new Vector3(L * 0.012, L * 0.004, sign * L * 0.012)),
+              L * 0.009,
+            ),
+          ),
+          skin.eye,
+        ),
+      )
+    }
   }
+  if (conch) {
+    // The tube-like mouth (proboscis) reaching to the ground, and the brown operculum on the back of the foot.
+    const mouth = headAt.clone().add(new Vector3(L * 0.03, -footTop * 0.3, 0))
+    add(
+      new Mesh(
+        geo(
+          limb(
+            [
+              mouth,
+              mouth.clone().add(new Vector3(L * 0.07, -footTop * 0.2, 0)),
+              mouth.clone().add(new Vector3(L * 0.13, -footTop * 0.7, 0)),
+            ],
+            footTop * 0.2,
+            0.7,
+            14,
+          ),
+        ),
+        skin.flesh,
+      ),
+    )
+    const operculum = add(
+      new Mesh(
+        geo(new SphereGeometry(1, 24, 12)),
+        own.material(
+          new MeshPhysicalMaterial({
+            color: rgb([96, 62, 34]),
+            roughness: 0.75,
+            clearcoat: 0.2,
+          }),
+        ),
+      ),
+    )
+    operculum.scale.set(L * 0.09, footTop * 0.12, L * 0.035)
+    operculum.position.add(
+      new Vector3(
+        footX - footLength * 0.08,
+        footTop * 1.1,
+        mid + footWidth * 0.18,
+      ),
+    )
+    operculum.rotation.set(0.5, 0.3, 0.6)
+  }
+
+  // The inhalant siphon: a soft tube rising from the front of the opening.
   const siphonBase = cowrie
-    ? new Vector3(front - L * 0.01, footTop * 1.4, mid)
-    : new Vector3(front - L * 0.04, box.min.y + H * 0.35, mid)
+    ? new Vector3(front - L * 0.01, footTop * 1.3, mid)
+    : new Vector3(front - L * 0.05, box.min.y + H * 0.3, mid)
   const siphonTip = cowrie
-    ? siphonBase.clone().add(new Vector3(L * 0.07, footTop * 0.8, 0))
-    : siphonBase.clone().add(new Vector3(L * 0.14, H * 0.35, 0))
-  place(
-    tube(
-      [
-        siphonBase,
-        siphonBase
-          .clone()
-          .lerp(siphonTip, 0.5)
-          .add(new Vector3(L * 0.02, 0, 0)),
-        siphonTip,
-      ],
-      L * (cowrie ? 0.018 : 0.022),
-      own,
-      tissue,
+    ? siphonBase.clone().add(new Vector3(L * 0.08, footTop * 0.9, 0))
+    : siphonBase.clone().add(new Vector3(L * 0.13, H * 0.42, -L * 0.02))
+  const siphonPath = [
+    siphonBase,
+    siphonBase
+      .clone()
+      .lerp(siphonTip, 0.5)
+      .add(new Vector3(L * 0.025, 0, 0)),
+    siphonTip,
+  ]
+  const siphonRadius = L * (cowrie ? 0.017 : 0.02)
+  if (skin.bands) {
+    // Banded black and red (textile-cone-size-pattern): alternate short pieces along the siphon.
+    const curve = new CatmullRomCurve3(siphonPath)
+    const pieces = 8
+    for (let i = 0; i < pieces; i++) {
+      const a = curve.getPoint(i / pieces)
+      const b = curve.getPoint((i + 0.5) / pieces)
+      const c = curve.getPoint((i + 1) / pieces)
+      const keep = 1 - 0.45 * (i / pieces)
+      add(
+        new Mesh(
+          geo(limb([a, b, c], siphonRadius * keep, 0.95, 4)),
+          skin.bands[i % 2]!,
+        ),
+      )
+    }
+    add(new Mesh(geo(cap(siphonTip, siphonRadius * 0.55)), skin.bands[1]!))
+  } else {
+    add(new Mesh(geo(limb(siphonPath, siphonRadius, 0.6, 18)), skin.flesh))
+  }
+  outside.position.copy(pivot)
+  return outside
+}
+
+/**
+ * The nautilus: a leathery hood over the opening, a ring of many slender
+ * tentacles (nautilus-appearance: more than 90, without suckers), a large eye
+ * on each side, and the funnel below that it jets water from (nautilus-buoyancy).
+ */
+function nautilusBody(
+  mouth: Vector3,
+  ahead: Vector3,
+  size: number,
+  skin: BodyMaterials,
+  own: Own,
+) {
+  const outside = new Group()
+  const geo = <T extends BufferGeometry>(g: T) => own.geometry(g)
+  const up = new Vector3(0, 1, 0)
+  const side = new Vector3().crossVectors(ahead, up).normalize()
+  const add = (mesh: Mesh) => {
+    mesh.position.sub(mouth)
+    outside.add(mesh)
+  }
+  const hood = new Mesh(
+    geo(new SphereGeometry(1, 32, 20, 0, Math.PI * 2, 0, Math.PI * 0.62)),
+    skin.flesh,
+  )
+  hood.scale.set(size * 0.17, size * 0.11, size * 0.19)
+  hood.position
+    .copy(mouth)
+    .addScaledVector(ahead, size * 0.03)
+    .addScaledVector(up, size * 0.08)
+  hood.quaternion.setFromUnitVectors(
+    new Vector3(0, 1, 0),
+    up.clone().addScaledVector(ahead, 0.35).normalize(),
+  )
+  add(hood)
+  const count = 92
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * TAU * 3.1
+    const ring = 0.35 + (0.65 * ((i * 37) % count)) / count
+    const offset = side
+      .clone()
+      .multiplyScalar(Math.cos(angle) * size * 0.12 * ring)
+      .addScaledVector(up, Math.sin(angle) * size * 0.09 * ring - size * 0.02)
+    const from = mouth.clone().add(offset)
+    const reach = size * (0.16 + 0.12 * (((i * 13) % 7) / 7))
+    const droop = new Vector3(0, -size * (0.04 + 0.05 * ring), 0)
+    const to = from
+      .clone()
+      .addScaledVector(ahead, reach)
+      .add(offset.clone().multiplyScalar(0.5))
+      .add(droop)
+    const middle = from
+      .clone()
+      .lerp(to, 0.5)
+      .add(droop.clone().multiplyScalar(0.3))
+    add(
+      new Mesh(
+        geo(limb([from, middle, to], size * 0.0065, 0.35, 10)),
+        skin.flesh,
+      ),
+    )
+  }
+  for (const sign of [-1, 1]) {
+    const at = mouth
+      .clone()
+      .addScaledVector(side, sign * size * 0.16)
+      .addScaledVector(up, size * 0.05)
+      .addScaledVector(ahead, -size * 0.01)
+    add(new Mesh(geo(cap(at, size * 0.04)), skin.eye))
+    add(
+      new Mesh(
+        geo(
+          cap(
+            at.clone().addScaledVector(side, -sign * size * 0.012),
+            size * 0.046,
+          ),
+        ),
+        skin.flesh,
+      ),
+    )
+  }
+  const funnelFrom = mouth.clone().addScaledVector(up, -size * 0.1)
+  add(
+    new Mesh(
+      geo(
+        limb(
+          [
+            funnelFrom,
+            funnelFrom
+              .clone()
+              .addScaledVector(ahead, size * 0.07)
+              .addScaledVector(up, -size * 0.03),
+            funnelFrom
+              .clone()
+              .addScaledVector(ahead, size * 0.12)
+              .addScaledVector(up, -size * 0.02),
+          ],
+          size * 0.035,
+          0.75,
+          12,
+        ),
+      ),
+      skin.flesh,
     ),
   )
-  outside.position.copy(pivot)
+  outside.position.copy(mouth)
   return outside
 }
 
@@ -492,24 +836,15 @@ export function buildScene(
     }
     return own.material(material)
   }
-  const tissue = own.material(
-    new MeshPhysicalMaterial({
-      color: rgb(look.tissue),
-      roughness: 0.55,
-      sheen: 0.6,
-      sheenColor: rgb(look.tissue).multiplyScalar(1.4),
-      transparent: frame.animal < 1,
-      opacity: Math.max(0, frame.animal),
-    }),
-  )
-  const eye = own.material(
-    new MeshStandardMaterial({
-      color: rgb([28, 24, 22]),
-      roughness: 0.2,
-      transparent: frame.animal < 1,
-      opacity: frame.animal,
-    }),
-  )
+  const skin = skinMaterials(species.id, Math.max(0, frame.animal))
+  for (const material of [
+    skin.flesh,
+    skin.sole,
+    skin.eye,
+    ...(skin.bands ?? []),
+  ])
+    own.material(material)
+  const tissue = skin.flesh
   const wear = Math.round(frame.wear * 10) / 10
   let rig: Rig | null = null
   const eggs: Mesh[] = []
@@ -595,6 +930,30 @@ export function buildScene(
         cowrieBody.children[cowrieBody.children.length - 1]!.scale.setScalar(
           0.94,
         )
+        if (species.id === 'tiger-cowrie') {
+          // Short papillae over the mantle lobes (cowrie-animal-anatomy), on the mantle's own surface.
+          const progress = built.progress
+          const limit = Math.PI - getShape(progress).opening
+          const reach = (coverage / 100) * limit
+          const mantleAt = (u: number, v: number) => {
+            const side = v < 0.5 ? -1 : 1
+            const theta =
+              side * (limit - (v < 0.5 ? v * 2 : (v - 0.5) * 2) * reach)
+            const uu = 0.08 + u * 0.84
+            const p = shellPoint(uu, theta, progress, -0.04)
+            const q = shellPoint(uu, theta, progress, 0.0)
+            const point = new Vector3(p.x, p.y, p.z)
+            return {
+              point,
+              normal: point
+                .clone()
+                .sub(new Vector3(q.x, q.y, q.z))
+                .normalize(),
+            }
+          }
+          for (const geometry of papillae(mantleAt, 150, 0.07, 41))
+            cowrieBody.add(new Mesh(own.geometry(geometry), tissue))
+        }
         body.add(cowrieBody)
       }
     }
@@ -692,59 +1051,15 @@ export function buildScene(
       ).sub(mouthLocal)
       const mouth = shell.localToWorld(mouthLocal.clone())
       const ahead = aheadLocal.applyQuaternion(pose).normalize()
-      const size = length * frame.size
-      const parts: Mesh[] = []
-      const hood = blob([size * 0.14, size * 0.1, size * 0.16], own, tissue)
-      hood.position
-        .copy(mouth)
-        .addScaledVector(ahead, size * 0.03)
-        .add(new Vector3(0, size * 0.1, 0))
-      parts.push(hood)
-      for (let i = 0; i < 30; i++) {
-        const angle = (i / 30) * TAU
-        const ring = new Vector3(
-          0,
-          Math.sin(angle) * size * 0.12,
-          Math.cos(angle) * size * 0.14,
-        )
-        const from = mouth.clone().add(ring.clone().multiplyScalar(0.6))
-        const reach = size * (0.22 + ((i * 7) % 5) * 0.03)
-        const to = mouth
-          .clone()
-          .addScaledVector(ahead, reach)
-          .add(ring)
-          .add(new Vector3(0, -size * 0.1, 0))
-        const middle = from
-          .clone()
-          .lerp(to, 0.5)
-          .add(new Vector3(0, -size * 0.05, 0))
-        parts.push(tube([from, middle, to], size * 0.008, own, tissue, true))
-      }
-      for (const sign of [-1, 1]) {
-        const eyeBall = blob(
-          [size * 0.045, size * 0.045, size * 0.045],
-          own,
-          eye,
-        )
-        eyeBall.position
-          .copy(mouth)
-          .addScaledVector(ahead, -size * 0.02)
-          .add(new Vector3(0, size * 0.04, sign * size * 0.15))
-        parts.push(eyeBall)
-      }
-      for (const part of parts) {
-        part.position.sub(mouth)
-        outside.add(part)
-      }
-      outside.position.copy(mouth)
+      outside = nautilusBody(mouth, ahead, length * frame.size, skin, own)
     } else if (living && !swims) {
       outside = snailBody(
         seated,
         footTop,
-        tissue,
-        eye,
+        skin,
         own,
-        shape.kind === 'cowrie',
+        species.id,
+        underside(built.group, 12),
       )
     }
     specimen.add(outside)
