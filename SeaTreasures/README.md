@@ -335,19 +335,19 @@ tone is used.
 
 **Things to touch.**
 
-| Part of life | Tap or drag                     | What happens                                          |
-| ------------ | ------------------------------- | ----------------------------------------------------- |
-| Egg          | Tap an egg, or “Hatch them all” | Eggs hatch one by one                                 |
-| Larva        | Move the pointer or tap         | Steer the swimming larva, then let it settle          |
-| Growing      | Press and hold the shell        | It grows at its opening while you hold                |
-| Adult        | Tap the animal                  | It pulls back into its shell, then slowly comes out   |
-| Adult        | “Take apart” slider             | Lifts the shell off the soft body inside              |
-| Any          | “See-through”, “Cut open”       | See through the shell, or slice it open               |
-| Any          | “Labels”, then a label          | Names each part; a tap explains it, with its source   |
-| Any          | Style slider, views, turntable  | Drawing to realistic, a side-on plate, or a slow turn |
-| Death        | Choose an ending                | Only sourced causes; otherwise “not documented”       |
-| Empty shell  | Tap the shell                   | A hermit crab moves in, or a nautilus shell floats    |
-| Beach        | Tap the shell                   | A wave rolls it; each wave wears it paler             |
+| Part of life | Tap or drag                     | What happens                                                                               |
+| ------------ | ------------------------------- | ------------------------------------------------------------------------------------------ |
+| Egg          | Tap an egg, or “Hatch them all” | Eggs hatch one by one                                                                      |
+| Larva        | Move the pointer or tap         | Steer the swimming larva, then let it settle                                               |
+| Growing      | Press and hold the shell        | It grows at its opening while you hold                                                     |
+| Adult        | Tap the animal                  | It pulls back into its shell, then slowly comes out                                        |
+| Adult        | “Take apart” slider             | Lifts the shell off the soft body inside                                                   |
+| Any          | “See-through”, “Cut open”       | See through the shell, or slice it open                                                    |
+| Any          | “Labels”, then a label          | Names each part; a tap explains it, with its source                                        |
+| Any          | Style slider, views, turntable  | Drawing to realistic, a side-on plate, or a slow turn                                      |
+| Death        | Choose an ending                | Only sourced causes; otherwise “not documented”                                            |
+| Empty shell  | Tap the shell                   | A hermit crab moves in, or a nautilus shell floats                                         |
+| Beach        | Tap the shell                   | A wave rolls it; each wave wears it paler                                                  |
 | Found        | Tap the shell                   | You pick it up, place it in a dry bookshelf display case, and browse documented shell uses |
 
 ## Scientific boundaries
