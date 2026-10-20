@@ -95,6 +95,7 @@ import {
 } from './seabed.ts'
 import type { Bed, Setting } from './seabed.ts'
 import { activity } from './crawl.ts'
+import { nestFor } from './nests.ts'
 import {
   bestPlaceFor,
   habitatName,
@@ -459,6 +460,23 @@ const moveWords: Record<Mode, string> = {
   still: 'Swimming larva',
 }
 
+/** Where the species lays its eggs, from its sources (nests.ts). */
+function EggSite({ species }: { species: Species }) {
+  const { fact } = nestFor(species.id)
+  if (!fact) return null
+  return (
+    <section
+      className="egg-site grid gap-2"
+      aria-label="Where the eggs are laid"
+    >
+      <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+        Where the eggs are laid
+      </p>
+      <Fact claim={fact.claim}>{fact.text}</Fact>
+    </section>
+  )
+}
+
 /** How the animal moves at this stage, by day or night, from its sources. */
 function HowItMoves({
   species,
@@ -707,9 +725,11 @@ function PhaseStory({
 }
 
 /** What the setting chip says about where the seabed came from. */
-function settingNote(setting: Setting, choice: Bed | null) {
+function settingNote(setting: Setting, choice: Bed | null, phase: PhaseId) {
   if (setting.scene === 'open-water')
-    return ' · the larva drifts in the plankton'
+    return phase === 'egg'
+      ? ' · the eggs drift in the plankton'
+      : ' · the larva drifts in the plankton'
   if (setting.scene === 'beach') return ' · washed ashore'
   if (choice)
     return setting.elsewhere
@@ -1695,7 +1715,7 @@ export function Simulator() {
                 <div className="setting-note" aria-live="polite">
                   <Fact claim="seabed-setting-illustrative">
                     <strong>{settingLabel(setting)}</strong>
-                    {settingNote(setting, bedChoice)}
+                    {settingNote(setting, bedChoice, frame.phase)}
                   </Fact>
                   {setting.scene === 'seabed' && (
                     <Fact
@@ -1953,6 +1973,7 @@ export function Simulator() {
                       : action.button}
                   </Button>
                 )}
+                {frame.phase === 'egg' && <EggSite species={species} />}
                 <HowItMoves
                   species={species}
                   phase={frame.phase}

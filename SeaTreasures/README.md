@@ -223,8 +223,8 @@ each stage of life and for day or night (light mode is day, dark mode a night
 dive), and the life panel says how, with evidence (`src/sim/crawl.ts`, claims
 in `data/research/movement.json`):
 
-- **Egg:** the capsules stay put; a tiger cowrie mother covers hers with her
-  foot until they hatch.
+- **Egg:** attached capsules stay put; a tiger cowrie mother covers hers with
+  her foot until they hatch. Broadcast-spawned eggs are shown in open water.
 - **Larva:** a veliger swims by beating the cilia on its velum and pulls the
   velum in to sink; near settling, a cowrie larva swims less, spends more time
   on the bottom, then starts to crawl.
@@ -245,7 +245,22 @@ sediment beneath, so the buried shell, foot and head can still be seen and
 followed. The window is placed along the line of sight, so it shows what lies
 under the sand from wherever you look, and it fades as the animal comes out.
 
-**The larva.** The velum is drawn as two thin, wing-like lobes on a short head
+**Where the eggs are laid.** The egg stage follows sourced laying sites
+(`src/sim/nests.ts`): cowries brood layered capsule masses on rubble, cone
+snails attach capsules below rock ledges, queen conch lay sand-coated folded
+strands on clean sand, and broadcast spawners release eggs into water.
+Nautilus crevices are based on aquarium observations, not wild egg sightings.
+The cowrie mother is deliberately offset so the mass remains visible; in life
+her foot covers it. Unmeasured nest arrangements and strand dimensions are
+illustrative, not reconstructions.
+
+**The larva.** Gastropods have a dedicated translucent, open-coiled protoconch,
+not an adult cowrie scaled down (`src/sim/larvae.ts`). The tiger cowrie starts
+near 0.22 mm shell length, within the measured 200–242 µm range. Its velum
+changes from two kidney-shaped lobes toward four elongated arms, based on
+Tay et al. 2023, figures 3–4 (claim `tiger-cowrie-larval-form`). Other snails
+borrow this illustrative veliger form; it is not species-specific microscopy.
+The velum is drawn as thin lobes on a short head
 rising from the shell's opening, each rimmed with a band of long cilia and a
 band of short cilia inside it; the cilia beat in waves around the rim
 (`src/sim/velum.ts`). Its label explains what the velum is, why the larva has it and
@@ -258,13 +273,20 @@ into its shell.
 there is nothing below it to catch one. Where the sources say larvae hatch
 together (tropical cowries, about 740 per egg capsule and most of a brood in
 one night, claim `cowrie-hatch-together`; the queen conch's and cone's egg
-masses; the giant clam's spawning), a dozen sibling veligers drift behind it
+masses; the giant clam's spawning), six faint sibling veligers drift behind it
 (`src/sim/siblings.ts`, one instanced mesh). They are the same size but drawn
 smaller and hazier, as a photo would show larvae farther from the lens. Far
 off in the blue a loose school of jacks and a lone tuna pass by, drawn at their
 real length and distance in the backdrop shader (`src/sim/sky.ts`), so they cost
 almost nothing and read as distant beside a larva a fraction of a millimetre
 long.
+
+**Suspended particles, not rainfall.** Marine snow uses GPU points, smaller
+and dimmer than the previous glowing flakes. Sinking and current speeds are
+capped to the current magnified view (`src/sim/suspension.ts`): even the
+fastest flake settles no faster than 1.2 pixels/second in an 800-pixel-high
+view. The visual cap is intentional; unscaled mm/s would race past a larva
+only a fraction of a millimetre long.
 
 A travelling animal follows a loose figure of eight with the camera, light and
 shadow following, so the seabed slides past. The pace is sped up to be

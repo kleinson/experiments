@@ -126,6 +126,21 @@ export function activity(
         text: 'It swims by beating the cilia on its velum, and can pull the velum into its shell for protection.',
         claim: 'term-velum-why',
       },
+      ...(species.id === 'tiger-cowrie'
+        ? [
+            {
+              text: 'The hatchling has a translucent first shell only 0.20–0.24 mm long, not the adult cowrie shape. Its velum starts with two lobes and develops four elongated arms.',
+              claim: 'tiger-cowrie-larval-form',
+            },
+          ]
+        : cowrie
+          ? [
+              {
+                text: 'This larval form is an illustration based on related cowries, not a measured reconstruction of this species.',
+                claim: 'tiger-cowrie-larval-form',
+              },
+            ]
+          : []),
       ...among,
       ...(cowrie
         ? [

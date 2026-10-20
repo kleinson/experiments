@@ -48,6 +48,7 @@ import {
 } from './crawl.ts'
 import { seeded } from './patterns.ts'
 import { buildSiblings } from './siblings.ts'
+import { larvalSize } from './larvae.ts'
 import type { Siblings } from './siblings.ts'
 import { InkPass, inkify, LIGHTS } from './ink.ts'
 import type { Look } from './ink.ts'
@@ -658,12 +659,12 @@ export default function Stage({
         built.close &&
         hatchesTogether(species.id)
       ) {
-        // The larva's own framing is three of it across (scene.ts).
         siblings = buildSiblings(
-          built.close.width / 3,
+          larvalSize(species.id, frame.local),
           built.close.width * 2.2,
           built.close.target,
           seeded(seedOf(species.id) + 7),
+          6,
         )
         siblings.group.visible = waterParts?.group.visible ?? true
         scene.add(siblings.group)
@@ -1578,7 +1579,9 @@ export default function Stage({
       const { frame } = latest.current
       if (frame.phase === 'egg') {
         const hit = pick(event, built.eggs)
-        if (hit) actions.hatch(hit.object.userData.egg as number)
+        let egg: Object3D | null = hit?.object ?? null
+        while (egg && egg.userData.egg === undefined) egg = egg.parent
+        if (egg) actions.hatch(egg.userData.egg as number)
       } else if (frame.phase === 'larva') {
         if (built.velum && pick(event, [built.specimen])) actions.tuck()
         else steer(event)

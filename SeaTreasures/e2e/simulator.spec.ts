@@ -121,11 +121,14 @@ test('tapping eggs on the stage hatches them one by one', async ({ page }) => {
   await phase(page, 'Egg')
   const box = await page.locator('[data-sim-canvas]').boundingBox()
   if (!box) throw new Error('No stage.')
-  for (let x = 0.2; x <= 0.8; x += 0.05) {
-    await page.mouse.click(box.x + box.width * x, box.y + box.height * 0.6)
-    if ((await announced(page).textContent())?.match(/eggs left|All hatched/))
-      break
-  }
+  // The crevice's eggs sit between rocks; find one in the unobstructed middle
+  // rather than assuming every nest shares the old flat clutch's fixed row.
+  search: for (let y = 0.38; y <= 0.65; y += 0.035)
+    for (let x = 0.37; x <= 0.65; x += 0.025) {
+      await page.mouse.click(box.x + box.width * x, box.y + box.height * y)
+      if ((await announced(page).textContent())?.match(/eggs left|All hatched/))
+        break search
+    }
   await expect(announced(page)).toContainText(/eggs left|All hatched/)
 })
 

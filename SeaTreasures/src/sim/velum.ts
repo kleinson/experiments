@@ -1,7 +1,6 @@
 import {
   BufferGeometry,
   CatmullRomCurve3,
-  CircleGeometry,
   DoubleSide,
   Float32BufferAttribute,
   Group,
@@ -32,9 +31,9 @@ export type Velum = {
 const rgb = ([r, g, b]: Rgb) => (r << 16) | (g << 8) | b
 
 /** How far each lobe's centre sits from the middle, in lobe radii. */
-const APART = 0.78
+const APART = 0.7
 /** Lobes are a little longer side to side than front to back. */
-const DEPTH = 0.82
+const DEPTH = 1.1
 /** Half the angle of each lobe's rim hidden where it meets the other lobe. */
 const JOIN = Math.acos(APART)
 
@@ -46,17 +45,17 @@ const JOIN = Math.acos(APART)
  * towards them, and the food groove lies between the two. Sizes are
  * illustrative, scaled to the larval shell (`span`, its longest side).
  */
-export function buildVelum(span: number, own: Own): Velum {
+export function buildVelum(span: number, own: Own, maturity = 0): Velum {
   const group = new Group()
-  const R = span * 0.62
-  const neck = span * 0.16
-  const cup = R * 0.16
+  const R = span * 0.43
+  const neck = span * 0.1
+  const cup = R * 0.3
   const skin = own.material(
     new MeshPhysicalMaterial({
       color: rgb([238, 226, 210]),
       roughness: 0.45,
       transparent: true,
-      opacity: 0.62,
+      opacity: 0.32,
       side: DoubleSide,
       depthWrite: false,
       sheen: 0.6,
@@ -102,12 +101,18 @@ export function buildVelum(span: number, own: Own): Velum {
   group.add(neckMesh, crown)
 
   /** A point on a lobe's surface, `r` lobe radii out at angle `a`. */
-  const onLobe = (side: number, a: number, r: number, drop = 0) =>
-    new Vector3(
-      side * R * APART + Math.cos(a) * R * r,
-      neck + cup * r * r - drop,
-      Math.sin(a) * R * r * DEPTH,
+  const onLobe = (side: number, a: number, r: number, drop = 0) => {
+    const edge =
+      (1 + maturity * 0.35) *
+      (1 -
+        (0.22 + maturity * 0.3) * Math.cos(a * 2) +
+        0.04 * Math.sin(a * 3 + side))
+    return new Vector3(
+      side * R * APART + Math.cos(a) * R * r * edge,
+      neck + cup * r * r + Math.sin(a) * R * 0.12 * r - drop,
+      Math.sin(a) * R * r * DEPTH * edge,
     )
+  }
 
   type Cilium = {
     root: Vector3
@@ -119,15 +124,21 @@ export function buildVelum(span: number, own: Own): Velum {
   const cilia: Cilium[] = []
   for (const side of [-1, 1]) {
     // The lobe: a thin disc, cupped so its rim turns up a little.
-    const disc = new CircleGeometry(R, 64)
-    disc.rotateX(-Math.PI / 2)
-    const position = disc.getAttribute('position')
-    for (let i = 0; i < position.count; i++) {
-      const x = position.getX(i)
-      const z = position.getZ(i) * DEPTH
-      const r = Math.hypot(x, z * (1 / DEPTH)) / R
-      position.setXYZ(i, x + side * R * APART, neck + cup * r * r, z)
+    const disc = new BufferGeometry()
+    const vertices: number[] = []
+    const triangles: number[] = []
+    for (let row = 0; row <= 6; row++) {
+      for (let column = 0; column <= 64; column++) {
+        const p = onLobe(side, (column / 64) * Math.PI * 2, row / 6)
+        vertices.push(p.x, p.y, p.z)
+        if (row < 6 && column < 64) {
+          const i = row * 65 + column
+          triangles.push(i, i + 1, i + 65, i + 1, i + 66, i + 65)
+        }
+      }
     }
+    disc.setAttribute('position', new Float32BufferAttribute(vertices, 3))
+    disc.setIndex(triangles)
     disc.computeVertexNormals()
     const lobe = new Mesh(own.geometry(disc), skin)
     if (side > 0) markMesh(lobe, 'Velum')
@@ -142,8 +153,8 @@ export function buildVelum(span: number, own: Own): Velum {
         onLobe(side, from + ((to - from) * k) / steps, r, drop),
       )
     for (const [r, drop, thick] of [
-      [1, 0, R * 0.032],
-      [0.86, R * 0.025, R * 0.018],
+      [1, 0, R * 0.009],
+      [0.93, R * 0.01, R * 0.005],
     ] as const)
       group.add(
         new Mesh(
@@ -169,12 +180,12 @@ export function buildVelum(span: number, own: Own): Velum {
       cilia.push({
         root: onLobe(side, a, 1),
         out,
-        length: R * 0.2,
+        length: R * 0.13,
         u: around,
         long: true,
       })
       cilia.push({
-        root: onLobe(side, a, 0.86, R * 0.025),
+        root: onLobe(side, a, 0.93, R * 0.01),
         out,
         length: R * 0.09,
         u: around,

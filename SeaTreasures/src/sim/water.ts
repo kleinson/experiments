@@ -23,6 +23,7 @@ import type { Rgb } from './patterns.ts'
 import type { Setting } from './seabed.ts'
 import { daylightAt } from './depth.ts'
 import { buildFish } from './fish.ts'
+import { suspension } from './suspension.ts'
 
 /**
  * Light under water: what makes the seabed read as the sea floor rather than
@@ -400,8 +401,8 @@ export function buildWater(
       box: { value: box },
       // The box wraps round what the camera looks at, so the snow always fills the view.
       centre: water.centre,
-      // Real speeds in mm/s: marine snow sinks about 1 mm/s (tens of metres a day); the current
-      // carries it sideways a little faster and the swell rocks it.
+      // Physical speeds are capped to the magnified view below: otherwise millimetres
+      // per second become a blizzard across a microscopic larva.
       sink: { value: 0.9 },
       drift: { value: 6 },
       sway: { value: 20 },
@@ -429,13 +430,13 @@ export function buildWater(
             vec4 view = modelViewMatrix * vec4(p + centre, 1.0);
             gl_Position = projectionMatrix * view;
             float px = size * projectionMatrix[1][1] * viewH * 0.5;
-            gl_PointSize = clamp(px, 2.6, 16.0);
+            gl_PointSize = clamp(px, 1.0, 4.5);
             // Fade in and out at the edges of the box, so wrapping round never pops.
             vec3 edge = abs(p / halfBox);
             float fade = (1.0 - smoothstep(0.75, 1.0, edge.x))
               * (1.0 - smoothstep(0.75, 1.0, edge.y))
               * (1.0 - smoothstep(0.75, 1.0, edge.z));
-            vAlpha = fade * light * (0.55 + 0.4 * seed);
+            vAlpha = fade * light * (0.2 + 0.3 * seed);
           }`,
         fragmentShader: /* glsl */ `
           varying float vAlpha;
@@ -461,8 +462,10 @@ export function buildWater(
     snowView = (width, height) => {
       box.set(width * 1.4, height * 1.6, width * 1.4)
       // The swell's sway is real (about 20 mm) but kept inside a small box.
-      uniforms.sway.value = Math.min(20, width * 0.05)
-      uniforms.drift.value = Math.min(6, width * 0.02)
+      const motion = suspension(width, height)
+      uniforms.sway.value = motion.sway
+      uniforms.drift.value = motion.drift
+      uniforms.sink.value = motion.sink
     }
   }
 
