@@ -6,11 +6,14 @@ import {
   useSyncExternalStore,
 } from 'react'
 import type { ReactNode } from 'react'
+import type { Material } from 'three'
 import { createPortal } from 'react-dom'
 import {
   AmbientLight,
   Box3,
+  CircleGeometry,
   Color,
+  DoubleSide,
   DirectionalLight,
   HemisphereLight,
   Mesh,
@@ -42,7 +45,7 @@ import type { Label } from './labels.ts'
 import type { LifeFrame } from './life.ts'
 import type { Setting } from './seabed.ts'
 import { buildSeafloor } from './seafloor.ts'
-import { buildWater, submerge, water, waterFor } from './water.ts'
+import { buildWater, submerge, water, waterFor, windowed } from './water.ts'
 import type { WaterLight } from './water.ts'
 import type { Scenery } from './seafloor.ts'
 import { buildScene } from './scene.ts'
@@ -61,6 +64,7 @@ export type StageEvent =
   | { type: 'settle' }
   | { type: 'hold'; on: boolean }
   | { type: 'poke' }
+  | { type: 'tuck' }
   | { type: 'shell' }
   | { type: 'tumble' }
   | { type: 'pickup' }
@@ -69,6 +73,7 @@ export type StageEvent =
 export type Pulse = {
   kind:
     | 'poke'
+    | 'tuck'
     | 'tumble'
     | 'pickup'
     | 'hatch'
@@ -176,6 +181,8 @@ export default function Stage({
   const host = useRef<HTMLDivElement>(null)
   const layer = useRef<HTMLDivElement>(null)
   const pop = useRef<HTMLDivElement>(null)
+  /** True while the pointer or focus is on a label. */
+  const pointing = useRef(false)
   // The card renders above the floating panels, in the ocean section that holds them all.
   const [cardHost, setCardHost] = useState<HTMLElement | null>(null)
   useEffect(() => setCardHost(host.current?.parentElement ?? null), [])
@@ -292,6 +299,18 @@ export default function Stage({
     scene.add(ambient, sky, key, key.target, rim)
     // A soft cast shadow on the paper: tinted in the drawing, neutral when realistic.
     const paper = new Mesh(new PlaneGeometry(1, 1), new ShadowMaterial())
+    // Damp sediment seen through the sand's see-through window, behind a buried animal.
+    const hollow = new Mesh(
+      new CircleGeometry(1, 48).rotateX(-Math.PI / 2),
+      new MeshStandardMaterial({ roughness: 1, side: DoubleSide }),
+    )
+    hollow.visible = false
+    hollow.receiveShadow = true
+    submerge(hollow, true)
+    hollow.userData.noInk = true
+    scene.add(hollow)
+    const sandBox = new Box3()
+    const sandView = new Vector3()
     const shadowTint = new Color()
     const black = new Color(0, 0, 0)
     const light = (look: Look) => {
@@ -311,9 +330,10 @@ export default function Stage({
         // Daylight fades with depth, and is gone at night: then a diver's torch lights the animal.
         const day = waterLight.night ? 0.05 : waterLight.daylight
         const keep = 0.35 + 0.65 * day
-        key.intensity = set.key * 0.62 * (0.25 + 0.75 * day)
-        sky.intensity = set.hemisphere * 0.55 * keep
-        ambient.intensity = set.ambient * 0.6 * keep
+        // Matched to underwater photos of each place (scripts/place-photos.py): dimmer than daylight on land.
+        key.intensity = set.key * 0.42 * (0.25 + 0.75 * day)
+        sky.intensity = set.hemisphere * 0.38 * keep
+        ambient.intensity = set.ambient * 0.42 * keep
         rim.intensity = set.rim * 0.2 * day
         sky.color.setRGB(0.55 + 0.2 * day, 0.75 + 0.17 * day, 1)
         if (waterLight.night || day < 0.25) {
@@ -415,10 +435,13 @@ export default function Stage({
       crabSince: Number.NEGATIVE_INFINITY,
       hadCrab: false,
       hatchedAt: new Map<number, number>(),
+      autoHatched: new Set<number>(),
       larva: new Vector3(),
       larvaTarget: new Vector3(),
       settling: Number.NEGATIVE_INFINITY,
       larvaKey: '',
+      drift: 0,
+      driftAt: 0,
       apart: 0,
     }
     /**
@@ -536,6 +559,22 @@ export default function Stage({
       ink.forget()
       scenery = buildSeafloor(setting, built.extent, seedOf(key))
       undoScenery = inkify(scenery.group)
+      // The drawn look's sand needs the see-through window too.
+      scenery.group.traverse((object) => {
+        const looks = object.userData.looks as
+          { drawn: Material | Material[] } | undefined
+        if (object.userData.inkGround && looks && !Array.isArray(looks.drawn))
+          windowed(looks.drawn)
+      })
+      ;(hollow.material as MeshStandardMaterial).color
+        .setRGB(
+          ...(latest.current.setting.ground.map((c) => c / 255) as [
+            number,
+            number,
+            number,
+          ]),
+        )
+        .multiplyScalar(0.42)
       submerge(scenery.group)
       waterParts = buildWater(setting, built.extent, seedOf(key) + 1)
       scene.add(waterParts.group)
@@ -624,7 +663,10 @@ export default function Stage({
       const hasCrab = (built.rig?.crab.children.length ?? 0) > 0
       if (hasCrab && !motion.hadCrab) motion.crabSince = now()
       motion.hadCrab = hasCrab
-      if (frame.phase !== 'egg') motion.hatchedAt.clear()
+      if (frame.phase !== 'egg') {
+        motion.hatchedAt.clear()
+        motion.autoHatched.clear()
+      }
       if (frame.phase !== 'found') motion.pickup = Number.NEGATIVE_INFINITY
       const larvaKey = `${species.id}:${frame.phase === 'larva'}`
       if (larvaKey !== motion.larvaKey) {
@@ -661,45 +703,67 @@ export default function Stage({
         frame.animal > 0 &&
         frame.larva === 0 &&
         !frame.beach
+      // Dying, it slows to a stop where it is; the empty shell then stays there, facing the same way.
+      const lingering = frame.phase === 'death' || frame.phase === 'remains'
       const night = document.documentElement.dataset.theme === 'dark'
       const mode = living
         ? activity(species, frame.phase, night).mode
-        : ('still' as const)
+        : frame.phase === 'death'
+          ? activity(species, 'adult', night).mode
+          : ('still' as const)
+      // How fast it goes now: a settled youngster sets off slowly, a dying animal slows to a halt.
+      const pace =
+        frame.phase === 'growth'
+          ? Math.min(1, 0.15 + frame.local / 0.15)
+          : frame.phase === 'death'
+            ? frame.animal * frame.animal
+            : 1
       const hiding =
         Number.isFinite(t - motion.withdraw) && t - motion.withdraw < 2.6
       const go =
-        living &&
+        (living || frame.phase === 'death') &&
         travels(mode) &&
+        pace > 0.02 &&
         !calm &&
         !hiding &&
         motion.apart < 0.01 &&
         selected === null
+      const elapsed = Math.min(0.25, Math.max(0, t - crawl.last))
       if (go) {
-        const step = Math.min(0.1, Math.max(0, t - crawl.last))
+        const step = Math.min(0.1, elapsed)
         // Distance is kept apart from time, so changing gait never jumps.
         crawl.distance +=
-          travelled(mode, crawl.seconds + step) - travelled(mode, crawl.seconds)
-        crawl.seconds += step
+          travelled(mode, crawl.seconds + step * pace) -
+          travelled(mode, crawl.seconds)
+        crawl.seconds += step * pace
       }
       crawl.last = t
-      crawl.active = living && !calm
-      const state = crawl.active
-        ? mode === 'buried'
-          ? 'buried'
-          : go
-            ? 'moving'
-            : 'resting'
-        : ''
+      crawl.active = (living || lingering) && !calm
+      const state =
+        crawl.active && living
+          ? mode === 'buried'
+            ? 'buried'
+            : go
+              ? 'moving'
+              : 'resting'
+          : ''
       if (renderer.domElement.dataset.crawl !== state) {
         if (state) renderer.domElement.dataset.crawl = state
         else delete renderer.domElement.dataset.crawl
       }
-      const deep = living ? sunk(mode) * crawl.height : 0
-      crawl.sink = calm ? deep : crawl.sink + (deep - crawl.sink) * 0.06
+      // A buried animal stays buried as it dies; its empty shell lies on the sand.
+      const deep =
+        living || frame.phase === 'death'
+          ? sunk(mode) * crawl.height * (living ? 1 : frame.animal)
+          : 0
+      // Eased by time, not frames, so it sinks or rises in about a second at any frame rate.
+      crawl.sink = calm
+        ? deep
+        : crawl.sink + (deep - crawl.sink) * (1 - Math.exp(-elapsed * 3.5))
       const settling = Math.abs(deep - crawl.sink) > crawl.height * 0.002
       if (!settling) crawl.sink = deep
       moved.set(0, 0, 0)
-      if (living) {
+      if (living || lingering) {
         const body = built.extent * Math.max(frame.size, 0.05)
         const place = along(crawl.distance, mode === 'swim' || mode === 'hover')
         turn.setFromAxisAngle(UP, calm ? 0 : place.heading)
@@ -724,6 +788,62 @@ export default function Stage({
         paper.position.copy(crawl.paper).add(moved)
       }
       return settling
+    }
+
+    /**
+     * Opens a see-through window in the sand over a buried animal, with a hollow
+     * of sediment beneath it, so it can be seen and followed where it lies.
+     */
+    const openSand = () => {
+      const deep = crawl.height > 0 ? crawl.sink / (crawl.height * 0.45) : 0
+      const shown = Boolean(built && scenery?.ground && deep >= 0.04)
+      if (renderer.domElement.dataset.sand !== (shown ? 'open' : undefined)) {
+        if (shown) renderer.domElement.dataset.sand = 'open'
+        else delete renderer.domElement.dataset.sand
+      }
+      if (!built || !shown) {
+        water.window.value.w = 0
+        hollow.visible = false
+        return
+      }
+      built.specimen.updateMatrixWorld(true)
+      sandBox.setFromObject(built.specimen)
+      const floor = built.floor
+      // The view looks down at a slant: a point under the sand is seen through the sand in front
+      // of it. Project the buried part onto the sand along the line of sight.
+      camera.getWorldDirection(sandView)
+      const down = Math.max(0.12, -sandView.y)
+      const ahead = { x: sandView.x / down, z: sandView.z / down }
+      let minX = Infinity
+      let maxX = -Infinity
+      let minZ = Infinity
+      let maxZ = -Infinity
+      for (let i = 0; i < 8; i++) {
+        const x = i & 1 ? sandBox.max.x : sandBox.min.x
+        const y = Math.min(floor, i & 2 ? sandBox.max.y : sandBox.min.y)
+        const z = i & 4 ? sandBox.max.z : sandBox.min.z
+        const below = floor - y
+        const px = x - ahead.x * below
+        const pz = z - ahead.z * below
+        minX = Math.min(minX, px, x)
+        maxX = Math.max(maxX, px, x)
+        minZ = Math.min(minZ, pz, z)
+        maxZ = Math.max(maxZ, pz, z)
+      }
+      const cx = (minX + maxX) / 2
+      const cz = (minZ + maxZ) / 2
+      const radius =
+        Math.hypot(maxX - minX, maxZ - minZ) * 0.55 * Math.min(1, deep)
+      water.window.value.set(cx, floor, cz, radius)
+      // The sediment floor lies just under the animal, where the sightlines through the window end.
+      const depth = Math.max(radius * 0.02, (floor - sandBox.min.y) * 1.15)
+      hollow.visible = true
+      hollow.position.set(
+        cx + ahead.x * depth,
+        floor - depth,
+        cz + ahead.z * depth,
+      )
+      hollow.scale.setScalar(radius * 1.35)
     }
 
     /** Applies every transient motion; true while something is still moving. */
@@ -767,8 +887,15 @@ export default function Stage({
       const base = specimen.userData.base as Vector3
       specimen.position.copy(base)
       moving = roam(t, calm) || moving
+      openSand()
+      // A larva holds still while a part is being read or pointed at, so its labels are easy to tap.
+      const reading = latest.current.selected !== null || pointing.current
+      if (!calm && !reading)
+        motion.drift += Math.min(0.1, Math.max(0, t - motion.driftAt))
+      motion.driftAt = t
       if (built.bob > 0 && !calm) {
-        specimen.position.y += Math.sin(t * 1.8) * built.bob
+        const clock = frame.larva > 0 ? motion.drift : t
+        specimen.position.y += Math.sin(clock * 1.8) * built.bob
         moving = true
       }
       if (frame.larva > 0) {
@@ -776,9 +903,45 @@ export default function Stage({
         const settle = Number.isFinite(motion.settling)
           ? ease((t - motion.settling) / (calm ? 0.001 : 1.2))
           : 0
-        specimen.position.x += motion.larva.x * (1 - settle)
+        const room = built.close ? built.close.height * 0.3 : 0
+        // Late in its time in the plankton it swims less, tucks its velum in and sinks towards the
+        // bottom, as cowrie larvae ready to settle do (claim move-cowrie-settling); the timing is a guess.
+        const late = ease(Math.min(1, Math.max(0, (frame.local - 0.72) / 0.28)))
+        // Left alone it drifts a little on its own.
+        const d = motion.drift
+        const wander = calm
+          ? new Vector3()
+          : new Vector3(
+              Math.sin(d * 0.31) * room * 0.25,
+              Math.sin(d * 0.47 + 1) * room * 0.2,
+              Math.sin(d * 0.23 + 2) * room * 0.25,
+            )
+        // Tapped, it pulls its velum into the shell and drops a little until it opens again.
+        const velum = built.velum
+        let open = 1
+        const since = t - motion.withdraw
+        if (velum && Number.isFinite(since) && since >= 0 && since < 2.6) {
+          moving = true
+          open =
+            since < 0.3
+              ? 1 - 0.95 * ease(since / 0.3)
+              : since < 1.6
+                ? 0.05
+                : 0.05 + 0.95 * ease(since - 1.6)
+        }
+        open = Math.min(open, 1 - 0.85 * late)
+        if (velum) {
+          velum.group.scale.setScalar(Math.max(0.01, open))
+          if (!calm && open > 0.5) velum.beat(t)
+        }
+        const away = 1 - settle
+        wander.multiplyScalar(1 - late)
+        specimen.position.x += (motion.larva.x + wander.x) * away
+        specimen.position.z += (motion.larva.z + wander.z) * away
         specimen.position.y +=
-          motion.larva.y * (1 - settle) -
+          (motion.larva.y + wander.y) * away -
+          late * room * 0.9 * (1 - settle) -
+          (1 - open) * room * 0.25 -
           (built.close?.target.y ?? 0) * 0.6 * settle
         if (
           motion.larva.distanceTo(motion.larvaTarget) > 0.01 ||
@@ -811,6 +974,19 @@ export default function Stage({
         specimen.scale.setScalar(1 + p * 0.25)
         if (p < 1) moving = true
       } else specimen.scale.setScalar(1)
+      // As the timeline plays through the egg stage, the eggs hatch one after another near its end.
+      if (frame.phase === 'egg')
+        built.eggs.forEach((egg, i) => {
+          const id = egg.userData.egg as number
+          const due = 0.6 + (0.35 * i) / Math.max(1, built!.eggs.length)
+          if (frame.local >= due && !motion.hatchedAt.has(id)) {
+            motion.hatchedAt.set(id, t)
+            motion.autoHatched.add(id)
+          } else if (frame.local < due && motion.autoHatched.has(id)) {
+            motion.hatchedAt.delete(id)
+            motion.autoHatched.delete(id)
+          }
+        })
       for (const egg of built.eggs) {
         const at = motion.hatchedAt.get(egg.userData.egg as number)
         egg.userData.size ??= egg.scale.clone()
@@ -1020,9 +1196,20 @@ export default function Stage({
       )
     }
 
+    // Frame cost, for tuning and tests: window.__seaStats() in the console.
+    const stats = { frames: 0, ms: 0, calls: 0, triangles: 0 }
+    ;(window as unknown as { __seaStats?: () => object }).__seaStats = () => ({
+      frames: stats.frames,
+      msPerFrame: stats.frames ? +(stats.ms / stats.frames).toFixed(2) : 0,
+      calls: stats.calls,
+      triangles: stats.triangles,
+    })
     const draw = () => {
       frameId = 0
       if (disposed || !visible || document.hidden) return
+      const began = performance.now()
+      renderer.info.autoReset = false
+      renderer.info.reset()
       let moving = animate()
       const { turntable, reducedMotion, look } = latest.current
       controls.autoRotate = turntable && !reducedMotion
@@ -1071,6 +1258,10 @@ export default function Stage({
             : null,
       })
       placeLabels()
+      stats.frames++
+      stats.ms += performance.now() - began
+      stats.calls = renderer.info.render.calls
+      stats.triangles = renderer.info.render.triangles
       // controls.update() may already have asked for the next frame through its change event.
       if (moving && !frameId) frameId = requestAnimationFrame(draw)
       else if (ambient && !frameId && !ambientTimer)
@@ -1147,14 +1338,10 @@ export default function Stage({
       )
       const point = raycaster.ray.intersectPlane(plane, new Vector3())
       if (!point) return
-      // An offset from the larva's resting place, kept inside the close-up so it never leaves view.
+      // An offset from the larva's resting place in the plane facing the viewer,
+      // kept inside the close-up so it never leaves view.
       const room = built.close ? built.close.height * 0.3 : 0
-      const offset = point.sub(centre)
-      motion.larvaTarget.set(
-        Math.max(-room * 1.4, Math.min(room * 1.4, offset.x)),
-        Math.max(-room, Math.min(room, offset.y)),
-        0,
-      )
+      motion.larvaTarget.copy(point.sub(centre)).clampLength(0, room)
       request()
     }
 
@@ -1182,6 +1369,12 @@ export default function Stage({
       poke() {
         motion.withdraw = now()
         emit({ type: 'poke' })
+        request()
+      },
+      tuck() {
+        if (!built?.velum) return
+        motion.withdraw = now()
+        emit({ type: 'tuck' })
         request()
       },
       tumble() {
@@ -1277,21 +1470,15 @@ export default function Stage({
       if (frame.phase === 'egg') {
         const hit = pick(event, built.eggs)
         if (hit) actions.hatch(hit.object.userData.egg as number)
-      } else if (frame.phase === 'larva') steer(event)
-      else if (pick(event, [built.specimen])) {
+      } else if (frame.phase === 'larva') {
+        if (built.velum && pick(event, [built.specimen])) actions.tuck()
+        else steer(event)
+      } else if (pick(event, [built.specimen])) {
         if (frame.phase === 'adult') actions.poke()
         else if (frame.phase === 'remains') emit({ type: 'shell' })
         else if (frame.phase === 'beach') actions.tumble()
         else if (frame.phase === 'found') actions.pickup()
       }
-    }
-    const pointermove = (event: PointerEvent) => {
-      if (
-        latest.current.frame.larva > 0 &&
-        event.pointerType === 'mouse' &&
-        !down
-      )
-        steer(event)
     }
     const pointercancel = () => {
       release()
@@ -1299,7 +1486,6 @@ export default function Stage({
     }
     renderer.domElement.addEventListener('pointerdown', pointerdown)
     renderer.domElement.addEventListener('pointerup', pointerup)
-    renderer.domElement.addEventListener('pointermove', pointermove)
     renderer.domElement.addEventListener('pointercancel', pointercancel)
 
     /** The point on the plane through the target, facing the camera, under a screen position. */
@@ -1464,7 +1650,6 @@ export default function Stage({
       container.removeEventListener('gesturechange', gesturechange)
       renderer.domElement.removeEventListener('pointerdown', pointerdown)
       renderer.domElement.removeEventListener('pointerup', pointerup)
-      renderer.domElement.removeEventListener('pointermove', pointermove)
       renderer.domElement.removeEventListener('pointercancel', pointercancel)
       renderer.domElement.removeEventListener('webglcontextlost', lost)
       window.clearTimeout(ambientTimer)
@@ -1484,6 +1669,9 @@ export default function Stage({
       pmrem.dispose()
       paper.geometry.dispose()
       paper.material.dispose()
+      hollow.geometry.dispose()
+      ;(hollow.material as Material).dispose()
+      water.window.value.w = 0
       inkProbe.remove()
       shadowProbe.remove()
       renderer.dispose()
@@ -1515,7 +1703,13 @@ export default function Stage({
             </g>
           ))}
         </svg>
-        <ul aria-label="Labelled parts">
+        <ul
+          aria-label="Labelled parts"
+          onPointerOver={() => (pointing.current = true)}
+          onPointerOut={() => (pointing.current = false)}
+          onFocus={() => (pointing.current = true)}
+          onBlur={() => (pointing.current = false)}
+        >
           {parts.map((part) => (
             <li key={part.text} data-part={part.text} hidden>
               <button

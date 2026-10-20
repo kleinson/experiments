@@ -52,7 +52,7 @@ test('each stage moves as its sources say', () => {
   // A swimming veliger is explained in the larva stage.
   assert.ok(
     activity(getSpecies('tiger-cowrie'), 'larva', false).facts.some(
-      (fact) => fact.claim === 'term-veliger-velum',
+      (fact) => fact.claim === 'term-velum-why',
     ),
   )
 })
@@ -80,7 +80,7 @@ test('the route is a closed loop over the clear sand around the start', () => {
   assert.ok(Math.abs(Math.cos(back - forward) + 1) < 1e-9)
 })
 
-test('crawling is slow and steady; a vault is low and followed by a long rest', () => {
+test('crawling is slow and steady; a lunge stays on the sand and is followed by a rest', () => {
   for (const gait of ['crawl', 'swim'] as const) {
     const step = travelled(gait, 0.5)
     for (let s = 0; s < 30; s += 0.5)
@@ -99,10 +99,9 @@ test('crawling is slow and steady; a vault is low and followed by a long rest', 
     assert.ok(!travels(still))
     assert.equal(travelled(still, 10), 0)
   }
-  // The conch rests between vaults, and barely leaves the sand.
-  assert.equal(travelled('vault', 1.5), travelled('vault', 3.5))
-  assert.ok(lift('vault', 0.45) > 0 && lift('vault', 0.45) <= 0.03)
-  assert.equal(lift('vault', 2), 0)
+  // The conch rests between lunges, and never leaves the sand.
+  assert.equal(travelled('vault', 2), travelled('vault', 4))
+  for (let s = 0; s < 10; s += 0.1) assert.equal(lift('vault', s), 0)
   assert.ok(sunk('buried') > 0.3)
   assert.equal(sunk('crawl'), 0)
 })

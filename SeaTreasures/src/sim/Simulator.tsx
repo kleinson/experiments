@@ -93,11 +93,18 @@ import {
 } from './seabed.ts'
 import type { Bed, Setting } from './seabed.ts'
 import { activity } from './crawl.ts'
+import {
+  bestPlaceFor,
+  habitatName,
+  livesIn,
+  shellsIn,
+  shellsPerBed,
+} from './filters.ts'
 import type { Mode } from './crawl.ts'
 import { drawThumbs } from './thumbs.ts'
 import { localForm } from './forms.ts'
 import { formatDepth } from './depth.ts'
-import { reefLabels } from './places.ts'
+import { matchedColours, reefLabels } from './places.ts'
 import type { Thumbs } from './thumbs.ts'
 import type { PhaseId } from './life.ts'
 import { addToShelf, parseShelf, shelfKey } from './shelf.ts'
@@ -143,27 +150,61 @@ const scopeLabel: Record<string, string> = {
 }
 
 /** One sourced statement with its evidence on demand. */
-function Fact({ claim: id, children }: { claim: string; children: ReactNode }) {
-  const claim = getClaim(id)
+const confidenceRank = ['limited', 'moderate', 'high']
+
+/**
+ * One sourced statement with its evidence on demand. A statement drawn from
+ * several claims lists each, and is only as confident as the weakest.
+ */
+function Fact({
+  claim: ids,
+  children,
+}: {
+  claim: string | string[]
+  children: ReactNode
+}) {
+  const claims = [ids].flat().map(getClaim)
+  const first = claims[0]!
+  const weakest = claims.reduce((low, claim) =>
+    confidenceRank.indexOf(claim.confidence) <
+    confidenceRank.indexOf(low.confidence)
+      ? claim
+      : low,
+  )
   return (
-    <div className="fact" data-claim-id={claim.id}>
+    <div
+      className="fact"
+      data-claim-id={claims.map((claim) => claim.id).join(' ')}
+    >
       <p>{children}</p>
       <details>
         <summary>
-          Evidence · {scopeLabel[claim.scope] ?? claim.scope} ·{' '}
-          {claim.confidence}
+          Evidence ·{' '}
+          {claims.length > 1
+            ? `${claims.length} claims`
+            : (scopeLabel[first.scope] ?? first.scope)}{' '}
+          · {weakest.confidence}
         </summary>
-        <p>{claim.text}</p>
-        <p className="fact-note">{claim.evidenceNote}</p>
-        <ul>
-          {sourcesFor(claim).map((source) => (
-            <li key={source.id}>
-              <a href={source.url} target="_blank" rel="noreferrer">
-                {source.publisher}: {source.title}
-              </a>
-            </li>
-          ))}
-        </ul>
+        {claims.map((claim) => (
+          <div key={claim.id} className="fact-claim">
+            {claims.length > 1 && (
+              <p className="fact-note">
+                {scopeLabel[claim.scope] ?? claim.scope} · {claim.confidence}
+              </p>
+            )}
+            <p>{claim.text}</p>
+            <p className="fact-note">{claim.evidenceNote}</p>
+            <ul>
+              {sourcesFor(claim).map((source) => (
+                <li key={source.id}>
+                  <a href={source.url} target="_blank" rel="noreferrer">
+                    {source.publisher}: {source.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </details>
     </div>
   )
@@ -370,7 +411,10 @@ function actionFor(
             hint: 'A small nautilus hatches already shelled',
             button: 'Let it settle',
           }
-        : { hint: 'Move or tap to steer the larva', button: 'Let it settle' }
+        : {
+            hint: 'Tap the water to steer it, or the larva to tuck it in',
+            button: 'Let it settle',
+          }
     case 'growth':
       return { hint: 'Press and hold the shell to grow it', button: 'Grow' }
     case 'adult':
@@ -402,7 +446,7 @@ function actionFor(
 
 const moveWords: Record<Mode, string> = {
   crawl: 'Crawling',
-  vault: 'Vaulting',
+  vault: 'Lunging',
   swim: 'Swimming',
   hover: 'Resting in the water',
   hidden: 'Hiding',
@@ -416,11 +460,13 @@ function HowItMoves({
   phase,
   night,
   onNight,
+  onTuck,
 }: {
   species: Species
   phase: PhaseId
   night: boolean
   onNight: () => void
+  onTuck: () => void
 }) {
   const now = activity(species, phase, night)
   if (!now.facts.length) return null
@@ -435,6 +481,17 @@ function HowItMoves({
           {fact.text}
         </Fact>
       ))}
+      {phase === 'larva' && species.group !== 'cephalopod' && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="justify-self-start rounded-full"
+          onClick={onTuck}
+        >
+          <Hand />
+          Tuck in the velum
+        </Button>
+      )}
       {now.wakesAtNight && !night && (
         <Button
           variant="outline"
@@ -658,6 +715,10 @@ function settingNote(setting: Setting, choice: Bed | null) {
     : ` · from its habitat, with this coast's ${coastLabels[setting.coast]}`
 }
 
+/** One floating filter pill: its own panel, above the water. */
+const PILL =
+  'filter-pill h-11 rounded-full border-0 bg-card/95 text-foreground shadow-[0_0_0_1px_var(--cp-border),0_10px_28px_color-mix(in_srgb,var(--cp-text)_14%,transparent)] backdrop-blur-md hover:bg-card dark:bg-card/95 dark:hover:bg-card'
+
 const PANEL =
   'pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md'
 
@@ -680,6 +741,7 @@ const nightNote: Record<string, { text: string; claim: string }> = {
 const speciesIds = allSpecies.map((item) => item.id)
 /** Every place where any of the shells has been recorded. */
 const everyPlace = placesWithShells(speciesIds)
+const perBed = shellsPerBed(speciesIds)
 
 const groupLabel: Record<string, string> = {
   gastropod: 'Sea snail',
@@ -701,6 +763,7 @@ function ShellCard({
   chosen,
   here,
   bestAt,
+  note,
   onChoose,
 }: {
   item: Species
@@ -708,6 +771,8 @@ function ShellCard({
   chosen: boolean
   here: Here | null
   bestAt: string
+  /** Why it is not in the filtered set, instead of its records here. */
+  note?: string
   onChoose: () => void
 }) {
   return (
@@ -719,7 +784,9 @@ function ShellCard({
       className={cn(
         'h-auto w-full flex-col items-stretch gap-1 overflow-hidden rounded-xl p-0 text-left whitespace-normal',
         chosen && 'border-brand ring-1 ring-brand',
-        !here && 'opacity-80',
+        // Not found here (or not in this habitat): faded, but still a button that picks it.
+        (!here || note) &&
+          'opacity-70 hover:opacity-100 focus-visible:opacity-100',
       )}
     >
       <span
@@ -748,9 +815,10 @@ function ShellCard({
           {item.scientificName}
         </i>
         <span className="mt-1 font-mono text-[11px] font-normal text-muted-foreground">
-          {here
-            ? `${here.count.n} record${here.count.n === 1 ? '' : 's'} here · ${levelWords[here.level] ?? ''}${here.outside ? ' · outside its documented range' : ''}`
-            : `Not recorded here · best at ${bestAt}`}
+          {note ??
+            (here
+              ? `${here.count.n} record${here.count.n === 1 ? '' : 's'} here · ${levelWords[here.level] ?? ''}${here.outside ? ' · outside its documented range' : ''}`
+              : `Not recorded here · best at ${bestAt}`)}
         </span>
         <span className="font-mono text-[11px] font-normal text-muted-foreground">
           {groupLabel[item.group] ?? item.group} · about {item.lengthMm.drawn}{' '}
@@ -765,7 +833,8 @@ function ShellCard({
 function ShellMenu({
   species,
   placeName: place,
-  here,
+  here: recorded,
+  bed,
   thumbs,
   onChoose,
   onOpen,
@@ -773,14 +842,19 @@ function ShellMenu({
   species: Species
   placeName: string
   here: Here[]
+  bed: Bed | null
   thumbs: Record<string, Thumbs>
   onChoose: (id: string) => void
   onOpen: () => void
 }) {
   const [open, setOpen] = useState(false)
   const current = thumbs[species.id]
+  // Shells found here that also fit the habitat filter, then everything else with the reason.
+  const here = recorded.filter((item) => livesIn({ id: item.speciesId }, bed))
   const local = here.map((item) => item.speciesId)
   const elsewhere = allSpecies.filter((item) => !local.includes(item.id))
+  const why = (item: Species) =>
+    bed && !livesIn(item, bed) ? `Not a ${habitatName(bed)} shell` : undefined
   const pick = (id: string) => {
     onChoose(id)
     setOpen(false)
@@ -800,7 +874,7 @@ function ShellMenu({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="h-10 gap-2 rounded-full pr-3 pl-1 font-semibold"
+          className={cn(PILL, 'gap-2 pr-3 pl-1.5 font-semibold')}
           aria-label="Shells"
           style={swatch(species)}
         >
@@ -813,10 +887,13 @@ function ShellMenu({
           ) : (
             <span className="swatch size-8" aria-hidden="true" />
           )}
-          <span aria-hidden="true">Shells</span>
+          <span aria-hidden="true" className="max-w-[11rem] truncate">
+            {species.commonName}
+          </span>
           <span
             className="rounded-full bg-muted px-1.5 font-mono text-[10px] font-normal"
             aria-hidden="true"
+            title={`${local.length} shells found here`}
           >
             {local.length}
           </span>
@@ -833,11 +910,13 @@ function ShellMenu({
         <div className="grid gap-0.5">
           <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
             Found at {place}
+            {bed ? ` · in ${habitatName(bed)}` : ''}
           </p>
           <p className="text-xs text-muted-foreground">
-            {local.length} of these {allSpecies.length} shells have been
-            recorded here (GBIF specimens and observations). Pick another place
-            to see what turns up there.
+            {local.length} of these {allSpecies.length} shells{' '}
+            {bed ? `live in ${habitatName(bed)} and ` : ''}have been recorded
+            here (GBIF specimens and observations). Pick another place or
+            habitat to see what turns up there.
           </p>
         </div>
         <div className="-mr-1 max-h-[min(64dvh,600px)] overflow-y-auto overscroll-contain pr-1">
@@ -864,7 +943,9 @@ function ShellMenu({
           {elsewhere.length > 0 && (
             <>
               <p className="mt-4 mb-2 font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
-                Not recorded at {place}
+                {bed
+                  ? 'Elsewhere, or not in this habitat'
+                  : `Not recorded at ${place}`}
               </p>
               <ul className="grid grid-cols-[repeat(auto-fill,minmax(196px,1fr))] gap-2">
                 {elsewhere.map((item) => (
@@ -873,8 +954,12 @@ function ShellMenu({
                       item={item}
                       thumbs={thumbs[item.id]}
                       chosen={item.id === species.id}
-                      here={null}
+                      here={
+                        recorded.find((entry) => entry.speciesId === item.id) ??
+                        null
+                      }
                       bestAt={regionOf(item.id)}
+                      note={why(item)}
                       onChoose={() => pick(item.id)}
                     />
                   </li>
@@ -1112,6 +1197,11 @@ export function Simulator() {
           'It pulls back into its shell, then slowly comes out again.',
         )
         break
+      case 'tuck':
+        setAnnouncement(
+          'It pulls its velum into its shell for protection, then spreads it again and swims on.',
+        )
+        break
       case 'shell':
         if (species.drifts) {
           setFloatCalled(true)
@@ -1158,33 +1248,68 @@ export function Simulator() {
     }
   }
 
-  /** Picks a shell. It stays at this place if it was recorded here; otherwise it moves to its best place. */
-  function chooseSpecies(id: string, placeId = origin.id) {
+  /**
+   * Picks a shell. It stays at this place if it was recorded here; otherwise it
+   * moves to its best place. A habitat filter it does not fit is cleared.
+   */
+  function chooseSpecies(
+    id: string,
+    placeId = origin.id,
+    bed: Bed | null = bedChoice,
+  ) {
     const next = getSpecies(id)
     const stays = originsFor(id).some((place) => place.region.id === placeId)
     const place = stays ? placeId : firstOrigin(next)
     const shown = localForm(next, place).species
+    const keepsBed = livesIn(next, bed)
+    setBedChoice(keepsBed ? bed : null)
     setDepthChoice(null)
     setSpeciesId(id)
     setOriginId(place)
     setDeathId(next.deaths[0]?.id ?? '')
     setAnnouncement(
-      `${shown.commonName}, ${shown.scientificName}${stays ? '' : `, at ${placeName(next, place)}`}.`,
+      `${shown.commonName}, ${shown.scientificName}${stays ? '' : `, at ${placeName(next, place)}`}${bed && !keepsBed ? '. Habitat filter cleared' : ''}${bed && keepsBed ? `, in ${habitatName(bed)}` : ''}.`,
     )
     remember(id, place)
   }
 
-  /** Picks a place. If this shell was never recorded there, the best-recorded shell there takes over. */
+  /**
+   * Picks a place. The shell stays if it was recorded there (and fits the
+   * habitat filter); otherwise the best-recorded shell there that fits takes
+   * over. If none there fits the habitat, the habitat filter is cleared.
+   */
   function choosePlace(placeId: string) {
     setDepthChoice(null)
-    if (originsFor(speciesId).some((place) => place.region.id === placeId)) {
+    const fitting = shellsIn(placeId, speciesIds, bedChoice)
+    if (fitting.some((item) => item.speciesId === speciesId)) {
       setOriginId(placeId)
       setAnnouncement(`Place: ${placeName(baseSpecies, placeId)}.`)
       remember(speciesId, placeId)
       return
     }
-    const best = shellsAt(placeId, speciesIds)[0]
-    if (best) chooseSpecies(best.speciesId, placeId)
+    const best = fitting[0] ?? shellsAt(placeId, speciesIds)[0]
+    if (best)
+      chooseSpecies(best.speciesId, placeId, fitting[0] ? bedChoice : null)
+  }
+
+  /**
+   * Filters by habitat: the shell and place stay if they fit; otherwise the
+   * best-recorded shell here that lives there, or the best place for it.
+   */
+  function chooseBed(bed: Bed | null) {
+    setDepthChoice(null)
+    if (livesIn(baseSpecies, bed)) {
+      setBedChoice(bed)
+      setAnnouncement(bed ? `Habitat: ${bedLabels[bed]}.` : 'Habitat: its own.')
+      return
+    }
+    // A record outside a shell's documented range does not make this its place.
+    const here = shellsIn(origin.id, speciesIds, bed).find(
+      (item) => !item.outside,
+    )
+    if (here) return chooseSpecies(here.speciesId, origin.id, bed)
+    const best = bed ? bestPlaceFor(bed, speciesIds) : null
+    if (best) chooseSpecies(best.speciesId, best.placeId, bed)
   }
 
   function remember(id: string, placeId: string) {
@@ -1282,9 +1407,9 @@ export function Simulator() {
                     <CardContent className="grid gap-2.5 px-4">
                       <div className="grid gap-1">
                         <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
-                          What it’s for
+                          TL;DR · what, why and how
                         </p>
-                        <Fact claim={term.claim}>{term.use}</Fact>
+                        <Fact claim={term.claims}>{term.tldr}</Fact>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <Button
@@ -1337,6 +1462,119 @@ export function Simulator() {
             {bar.mm < 1 ? `${bar.mm * 1000} µm` : `${bar.mm} mm`}
           </div>
 
+          <div
+            className="filter-bar float pointer-events-auto"
+            role="group"
+            aria-label="Filters"
+          >
+            <ShellMenu
+              species={species}
+              placeName={origin.name}
+              here={shellsHere}
+              bed={bedChoice}
+              thumbs={thumbs}
+              onChoose={(id) => chooseSpecies(id)}
+              onOpen={() => setMenuOpened(true)}
+            />
+            <Select value={origin.id} onValueChange={choosePlace}>
+              <SelectTrigger
+                id="origin"
+                aria-label="Place"
+                data-value={origin.id}
+                className={cn(PILL, 'max-w-[17rem] pr-3 pl-3.5')}
+              >
+                <MapPin className="text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent position="popper" className="max-h-[60dvh]">
+                {bedChoice && (
+                  <p className="px-2 pt-1.5 pb-1 text-xs text-muted-foreground">
+                    Places with {habitatName(bedChoice)} shells
+                  </p>
+                )}
+                {Object.entries(ranges.oceans).map(([ocean, label]) => {
+                  const here = everyPlace
+                    .filter((place) => place.region.ocean === ocean)
+                    .map((place) => ({
+                      ...place,
+                      fit: shellsIn(place.region.id, speciesIds, bedChoice),
+                    }))
+                    .filter(
+                      (place) =>
+                        place.fit.length > 0 || place.region.id === origin.id,
+                    )
+                  return here.length ? (
+                    <SelectGroup key={ocean}>
+                      <SelectLabel>{label}</SelectLabel>
+                      {here.map((place) => (
+                        <SelectItem
+                          key={place.region.id}
+                          value={place.region.id}
+                        >
+                          {place.region.name}
+                          <span className="text-muted-foreground">
+                            {place.fit.length} shell
+                            {place.fit.length === 1 ? '' : 's'}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ) : null
+                })}
+              </SelectContent>
+            </Select>
+            <Select
+              value={bedChoice ?? 'habitat'}
+              onValueChange={(value) =>
+                chooseBed(value === 'habitat' ? null : (value as Bed))
+              }
+            >
+              <SelectTrigger
+                id="seabed"
+                aria-label="Habitat"
+                data-value={bedChoice ?? 'habitat'}
+                className={cn(PILL, 'pr-3 pl-3.5')}
+              >
+                <Waves className="text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectItem value="habitat">
+                  Any habitat
+                  <span className="text-muted-foreground">its own</span>
+                </SelectItem>
+                <SelectSeparator />
+                {beds.map((bed) => {
+                  const here = shellsIn(origin.id, speciesIds, bed).length
+                  const anywhere = perBed[bed]
+                  return (
+                    <SelectItem key={bed} value={bed} disabled={!anywhere}>
+                      {bedLabels[bed]}
+                      <span className="text-muted-foreground">
+                        {!anywhere
+                          ? 'no shells'
+                          : here
+                            ? `${here} here`
+                            : `${anywhere} elsewhere`}
+                      </span>
+                    </SelectItem>
+                  )
+                })}
+              </SelectContent>
+            </Select>
+            {bedChoice && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(PILL, 'px-3.5 text-muted-foreground')}
+                onClick={() => chooseBed(null)}
+              >
+                <X />
+                Clear
+              </Button>
+            )}
+          </div>
+
           <div className="float-left">
             <Card className="float-title pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md gap-3 py-3.5">
               <CardHeader className="px-4">
@@ -1361,86 +1599,23 @@ export function Simulator() {
                 </div>
               </CardHeader>
               <CardContent className="grid gap-3 px-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <ShellMenu
-                    species={species}
-                    placeName={origin.name}
-                    here={shellsHere}
-                    thumbs={thumbs}
-                    onChoose={(id) => chooseSpecies(id)}
-                    onOpen={() => setMenuOpened(true)}
-                  />
-                  <Select value={origin.id} onValueChange={choosePlace}>
-                    <SelectTrigger
-                      id="origin"
-                      aria-label="Place"
-                      data-value={origin.id}
-                      className="h-10 max-w-[16rem] rounded-full bg-background pl-3"
-                    >
-                      <MapPin className="text-muted-foreground" />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent position="popper" className="max-h-[60dvh]">
-                      {Object.entries(ranges.oceans).map(([ocean, label]) => {
-                        const here = everyPlace.filter(
-                          (place) => place.region.ocean === ocean,
-                        )
-                        return here.length ? (
-                          <SelectGroup key={ocean}>
-                            <SelectLabel>{label}</SelectLabel>
-                            {here.map((place) => (
-                              <SelectItem
-                                key={place.region.id}
-                                value={place.region.id}
-                              >
-                                {place.region.name}
-                                <span className="text-muted-foreground">
-                                  {place.shells.length} shell
-                                  {place.shells.length === 1 ? '' : 's'}
-                                </span>
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        ) : null
-                      })}
-                    </SelectContent>
-                  </Select>
-                  <Select
-                    value={bedChoice ?? 'habitat'}
-                    onValueChange={(value) =>
-                      setBedChoice(value === 'habitat' ? null : (value as Bed))
-                    }
-                  >
-                    <SelectTrigger
-                      id="seabed"
-                      aria-label="Seabed"
-                      data-value={bedChoice ?? 'habitat'}
-                      className="h-10 rounded-full bg-background pl-3"
-                    >
-                      <Waves className="text-muted-foreground" />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                      <SelectItem value="habitat">Its habitat</SelectItem>
-                      <SelectSeparator />
-                      {beds.map((bed) => (
-                        <SelectItem key={bed} value={bed}>
-                          {bedLabels[bed]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Separator />
                 <div className="setting-note" aria-live="polite">
                   <Fact claim="seabed-setting-illustrative">
                     <strong>{settingLabel(setting)}</strong>
                     {settingNote(setting, bedChoice)}
                   </Fact>
                   {setting.scene === 'seabed' && (
-                    <Fact claim={setting.place.claim}>
+                    <Fact
+                      claim={
+                        matchedColours[origin.id]
+                          ? [setting.place.claim, 'place-colours-from-photos']
+                          : setting.place.claim
+                      }
+                    >
                       <strong>{reefLabels[setting.place.reef]}</strong> ·{' '}
                       {setting.place.note}
+                      {matchedColours[origin.id] &&
+                        ` Water and sand colours matched to ${matchedColours[origin.id]!.photos.length} underwater photos.`}
                     </Fact>
                   )}
                   <Fact claim={habitat.claim}>
@@ -1664,6 +1839,7 @@ export function Simulator() {
                   phase={frame.phase}
                   night={night}
                   onNight={() => setTheme('dark')}
+                  onTuck={() => act('tuck')}
                 />
                 <div className="phase-story">
                   <PhaseStory

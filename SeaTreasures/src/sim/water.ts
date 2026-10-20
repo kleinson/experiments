@@ -18,6 +18,7 @@ import {
   ShaderMaterial,
   SphereGeometry,
   Vector3,
+  Vector4,
 } from 'three'
 import type { WebGLProgramParametersWithUniforms } from 'three'
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
@@ -49,6 +50,56 @@ export const water = {
   far: { value: 2000 },
   /** World point the fade is measured from (the specimen). */
   centre: { value: new Vector3() },
+  /**
+   * A see-through window in the sand over a buried animal: centre (xyz) and
+   * radius (w). A radius of 0 closes it.
+   */
+  window: { value: new Vector4() },
+  /** The water's colour cast on everything in it, per channel: red goes first. */
+  cast: { value: new Color(1, 1, 1) },
+}
+
+/** Over a buried animal the sand turns to frosted glass, edged by a faint rim, so it can be followed. */
+const WINDOW = /* glsl */ `
+  if (stWindow.w > 0.0) {
+    float stR = length(stWorld.xz - stWindow.xz) / stWindow.w;
+    float stInside = 1.0 - smoothstep(0.78, 0.96, stR);
+    diffuseColor.a *= mix(1.0, 0.16, stInside);
+    float stRim = smoothstep(0.9, 0.97, stR) * (1.0 - smoothstep(0.97, 1.04, stR));
+    outgoingLight *= 1.0 - stRim * 0.5;
+  }`
+
+/**
+ * The sand window alone, for the drawn look's ground, which is not lit by the
+ * water's shader. Returns the material.
+ */
+export function windowed(material: Material) {
+  material.transparent = true
+  const previous = material.onBeforeCompile
+  material.onBeforeCompile = (shader, renderer) => {
+    previous?.call(material, shader, renderer)
+    shader.uniforms.stWindow = water.window
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 stWorld;')
+      .replace(
+        '#include <worldpos_vertex>',
+        `#include <worldpos_vertex>
+        stWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;`,
+      )
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        '#include <common>',
+        '#include <common>\nuniform vec4 stWindow;\nvarying vec3 stWorld;',
+      )
+      .replace(
+        '#include <opaque_fragment>',
+        `${WINDOW}\n#include <opaque_fragment>`,
+      )
+  }
+  const key = material.customProgramCacheKey?.bind(material)
+  material.customProgramCacheKey = () => `${key?.() ?? ''}|sand-window`
+  material.needsUpdate = true
+  return material
 }
 
 const NOISE = /* glsl */ `
@@ -97,6 +148,8 @@ export function underwater(material: Material, near = false) {
     shader.uniforms.stNear = water.near
     shader.uniforms.stFar = water.far
     shader.uniforms.stCentre = water.centre
+    shader.uniforms.stCast = water.cast
+    shader.uniforms.stWindow = water.window
     shader.vertexShader = shader.vertexShader
       .replace(
         '#include <common>',
@@ -123,6 +176,8 @@ export function underwater(material: Material, near = false) {
         uniform float stNear;
         uniform float stFar;
         uniform vec3 stCentre;
+        uniform vec4 stWindow;
+        uniform vec3 stCast;
         varying vec3 stWorld;
         varying vec3 stNormalW;
         ${NOISE}`,
@@ -139,6 +194,8 @@ export function underwater(material: Material, near = false) {
           float c = c1 * 0.65 + c2 * 0.45;
           float up = smoothstep(-0.1, 0.8, stNormalW.y);
           outgoingLight += diffuseColor.rgb * vec3(0.55, 0.62, 0.65) * c * up * stCaustics * ${strength};
+          // The water tints everything in it, as in photographs taken there; the specimen a little less.
+          outgoingLight *= mix(vec3(1.0), stCast, ${near ? '0.7' : '1.0'});
           // Absorption: red fades first, then everything sinks into the water colour.
           float d = length(stWorld - stCentre);
           float fade = smoothstep(stNear, stFar, d) * ${fades};
@@ -146,6 +203,7 @@ export function underwater(material: Material, near = false) {
           outgoingLight = mix(outgoingLight, stWater, fade);
           // The far seabed dissolves into the water behind the canvas: no hard horizon.
           ${material.userData.horizon ? 'diffuseColor.a *= 1.0 - smoothstep(stFar * 0.8, stFar * 1.15, length(stWorld.xz - stCentre.xz));' : ''}
+          ${material.userData.horizon ? WINDOW : ''}
         }
         #include <opaque_fragment>`,
       )
@@ -202,6 +260,19 @@ export function waterFor(
     (tone[0] / 255) ** 2.2,
     (tone[1] / 255) ** 2.2,
     (tone[2] / 255) ** 2.2,
+  )
+  // The cast was measured from photos at about 8 m: weaker in the shallows, stronger deeper down.
+  const cast = place.cast ?? [1, 1, 1]
+  // The cast was measured from whole photographs taken at about 8 m: weaker in the
+  // shallows, stronger deeper down, gone on the beach and under a diver's torch.
+  const strength =
+    setting.scene === 'beach' || night
+      ? 0
+      : Math.min(1.6, Math.max(0.5, depth / 8))
+  water.cast.value.setRGB(
+    cast[0] ** strength,
+    cast[1] ** strength,
+    cast[2] ** strength,
   )
   water.scale.value = extent * 0.55
   // Caustics fade fast with depth: bright webs in the shallows, gone by about 30 m.

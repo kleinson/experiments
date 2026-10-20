@@ -5,10 +5,12 @@ import manifest from '../data/claims.json' with { type: 'json' }
 import { glossary, speciesTerms } from '../src/sim/glossary.ts'
 
 const claimIds = new Set(manifest.claims.map((claim) => claim.id))
-const scene = readFileSync(
-  new URL('../src/sim/scene.ts', import.meta.url),
-  'utf8',
-)
+const read = (file: string) =>
+  readFileSync(new URL(`../src/sim/${file}`, import.meta.url), 'utf8')
+const scene = read('scene.ts') + read('velum.ts')
+/** Sentences end in . ! or ? before a capital (or a quote) or the end. */
+const sentences = (text: string) =>
+  text.split(/(?<=[.!?])\s+(?=[A-Z“‘])/).filter(Boolean).length
 
 test('every part label the figure draws is explained by a sourced claim', () => {
   const named = [
@@ -25,12 +27,19 @@ test('every part label the figure draws is explained by a sourced claim', () => 
     ),
   ]
   for (const [name, term] of terms) {
-    assert.ok(claimIds.has(term.claim), `${name} cites missing ${term.claim}`)
+    assert.ok(term.claims.length > 0, `${name} cites no claim`)
+    for (const claim of term.claims)
+      assert.ok(claimIds.has(claim), `${name} cites missing ${claim}`)
     assert.ok(term.what.length < 60, `${name}: keep "what" to a short line`)
-    // Real information on use: at least a full sentence, still short enough for a card.
+    // A TL;DR: what it is, why and how, together in two or three sentences, short enough for a card.
+    const count = sentences(term.tldr)
     assert.ok(
-      term.use.length > 70 && term.use.length < 240,
-      `${name}: "use" should say what the part does in one or two sentences`,
+      count >= 2 && count <= 3,
+      `${name}: the TL;DR has ${count} sentences, not two or three`,
+    )
+    assert.ok(
+      term.tldr.length > 120 && term.tldr.length < 420,
+      `${name}: the TL;DR is ${term.tldr.length} characters`,
     )
     assert.ok(glossary[name], `${name} must also have a general entry`)
   }

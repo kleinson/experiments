@@ -462,6 +462,14 @@
       "scope": "mollusks",
       "confidence": "moderate",
       "evidenceNote": "Used to tint and darken the scene with depth; the exact colours are illustrative."
+    },
+    {
+      "id": "place-colours-from-photos",
+      "text": "Each place's water colour, the colour cast on everything in it and its sand are matched to underwater photographs taken there, from Wikimedia Commons: the median colour of open water in each photo, the average colour of the whole frame, and pale sand where it shows. Only colour statistics are used; places with few usable photos borrow from places with the same kind of reef. The list of photos, authors and licences for every place is in data/place-colours.json.",
+      "sourceIds": [],
+      "scope": "demo-limitation",
+      "confidence": "moderate",
+      "evidenceNote": "Photos vary with camera, lens, depth, light and editing, so these are a typical look, not a measurement of the water. Photos lit by a flash or taken out of the water were left out (data/research/place-photo-exclusions.json and the script's filters)."
     }
   ],
   "species": {}

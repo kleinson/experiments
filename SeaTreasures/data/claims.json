@@ -873,6 +873,15 @@
       "accessedAt": "2026-10-19",
       "kind": "peer-reviewed",
       "accessNote": "Open-access abstract and methods read directly on PubMed Central."
+    },
+    {
+      "id": "riisgard-2000-downstream-collecting",
+      "title": "Downstream collecting in ciliary suspension feeders: the catch-up principle",
+      "publisher": "Marine Ecology Progress Series (Riisgård, Nielsen & Larsen, 2000, 207: 33–51)",
+      "url": "https://www.int-res.com/articles/meps/207/m207p033.pdf",
+      "accessedAt": "2026-10-20",
+      "kind": "peer-reviewed",
+      "accessNote": "Open-access PDF read directly: the section on trochophore and veliger larvae and their opposed ciliary bands."
     }
   ],
   "claims": [
@@ -2004,6 +2013,30 @@
       "scope": "species",
       "confidence": "moderate",
       "evidenceNote": "One tracked population; the study notes that nautiluses at Palau were deeper by day."
+    },
+    {
+      "id": "term-velum-why",
+      "text": "Unlike the adult, a gastropod veliger has two ciliated, semicircular lobes resembling fins or wings, together called the velum, its main means of propulsion and of collecting food particles. The planktonic larval stage can carry it far from the adults that produced it; the velum and foot can be pulled into the shell to protect them, and the velum is lost at metamorphosis.",
+      "sourceIds": ["wikipedia-veliger"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "General description of gastropod veligers; the shape and size drawn here are illustrative, not of a particular species."
+    },
+    {
+      "id": "term-velum-how",
+      "text": "Veligers have a band of long compound cilia in front of the mouth (the prototroch), a band of shorter cilia behind it (the metatroch), and a food groove between them whose cilia beat toward the mouth. The long cilia drive the water current; particles are caught between the two opposed bands and passed along the food groove to the mouth.",
+      "sourceIds": ["riisgard-2000-downstream-collecting"],
+      "scope": "mollusks",
+      "confidence": "high",
+      "evidenceNote": "A peer-reviewed review of ciliary feeding; it also notes that how exactly particles are caught (the 'catch-up' idea, filmed in veligers by Strathmann & Leise, 1979) is a hypothesis."
+    },
+    {
+      "id": "place-colours-from-photos",
+      "text": "Each place's water colour, the colour cast on everything in it and its sand are matched to underwater photographs taken there, from Wikimedia Commons: the median colour of open water in each photo, the average colour of the whole frame, and pale sand where it shows. Only colour statistics are used; places with few usable photos borrow from places with the same kind of reef. The list of photos, authors and licences for every place is in data/place-colours.json.",
+      "sourceIds": [],
+      "scope": "demo-limitation",
+      "confidence": "moderate",
+      "evidenceNote": "Photos vary with camera, lens, depth, light and editing, so these are a typical look, not a measurement of the water. Photos lit by a flash or taken out of the water were left out (data/research/place-photo-exclusions.json and the script's filters)."
     }
   ]
 }
