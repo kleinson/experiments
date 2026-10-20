@@ -16,6 +16,8 @@ const fragments = [
   'research/places.json',
   'research/part-functions.json',
   'research/movement.json',
+  'research/classes.json',
+  'research/pearls.json',
 ]
   .filter((file) => existsSync(root + file))
   .map((file) => ({
@@ -71,6 +73,18 @@ const names = {
   'textile-cone': 'Textile cone',
   'queen-conch': 'Queen conch',
   'chambered-nautilus': 'Chambered nautilus',
+  'giant-clam': 'Giant clam',
+  'fuzzy-chiton': 'West Indian fuzzy chiton',
+  'tusk-shell': 'Common tusk shell',
+  monoplacophoran: 'Neopilina',
+}
+/** The shelled classes of molluscs (MarineBio, WoRMS): one species each beyond the snails. */
+const groups = {
+  'chambered-nautilus': 'cephalopod',
+  'giant-clam': 'bivalve',
+  'fuzzy-chiton': 'chiton',
+  'tusk-shell': 'scaphopod',
+  monoplacophoran: 'monoplacophoran',
 }
 const order = Object.keys(names)
 const slug = (text) =>
@@ -126,7 +140,7 @@ const species = order
           )
         : null
     if (!drawn) throw new Error(`${id} has no sourced size to draw`)
-    const group = id === 'chambered-nautilus' ? 'cephalopod' : 'gastropod'
+    const group = groups[id] ?? 'gastropod'
     return {
       id,
       commonName: names[id],

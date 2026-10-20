@@ -480,6 +480,394 @@
       "hermit": false,
       "drifts": true,
       "drawnNote": "Drawn at an ordinary size below the reported maximum; no typical range was found."
+    },
+    {
+      "id": "giant-clam",
+      "commonName": "Giant clam",
+      "scientificName": "Tridacna gigas",
+      "authority": "(Linnaeus, 1758)",
+      "aphiaId": 207670,
+      "taxonClaim": "giant-clam-taxonomy",
+      "group": "bivalve",
+      "lengthMm": {
+        "typical": [800, 800],
+        "max": 1370,
+        "drawn": 800,
+        "claim": "giant-clam-size"
+      },
+      "origins": [
+        {
+          "id": "great-barrier-reef",
+          "name": "Great Barrier Reef",
+          "habitat": "Sand and coral rubble among hard corals on shallow coral reefs",
+          "depthM": [2, 20],
+          "claim": "giant-clam-range-habitat"
+        },
+        {
+          "id": "philippines",
+          "name": "Philippines",
+          "habitat": "Sand and coral rubble on shallow coral reefs; now rare",
+          "depthM": [2, 20],
+          "claim": "giant-clam-range-habitat"
+        },
+        {
+          "id": "solomon-islands",
+          "name": "Solomon Islands",
+          "habitat": "Sand, rubble and reef rock on shallow coral reefs; now rare",
+          "depthM": [2, 20],
+          "claim": "giant-clam-range-habitat"
+        },
+        {
+          "id": "marshall-islands",
+          "name": "Marshall Islands",
+          "habitat": "Sand and coral rubble in atoll lagoons and coral reefs; now rare",
+          "depthM": [2, 20],
+          "claim": "giant-clam-range-habitat"
+        }
+      ],
+      "pattern": {
+        "description": "A thick, heavy, off-white shell with four to six deep radial folds ending in big triangular points; between them shows a yellowish-brown to olive-green mantle dotted with brilliant blue-green rings.",
+        "claim": "giant-clam-appearance"
+      },
+      "life": {
+        "egg": {
+          "text": "One spawning releases about 500 million eggs; a fertilised egg hatches into a swimming larva within 12 to 24 hours.",
+          "range": [0.5, 1],
+          "unit": "days",
+          "claim": "giant-clam-spawning"
+        },
+        "larva": {
+          "text": "The larva grows a shell, swims and feeds on tiny algae, then grows a foot and settles about 6 to 14 days after fertilisation.",
+          "range": [6, 14],
+          "unit": "days",
+          "claim": "giant-clam-larva"
+        },
+        "maturity": {
+          "text": "Matures as a male at around 6 years and as a female by 9 to 10 years.",
+          "range": [6, 10],
+          "unit": "years",
+          "claim": "giant-clam-maturity"
+        },
+        "lifespan": {
+          "text": "Maximum lifespan is unknown; the oldest reliably aged true giant clam was 63 years old.",
+          "range": [63, 63],
+          "unit": "years",
+          "claim": "giant-clam-lifespan"
+        }
+      },
+      "deaths": [
+        {
+          "id": "eaten-by-a-fish-biting-its-mantle",
+          "cause": "Eaten by a fish biting its mantle",
+          "mark": "chip",
+          "claim": "giant-clam-predators"
+        },
+        {
+          "id": "shell-crushed-or-drilled-by-a-crab-or-sn",
+          "cause": "Shell crushed or drilled by a crab or snail while young",
+          "mark": "drill",
+          "claim": "giant-clam-predators"
+        },
+        {
+          "id": "harvested-by-people-for-meat-and-shell",
+          "cause": "Harvested by people for meat and shell",
+          "mark": "none",
+          "claim": "giant-clam-harvest"
+        },
+        {
+          "id": "bleached-by-hot-water-and-lost-its-algae",
+          "cause": "Bleached by hot water and lost its algae",
+          "mark": "none",
+          "claim": "giant-clam-bleaching"
+        },
+        {
+          "id": "not-documented",
+          "cause": "Cause not documented in our sources",
+          "mark": "none",
+          "claim": "death-cause-not-documented"
+        }
+      ],
+      "remains": [
+        {
+          "id": "giant-clam-remains",
+          "text": "Shells of long-dead clams can lie buried in the reef; in the South China Sea boats have dug them out for carving, wrecking the reef.",
+          "claim": "giant-clam-remains"
+        }
+      ],
+      "collecting": [
+        {
+          "id": "giant-clam-protection",
+          "text": "Listed in CITES Appendix II, assessed as Critically Endangered by the IUCN and proposed as endangered under the US Endangered Species Act. Do not take or buy giant clam shells.",
+          "claim": "giant-clam-protection"
+        }
+      ],
+      "hermit": false,
+      "drifts": false,
+      "drawnNote": "Drawn at the middle of the typical range."
+    },
+    {
+      "id": "fuzzy-chiton",
+      "commonName": "West Indian fuzzy chiton",
+      "scientificName": "Acanthopleura granulata",
+      "authority": "(Gmelin, 1791)",
+      "aphiaId": 386270,
+      "taxonClaim": "fuzzy-chiton-taxonomy",
+      "group": "chiton",
+      "lengthMm": {
+        "typical": null,
+        "max": 100,
+        "drawn": 80,
+        "claim": "fuzzy-chiton-size"
+      },
+      "origins": [
+        {
+          "id": "florida-keys",
+          "name": "Florida Keys",
+          "habitat": "Intertidal rocky shores, high on the rocks into the spray zone",
+          "depthM": [0, 1],
+          "claim": "fuzzy-chiton-range-habitat"
+        },
+        {
+          "id": "bahamas",
+          "name": "The Bahamas",
+          "habitat": "Intertidal rocky shores, high on the rocks into the spray zone",
+          "depthM": [0, 1],
+          "claim": "fuzzy-chiton-range-habitat"
+        },
+        {
+          "id": "cuba",
+          "name": "Cuba",
+          "habitat": "Intertidal rocky shores, high on the rocks into the spray zone",
+          "depthM": [0, 1],
+          "claim": "fuzzy-chiton-range-habitat"
+        },
+        {
+          "id": "puerto-rico",
+          "name": "Puerto Rico",
+          "habitat": "Intertidal rocky shores, high on the rocks into the spray zone",
+          "depthM": [0, 1],
+          "claim": "fuzzy-chiton-range-habitat"
+        }
+      ],
+      "pattern": {
+        "description": "Eight thick, heavy plates, usually eroded and rock-coloured (granular when unworn), set in a densely spiky girdle with a few black bands; tiny eyes dot the plates.",
+        "claim": "fuzzy-chiton-appearance"
+      },
+      "life": {
+        "egg": {
+          "text": "Males and females release sperm and eggs into the sea, where the eggs are fertilised.",
+          "range": null,
+          "unit": "days",
+          "claim": "fuzzy-chiton-reproduction"
+        },
+        "larva": {
+          "text": "A short-lived swimming trochophore larva lives on its yolk, then turns straight into a tiny chiton; there is no veliger stage. How many days this takes is not known for this species.",
+          "range": null,
+          "unit": "days",
+          "claim": "fuzzy-chiton-larva"
+        },
+        "maturity": {
+          "text": "Not established in the sources used here.",
+          "range": null,
+          "unit": "years",
+          "claim": null
+        },
+        "lifespan": {
+          "text": "Not established in the sources used here.",
+          "range": null,
+          "unit": "years",
+          "claim": null
+        }
+      },
+      "deaths": [
+        {
+          "id": "eaten-by-a-crab-fish-sea-star-or-seagull",
+          "cause": "Eaten by a crab, fish, sea star or seagull",
+          "mark": "chip",
+          "claim": "fuzzy-chiton-predators"
+        },
+        {
+          "id": "eaten-by-people-as-curb-or-used-as-bait",
+          "cause": "Eaten by people as 'curb' or used as bait",
+          "mark": "none",
+          "claim": "fuzzy-chiton-predators"
+        },
+        {
+          "id": "not-documented",
+          "cause": "Cause not documented in our sources",
+          "mark": "none",
+          "claim": "death-cause-not-documented"
+        }
+      ],
+      "remains": [
+        {
+          "id": "fuzzy-chiton-remains",
+          "text": "After death the eight plates fall apart; single 'butterfly shell' plates may wash up on the beach.",
+          "claim": "fuzzy-chiton-remains"
+        }
+      ],
+      "collecting": [
+        {
+          "id": "fuzzy-chiton-status",
+          "text": "Not evaluated by the IUCN and not assessed under CITES. Leave live chitons on the rock.",
+          "claim": "fuzzy-chiton-status"
+        }
+      ],
+      "hermit": false,
+      "drifts": false,
+      "drawnNote": "Drawn at an ordinary size below the reported maximum; no typical range was found."
+    },
+    {
+      "id": "tusk-shell",
+      "commonName": "Common tusk shell",
+      "scientificName": "Antalis vulgaris",
+      "authority": "(da Costa, 1778)",
+      "aphiaId": 196380,
+      "taxonClaim": "tusk-shell-taxonomy",
+      "group": "scaphopod",
+      "lengthMm": {
+        "typical": [30, 60],
+        "max": 60,
+        "drawn": 45,
+        "claim": "tusk-shell-size"
+      },
+      "origins": [
+        {
+          "id": "mediterranean",
+          "name": "Mediterranean Sea",
+          "habitat": "Buried in sand and detrital sediment on the continental shelf",
+          "depthM": [5, 1000],
+          "claim": "tusk-shell-range-habitat"
+        }
+      ],
+      "pattern": {
+        "description": "A slightly curved white tube like a tiny elephant tusk, open at both ends, with fine lengthwise ridges and a brownish tip at the narrow end.",
+        "claim": "tusk-shell-appearance"
+      },
+      "life": {
+        "egg": {
+          "text": "Males and females release their sex cells into the water.",
+          "range": null,
+          "unit": "days",
+          "claim": "tusk-shell-larva"
+        },
+        "larva": {
+          "text": "A swimming trochophore becomes a shelled veliger larva, which settles on the bottom and grows into a miniature adult. How long this takes is not known for this species.",
+          "range": null,
+          "unit": "days",
+          "claim": "tusk-shell-larva"
+        },
+        "maturity": {
+          "text": "Not established in the sources used here.",
+          "range": null,
+          "unit": "years",
+          "claim": null
+        },
+        "lifespan": {
+          "text": "Not established in the sources used here.",
+          "range": null,
+          "unit": "years",
+          "claim": null
+        }
+      },
+      "deaths": [
+        {
+          "id": "not-documented",
+          "cause": "Cause not documented in our sources",
+          "mark": "none",
+          "claim": "death-cause-not-documented"
+        }
+      ],
+      "remains": [
+        {
+          "id": "tusk-shell-remains",
+          "text": "Empty shells pile up on the seabed in places and wash up along the strandline.",
+          "claim": "tusk-shell-remains"
+        }
+      ],
+      "collecting": [
+        {
+          "id": "tusk-shell-collecting",
+          "text": "Not evaluated by the IUCN; rated very sensitive to seabed disturbance. Empty shells are often collected and made into jewellery.",
+          "claim": "tusk-shell-collecting"
+        }
+      ],
+      "hermit": false,
+      "drifts": false,
+      "drawnNote": "Drawn at the middle of the typical range."
+    },
+    {
+      "id": "monoplacophoran",
+      "commonName": "Neopilina",
+      "scientificName": "Neopilina galatheae",
+      "authority": "Lemche, 1957",
+      "aphiaId": 343689,
+      "taxonClaim": "neopilina-taxonomy",
+      "group": "monoplacophoran",
+      "lengthMm": {
+        "typical": [25, 37],
+        "max": 37,
+        "drawn": 31,
+        "claim": "neopilina-size"
+      },
+      "origins": [
+        {
+          "id": "east-pacific-abyss",
+          "name": "Eastern Pacific abyss",
+          "habitat": "Deep soft mud (muddy clay) in the abyss; once seen on hard lava",
+          "depthM": [2460, 3570],
+          "claim": "neopilina-range-depth"
+        }
+      ],
+      "pattern": {
+        "description": "A thin, almost round, cap-shaped shell, dull brown darkening to near-black at the apex and straw-coloured at the edge, with fine growth lines and 30 to 60 faint radial ribs.",
+        "claim": "neopilina-appearance"
+      },
+      "life": {
+        "egg": {
+          "text": "Not established in the sources used here.",
+          "range": null,
+          "unit": "days",
+          "claim": null
+        },
+        "larva": {
+          "text": "Unknown: no one has studied how monoplacophorans develop. One specimen still carried a tiny coiled larval shell at its tip.",
+          "range": null,
+          "unit": "days",
+          "claim": "neopilina-unknowns"
+        },
+        "maturity": {
+          "text": "Not established in the sources used here.",
+          "range": null,
+          "unit": "years",
+          "claim": null
+        },
+        "lifespan": {
+          "text": "Unknown.",
+          "range": null,
+          "unit": "years",
+          "claim": "neopilina-unknowns"
+        }
+      },
+      "deaths": [
+        {
+          "id": "not-documented",
+          "cause": "Cause not documented in our sources",
+          "mark": "none",
+          "claim": "death-cause-not-documented"
+        }
+      ],
+      "remains": [
+        {
+          "id": "neopilina-discovery",
+          "text": "The 1952 trawl brought up three empty shells along with the living animals.",
+          "claim": "neopilina-discovery"
+        }
+      ],
+      "collecting": [],
+      "hermit": false,
+      "drifts": false,
+      "drawnNote": "Drawn at the middle of the typical range."
     }
   ],
   "shared": {

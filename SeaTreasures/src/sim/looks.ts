@@ -75,4 +75,29 @@ export const looks: Record<string, Look> = {
     tissue: [196, 150, 120],
     seed: 2016,
   },
+  // The other classes are painted per vertex in classes.ts; these colours give the menu swatch.
+  'giant-clam': {
+    pattern: { kind: 'plain', ground: [226, 222, 210], margin: [118, 112, 58] },
+    inside: [246, 244, 238],
+    tissue: [118, 112, 58],
+    seed: 11,
+  },
+  'fuzzy-chiton': {
+    pattern: { kind: 'plain', ground: [150, 136, 110], margin: [96, 90, 80] },
+    inside: [220, 214, 200],
+    tissue: [150, 136, 110],
+    seed: 12,
+  },
+  'tusk-shell': {
+    pattern: { kind: 'plain', ground: [240, 236, 226], margin: [150, 96, 52] },
+    inside: [244, 240, 232],
+    tissue: [226, 196, 170],
+    seed: 13,
+  },
+  monoplacophoran: {
+    pattern: { kind: 'plain', ground: [160, 130, 96], margin: [56, 40, 30] },
+    inside: [236, 232, 220],
+    tissue: [226, 206, 180],
+    seed: 14,
+  },
 }

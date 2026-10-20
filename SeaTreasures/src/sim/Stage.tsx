@@ -37,7 +37,18 @@ import {
 } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
-import { activity, along, lift, sunk, travelled, travels } from './crawl.ts'
+import {
+  activity,
+  along,
+  hatchesTogether,
+  lift,
+  sunk,
+  travelled,
+  travels,
+} from './crawl.ts'
+import { seeded } from './patterns.ts'
+import { buildSiblings } from './siblings.ts'
+import type { Siblings } from './siblings.ts'
 import { InkPass, inkify, LIGHTS } from './ink.ts'
 import type { Look } from './ink.ts'
 import { labelsIn } from './labels.ts'
@@ -45,6 +56,7 @@ import type { Label } from './labels.ts'
 import type { LifeFrame } from './life.ts'
 import type { Setting } from './seabed.ts'
 import { buildSeafloor } from './seafloor.ts'
+import { createSky } from './sky.ts'
 import { buildWater, submerge, water, waterFor, windowed } from './water.ts'
 import type { WaterLight } from './water.ts'
 import type { Scenery } from './seafloor.ts'
@@ -138,6 +150,7 @@ export default function Stage({
   frame,
   cut,
   xray,
+  pearl,
   actual,
   apart,
   pxPerMm,
@@ -157,6 +170,8 @@ export default function Stage({
   frame: LifeFrame
   cut: boolean
   xray: boolean
+  /** A step of a pearl growing in a living clam, or null. */
+  pearl?: number | null
   actual: boolean
   apart: number
   pxPerMm: number
@@ -198,6 +213,7 @@ export default function Stage({
     frame,
     cut,
     xray,
+    pearl: pearl ?? null,
     actual,
     apart,
     pxPerMm,
@@ -222,12 +238,13 @@ export default function Stage({
       frame,
       cut,
       xray,
+      pearl: pearl ?? null,
       actual,
       pxPerMm,
       reducedMotion,
     }
     api.current?.update()
-  }, [species, frame, cut, xray, actual, pxPerMm, reducedMotion])
+  }, [species, frame, cut, xray, pearl, actual, pxPerMm, reducedMotion])
 
   useEffect(() => {
     latest.current = { ...latest.current, apart }
@@ -284,6 +301,8 @@ export default function Stage({
     renderer.domElement.setAttribute('aria-hidden', 'true')
     renderer.domElement.setAttribute('data-sim-canvas', '')
     container.prepend(renderer.domElement)
+    // The sun, the surface and its light shafts, drawn on a small canvas behind the scene.
+    const skyLayer = createSky(container)
 
     const scene = new Scene()
     // Soft reflections for the realistic shells (glossy cowries, pearly nautilus); none in the drawing.
@@ -348,6 +367,8 @@ export default function Stage({
       // Light rays, fish and drifting particles belong to the realistic water only; fish shelter at night.
       if (waterParts) {
         waterParts.group.visible = look === 'real'
+        if (siblings) siblings.group.visible = look === 'real'
+        waterParts.light(waterLight.night ? 0.05 : waterLight.daylight)
         waterParts.group.traverse((object) => {
           if (object.userData.fish) object.visible = !waterLight.night
         })
@@ -404,9 +425,17 @@ export default function Stage({
     let scenery: Scenery | null = null
     let undoScenery: (() => void) | null = null
     let waterParts: ReturnType<typeof buildWater> | null = null
+    // Larvae from the same brood drifting around the one shown, when they hatch together.
+    let siblings: Siblings | null = null
+    const siblingCentre = new Vector3()
     let waterCss = ''
     let sceneryKey = ''
-    let ambientTimer = 0
+    /** The scene's layout size, mm: the animal, but never less than a reef patch (30 cm). */
+    const layout = (target: Built) => Math.max(target.extent, 300)
+    /** Where the animal is now, which fish keep clear of. */
+    const fishAvoid = new Vector3()
+    /** Render resolution, scaled down on slow devices (see adapt). */
+    const quality = { scale: 1 }
     /** Room taken by the floating panels, in CSS pixels: the specimen is framed in what is left. */
     const safe = { left: 0, right: 0, top: 0, bottom: 0 }
     const readSafe = () => {
@@ -521,13 +550,17 @@ export default function Stage({
       readSafe()
       // The canvas fills the screen and is drawn in several passes: keep it under about 3.5 million pixels.
       renderer.setPixelRatio(
-        Math.min(
-          devicePixelRatio,
-          1.75,
-          Math.sqrt(3_500_000 / (width * height)),
+        Math.max(
+          0.5,
+          Math.min(
+            devicePixelRatio,
+            1.75,
+            Math.sqrt(3_500_000 / (width * height)),
+          ) * quality.scale,
         ),
       )
       renderer.setSize(width, height)
+      skyLayer?.resize(width, height)
       const size = frameSize()
       const { perPx, magnified } = size
       const target = size.target.clone().add(crawl.applied)
@@ -557,7 +590,7 @@ export default function Stage({
         waterParts.dispose()
       }
       ink.forget()
-      scenery = buildSeafloor(setting, built.extent, seedOf(key))
+      scenery = buildSeafloor(setting, layout(built), seedOf(key), built.extent)
       undoScenery = inkify(scenery.group)
       // The drawn look's sand needs the see-through window too.
       scenery.group.traverse((object) => {
@@ -574,16 +607,23 @@ export default function Stage({
             number,
           ]),
         )
-        .multiplyScalar(0.42)
+        .multiplyScalar(0.8)
       submerge(scenery.group)
-      waterParts = buildWater(setting, built.extent, seedOf(key) + 1)
+      waterParts = buildWater(
+        setting,
+        built.extent,
+        seedOf(key) + 1,
+        scenery,
+        fishAvoid,
+      )
       scene.add(waterParts.group)
       home()
       // Only the specimen casts a shadow: the scenery's own would cost more than it shows.
       scenery.group.traverse((object) => (object.castShadow = false))
       keepAbove()
       scene.add(scenery.group)
-      paper.visible = !scenery.ground
+      // Drifting in the open water column there is nothing below to catch a shadow.
+      paper.visible = !scenery.ground && setting.scene !== 'open-water'
       fit()
       request()
     }
@@ -600,14 +640,34 @@ export default function Stage({
     }
 
     const rebuild = () => {
-      const { species, frame, cut, xray } = latest.current
+      const { species, frame, cut, xray, pearl } = latest.current
       if (built) {
         scene.remove(built.group)
         undoInk?.()
         built.dispose()
       }
       ink.forget()
-      built = buildScene(species, frame, { cut, xray })
+      built = buildScene(species, frame, { cut, xray, pearl })
+      if (siblings) {
+        scene.remove(siblings.group)
+        siblings.dispose()
+        siblings = null
+      }
+      if (
+        frame.phase === 'larva' &&
+        built.close &&
+        hatchesTogether(species.id)
+      ) {
+        // The larva's own framing is three of it across (scene.ts).
+        siblings = buildSiblings(
+          built.close.width / 3,
+          built.close.width * 2.2,
+          built.close.target,
+          seeded(seedOf(species.id) + 7),
+        )
+        siblings.group.visible = waterParts?.group.visible ?? true
+        scene.add(siblings.group)
+      }
       undoInk = inkify(built.group)
       submerge(built.group, true)
       // Only the specimen reflects the soft studio light, so shells look glossy without lighting up the sea.
@@ -616,7 +676,8 @@ export default function Stage({
         for (const material of [object.material].flat())
           if (material instanceof MeshStandardMaterial) {
             material.envMap = studio
-            material.envMapIntensity = 0.35
+            material.envMapIntensity =
+              (material.userData.reflect as number | undefined) ?? 0.35
           }
       })
       scene.add(built.group)
@@ -777,6 +838,7 @@ export default function Stage({
         }
         specimen.position.y -= crawl.sink
       }
+      fishAvoid.copy(moved)
       const delta = moved.clone().sub(crawl.applied)
       if (delta.lengthSq() > 0) {
         crawl.applied.copy(moved)
@@ -948,6 +1010,11 @@ export default function Stage({
           (Number.isFinite(motion.settling) && settle < 1)
         )
           moving = true
+      }
+      if (siblings && built.close) {
+        siblingCentre.copy(built.close.target).add(specimen.position).sub(base)
+        siblings.animate(calm ? 0 : t, camera, siblingCentre)
+        if (!calm) moving = true
       }
       const tumbleSince = t - motion.tumble
       if (
@@ -1203,6 +1270,7 @@ export default function Stage({
       msPerFrame: stats.frames ? +(stats.ms / stats.frames).toFixed(2) : 0,
       calls: stats.calls,
       triangles: stats.triangles,
+      pixelRatio: +renderer.getPixelRatio().toFixed(2),
     })
     const draw = () => {
       frameId = 0
@@ -1215,7 +1283,6 @@ export default function Stage({
       controls.autoRotate = turntable && !reducedMotion
       controls.autoRotateSpeed = 1.2
       if (controls.autoRotate) moving = true
-      // The water's sway and the animal's slow crawl only need about 25 frames a second.
       const ambient =
         Boolean(scenery?.animated || waterParts || crawl.active) &&
         !reducedMotion
@@ -1239,6 +1306,25 @@ export default function Stage({
       }
       controls.update()
       if (camera.zoom !== frustum.zoom) frame()
+      const under = latest.current.setting
+      waterParts?.view(
+        (camera.right - camera.left) / camera.zoom,
+        (camera.top - camera.bottom) / camera.zoom,
+      )
+      skyLayer?.render(
+        waterParts?.group.visible && under.scene !== 'beach'
+          ? {
+              pitch: controls.getPolarAngle() - Math.PI / 2,
+              yaw: controls.getAzimuthalAngle(),
+              depthM: under.depthM,
+              daylight: waterLight.daylight,
+              night: waterLight.night,
+              tone: waterLight.tone,
+              time: reducedMotion ? 0 : now(),
+              pelagic: under.scene === 'open-water',
+            }
+          : null,
+      )
       cssColour(shadowProbe, shadowTint)
       ink.render(renderer, scene, camera, {
         style: look,
@@ -1262,14 +1348,37 @@ export default function Stage({
       stats.ms += performance.now() - began
       stats.calls = renderer.info.render.calls
       stats.triangles = renderer.info.render.triangles
+      adapt(began)
       // controls.update() may already have asked for the next frame through its change event.
-      if (moving && !frameId) frameId = requestAnimationFrame(draw)
-      else if (ambient && !frameId && !ambientTimer)
-        // The water's slow sway only needs about 25 frames a second.
-        ambientTimer = window.setTimeout(() => {
-          ambientTimer = 0
-          request()
-        }, 40)
+      // Anything moving, the water included, is drawn every frame so it stays smooth.
+      if ((moving || ambient) && !frameId) frameId = requestAnimationFrame(draw)
+    }
+    /**
+     * Smooth beats sharp: when frames come slower than about 50 a second the
+     * canvas renders at a lower resolution, and climbs back when there is room.
+     */
+    const pace = { last: 0, interval: 16.7, slow: 0, fast: 0 }
+    const adapt = (began: number) => {
+      const gap = began - pace.last
+      pace.last = began
+      // Only steady animation counts: a pause or the first frame after one says nothing.
+      if (gap <= 0 || gap > 100) return
+      pace.interval += (gap - pace.interval) * 0.1
+      if (pace.interval > 20) {
+        pace.fast = 0
+        if (++pace.slow > 45 && quality.scale > 0.5) {
+          quality.scale = Math.max(0.5, quality.scale * 0.85)
+          pace.slow = 0
+          fit()
+        }
+      } else if (pace.interval < 17.5) {
+        pace.slow = 0
+        if (++pace.fast > 240 && quality.scale < 1) {
+          quality.scale = Math.min(1, quality.scale * 1.12)
+          pace.fast = 0
+          fit()
+        }
+      }
     }
     const request = () => {
       if (!disposed && !frameId && visible && !document.hidden)
@@ -1652,12 +1761,13 @@ export default function Stage({
       renderer.domElement.removeEventListener('pointerup', pointerup)
       renderer.domElement.removeEventListener('pointercancel', pointercancel)
       renderer.domElement.removeEventListener('webglcontextlost', lost)
-      window.clearTimeout(ambientTimer)
       if (scenery) {
         undoScenery?.()
         scenery.dispose()
       }
       waterParts?.dispose()
+      siblings?.dispose()
+      skyLayer?.dispose()
       themeWatch.disconnect()
       scheme.removeEventListener('change', visibility)
       controls.dispose()

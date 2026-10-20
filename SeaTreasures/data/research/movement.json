@@ -121,6 +121,14 @@
       "scope": "mollusks",
       "confidence": "high",
       "evidenceNote": "A peer-reviewed review of ciliary feeding; it also notes that how exactly particles are caught (the 'catch-up' idea, filmed in veligers by Strathmann & Leise, 1979) is a hypothesis."
+    },
+    {
+      "id": "cowrie-hatch-together",
+      "text": "Tropical cowries produce many swimming veliger larvae from each egg capsule. In tiger cowries kept in the lab, a capsule held about 740 larvae on average, and a brood hatched over 1 to 3 days, with 90% of the larvae released overnight on the final day.",
+      "sourceIds": ["tay-2023-cowrie-larvae"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Counts and hatching timing are from captive tiger cowries (table 1 and section 3.1.1); 'numerous planktotrophic veligers per capsule' is stated for tropical cowries in general. How closely siblings stay together once in the open sea is not measured."
     }
   ]
 }

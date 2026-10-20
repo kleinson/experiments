@@ -254,6 +254,18 @@ its own and holds still while you point at a label or read one; tap the water
 to steer it, or tap the larva (or "Tuck in the velum") to see it pull the velum
 into its shell.
 
+**In the open water.** Drifting in the plankton, the larva casts no shadow:
+there is nothing below it to catch one. Where the sources say larvae hatch
+together (tropical cowries, about 740 per egg capsule and most of a brood in
+one night, claim `cowrie-hatch-together`; the queen conch's and cone's egg
+masses; the giant clam's spawning), a dozen sibling veligers drift behind it
+(`src/sim/siblings.ts`, one instanced mesh). They are the same size but drawn
+smaller and hazier, as a photo would show larvae farther from the lens. Far
+off in the blue a loose school of jacks and a lone tuna pass by, drawn at their
+real length and distance in the backdrop shader (`src/sim/sky.ts`), so they cost
+almost nothing and read as distant beside a larva a fraction of a millimetre
+long.
+
 A travelling animal follows a loose figure of eight with the camera, light and
 shadow following, so the seabed slides past. The pace is sped up to be
 watchable. It stops while it hides in its shell, while it is taken apart or a

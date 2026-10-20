@@ -27,6 +27,7 @@ import {
 import {
   BookOpen,
   ChevronDown,
+  CircleDot,
   Hand,
   Layers,
   MapPin,
@@ -46,6 +47,7 @@ import {
   ZoomIn,
   ZoomOut,
 } from 'lucide-react'
+import { pearlFor, type PearlKind } from './pearls.ts'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import {
@@ -406,9 +408,12 @@ function actionFor(
     case 'egg':
       return { hint: 'Tap the eggs to hatch them', button: 'Hatch them all' }
     case 'larva':
-      return species.group === 'cephalopod'
+      return species.group !== 'gastropod'
         ? {
-            hint: 'A small nautilus hatches already shelled',
+            hint:
+              species.group === 'cephalopod'
+                ? 'A small nautilus hatches already shelled'
+                : 'Tap the water to steer the larva',
             button: 'Let it settle',
           }
         : {
@@ -481,7 +486,7 @@ function HowItMoves({
           {fact.text}
         </Fact>
       ))}
-      {phase === 'larva' && species.group !== 'cephalopod' && (
+      {phase === 'larva' && species.group === 'gastropod' && (
         <Button
           variant="outline"
           size="sm"
@@ -722,6 +727,83 @@ const PILL =
 const PANEL =
   'pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md'
 
+const formatSize = (mm: number) =>
+  mm >= 100 ? `${mm / 10} cm` : `${mm < 1 ? mm.toFixed(1) : mm} mm`
+
+/** A pearl growing inside the clam, step by step and at true scale beside its shell. */
+function PearlCard({
+  kind,
+  step,
+  onStep,
+  cut,
+  onCut,
+}: {
+  kind: PearlKind
+  step: number
+  onStep: (step: number) => void
+  cut: boolean
+  onCut: (cut: boolean) => void
+}) {
+  const at = kind.steps[step]!
+  const last = kind.steps.length - 1
+  return (
+    <Card
+      className={`float depth-card pearl-card ${PANEL} gap-1.5 px-4 py-3`}
+      role="group"
+      aria-label="Pearl"
+    >
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+          Pearl · {at.name}
+        </span>
+        <span className="depth-value font-mono text-sm">
+          {at.blister ? '' : '≈ '}
+          {formatSize(at.mm)}
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="font-mono text-[10px] whitespace-nowrap text-muted-foreground">
+          Start
+        </span>
+        <Slider
+          min={0}
+          max={last}
+          step={1}
+          value={[step]}
+          onValueChange={([value]) => onStep(value ?? 0)}
+          thumbProps={{
+            'aria-label': 'Pearl growth',
+            'aria-valuetext': `${at.name}, about ${formatSize(at.mm)}`,
+          }}
+        />
+        <span className="font-mono text-[10px] whitespace-nowrap text-muted-foreground">
+          Record
+        </span>
+      </div>
+      <div className="text-xs text-muted-foreground">
+        <Fact claim={at.claims}>{at.text}</Fact>
+        <details className="pearl-more">
+          <summary>About these pearls</summary>
+          {kind.facts.map((id) => (
+            <Fact key={id} claim={id}>
+              {getClaim(id).text}
+            </Fact>
+          ))}
+        </details>
+      </div>
+      {!cut && step > 1 && (
+        <Button
+          variant="link"
+          className="h-auto justify-self-start p-0 text-xs"
+          onClick={() => onCut(true)}
+        >
+          Cut it open to see its growth layers
+        </Button>
+      )}
+    </Card>
+  )
+}
+
 /** What each animal does at night, where sourced. */
 const nightNote: Record<string, { text: string; claim: string }> = {
   'tiger-cowrie': {
@@ -746,6 +828,10 @@ const perBed = shellsPerBed(speciesIds)
 const groupLabel: Record<string, string> = {
   gastropod: 'Sea snail',
   cephalopod: 'Cephalopod',
+  bivalve: 'Bivalve',
+  chiton: 'Chiton',
+  scaphopod: 'Tusk shell',
+  monoplacophoran: 'Monoplacophoran',
 }
 
 type Here = ReturnType<typeof shellsAt>[number]
@@ -1030,6 +1116,8 @@ export function Simulator() {
   const [deathId, setDeathId] = useState(species.deaths[0]?.id ?? '')
   const [cut, setCut] = useState(false)
   const [xray, setXray] = useState(false)
+  /** The step of the pearl shown growing in a clam, or null when it is hidden. */
+  const [pearlStep, setPearlStep] = useState<number | null>(null)
   const [labels, setLabels] = useState(true)
   // Opens on the realistic sea; the slider turns it into an educational drawing.
   const [look, setLook] = useState(1)
@@ -1109,6 +1197,10 @@ export function Simulator() {
     }),
     [base, inRemains, crabCalled, floatCalled, waves, species],
   )
+  const pearlKind = pearlFor(species.id)
+  const pearlReady =
+    Boolean(pearlKind) && frame.animal > 0 && frame.larva === 0 && !frame.beach
+  const pearlShown = pearlReady ? pearlStep : null
   const night = theme === 'dark'
   const term = part ? termFor(part, species.id) : undefined
   const setting = useMemo(
@@ -1369,6 +1461,7 @@ export function Simulator() {
               frame={frame}
               cut={cut}
               xray={xray}
+              pearl={pearlShown}
               actual={actual}
               apart={apart}
               pxPerMm={calibration.pxPerMm}
@@ -1658,6 +1751,23 @@ export function Simulator() {
                 <ScanEye />
                 See-through
               </Toggle>
+              {pearlKind && (
+                <Toggle
+                  size="lg"
+                  pressed={pearlShown != null}
+                  onPressedChange={(on) => setPearlStep(on ? 2 : null)}
+                  disabled={!pearlReady}
+                  title={
+                    pearlReady
+                      ? 'Look inside for a pearl and watch it grow'
+                      : 'A pearl grows inside the living clam'
+                  }
+                  className="tool-toggle rounded-xl data-[state=on]:bg-foreground data-[state=on]:text-background"
+                >
+                  <CircleDot />
+                  Pearl
+                </Toggle>
+              )}
               <Toggle
                 size="lg"
                 pressed={labels}
@@ -1686,7 +1796,16 @@ export function Simulator() {
                 </Button>
               )}
             </div>
-            {setting.scene !== 'beach' && (
+            {pearlKind && pearlShown != null && (
+              <PearlCard
+                kind={pearlKind}
+                step={pearlShown}
+                onStep={setPearlStep}
+                cut={cut}
+                onCut={setCut}
+              />
+            )}
+            {setting.scene !== 'beach' && pearlShown == null && (
               <Card
                 className={`float depth-card ${PANEL} gap-1.5 px-4 py-3`}
                 role="group"

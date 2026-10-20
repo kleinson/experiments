@@ -1,5 +1,5 @@
 {
-  "accessedAt": "2026-10-19",
+  "accessedAt": "2026-10-20",
   "basis": [
     "HUMAN_OBSERVATION",
     "PRESERVED_SPECIMEN",
@@ -280,6 +280,14 @@
       "bbox": [-92.5, -1.6, -89, 1.8],
       "at": [831.2, 249.7],
       "box": [826.4, 245, 9.700000000000045, 9.400000000000006]
+    },
+    {
+      "id": "east-pacific-abyss",
+      "name": "Eastern Pacific abyss",
+      "ocean": "east-pacific",
+      "bbox": [-91, -20, -74, 14],
+      "at": [854.2, 258.3],
+      "box": [830.6, 211.1, 47.19999999999993, 94.50000000000003]
     },
     {
       "id": "gulf-of-california",
@@ -727,6 +735,11 @@
           "observed": 0,
           "specimens": 1
         },
+        "east-pacific-abyss": {
+          "n": 3,
+          "observed": 0,
+          "specimens": 3
+        },
         "abc-islands": {
           "n": 1,
           "observed": 1,
@@ -918,6 +931,11 @@
           "n": 8,
           "observed": 0,
           "specimens": 8
+        },
+        "east-pacific-abyss": {
+          "n": 111,
+          "observed": 92,
+          "specimens": 19
         },
         "florida-keys": {
           "n": 552,
@@ -1117,6 +1135,272 @@
           "central-pacific"
         ],
         "claim": "nautilus-range"
+      }
+    },
+    "giant-clam": {
+      "taxonKey": 4372619,
+      "total": {
+        "n": 1504,
+        "observed": 1385,
+        "specimens": 119
+      },
+      "regions": {
+        "red-sea": {
+          "n": 4,
+          "observed": 1,
+          "specimens": 3
+        },
+        "east-africa": {
+          "n": 4,
+          "observed": 0,
+          "specimens": 4
+        },
+        "seychelles": {
+          "n": 5,
+          "observed": 1,
+          "specimens": 4
+        },
+        "andaman": {
+          "n": 2,
+          "observed": 2,
+          "specimens": 0
+        },
+        "ningaloo": {
+          "n": 2,
+          "observed": 1,
+          "specimens": 1
+        },
+        "bali-komodo": {
+          "n": 6,
+          "observed": 6,
+          "specimens": 0
+        },
+        "sulawesi": {
+          "n": 15,
+          "observed": 12,
+          "specimens": 3
+        },
+        "ambon": {
+          "n": 124,
+          "observed": 122,
+          "specimens": 2
+        },
+        "philippines": {
+          "n": 65,
+          "observed": 53,
+          "specimens": 12
+        },
+        "papua-new-guinea": {
+          "n": 44,
+          "observed": 34,
+          "specimens": 10
+        },
+        "solomon-islands": {
+          "n": 17,
+          "observed": 14,
+          "specimens": 3
+        },
+        "okinawa": {
+          "n": 1,
+          "observed": 1,
+          "specimens": 0
+        },
+        "palau": {
+          "n": 119,
+          "observed": 110,
+          "specimens": 9
+        },
+        "guam": {
+          "n": 1,
+          "observed": 0,
+          "specimens": 1
+        },
+        "great-barrier-reef": {
+          "n": 899,
+          "observed": 886,
+          "specimens": 13
+        },
+        "new-caledonia": {
+          "n": 12,
+          "observed": 11,
+          "specimens": 1
+        },
+        "vanuatu": {
+          "n": 7,
+          "observed": 6,
+          "specimens": 1
+        },
+        "fiji": {
+          "n": 14,
+          "observed": 12,
+          "specimens": 2
+        },
+        "marshall-islands": {
+          "n": 80,
+          "observed": 60,
+          "specimens": 20
+        },
+        "samoa-tonga": {
+          "n": 12,
+          "observed": 11,
+          "specimens": 1
+        },
+        "cook-islands": {
+          "n": 4,
+          "observed": 4,
+          "specimens": 0
+        },
+        "french-polynesia": {
+          "n": 2,
+          "observed": 0,
+          "specimens": 2
+        },
+        "hawaiian-islands": {
+          "n": 1,
+          "observed": 1,
+          "specimens": 0
+        }
+      },
+      "native": {
+        "oceans": [
+          "indian",
+          "coral-triangle",
+          "west-pacific",
+          "central-pacific"
+        ],
+        "claim": "giant-clam-range-habitat"
+      }
+    },
+    "fuzzy-chiton": {
+      "taxonKey": 5193733,
+      "total": {
+        "n": 3604,
+        "observed": 2860,
+        "specimens": 744
+      },
+      "regions": {
+        "red-sea": {
+          "n": 1,
+          "observed": 0,
+          "specimens": 1
+        },
+        "madagascar": {
+          "n": 2,
+          "observed": 0,
+          "specimens": 2
+        },
+        "papua-new-guinea": {
+          "n": 13,
+          "observed": 0,
+          "specimens": 13
+        },
+        "east-pacific-abyss": {
+          "n": 146,
+          "observed": 123,
+          "specimens": 23
+        },
+        "florida-keys": {
+          "n": 543,
+          "observed": 403,
+          "specimens": 140
+        },
+        "bahamas": {
+          "n": 415,
+          "observed": 316,
+          "specimens": 99
+        },
+        "cuba": {
+          "n": 203,
+          "observed": 141,
+          "specimens": 62
+        },
+        "cayman-islands": {
+          "n": 166,
+          "observed": 149,
+          "specimens": 17
+        },
+        "jamaica": {
+          "n": 175,
+          "observed": 160,
+          "specimens": 15
+        },
+        "puerto-rico": {
+          "n": 325,
+          "observed": 298,
+          "specimens": 27
+        },
+        "lesser-antilles": {
+          "n": 379,
+          "observed": 275,
+          "specimens": 104
+        },
+        "abc-islands": {
+          "n": 213,
+          "observed": 192,
+          "specimens": 21
+        },
+        "mesoamerican-reef": {
+          "n": 567,
+          "observed": 532,
+          "specimens": 35
+        }
+      },
+      "native": {
+        "oceans": ["atlantic"],
+        "claim": "fuzzy-chiton-range-habitat"
+      }
+    },
+    "tusk-shell": {
+      "taxonKey": 2284973,
+      "total": {
+        "n": 2096,
+        "observed": 1398,
+        "specimens": 698
+      },
+      "regions": {
+        "florida-keys": {
+          "n": 1,
+          "observed": 0,
+          "specimens": 1
+        },
+        "canary-islands": {
+          "n": 1,
+          "observed": 0,
+          "specimens": 1
+        },
+        "mediterranean": {
+          "n": 373,
+          "observed": 196,
+          "specimens": 177
+        }
+      },
+      "native": {
+        "oceans": ["east-atlantic"],
+        "claim": "tusk-shell-range-habitat"
+      }
+    },
+    "monoplacophoran": {
+      "taxonKey": 2306873,
+      "total": {
+        "n": 20,
+        "observed": 0,
+        "specimens": 20
+      },
+      "regions": {
+        "east-pacific-abyss": {
+          "n": 18,
+          "observed": 0,
+          "specimens": 18
+        },
+        "gulf-of-california": {
+          "n": 2,
+          "observed": 0,
+          "specimens": 2
+        }
+      },
+      "native": {
+        "oceans": ["east-pacific"],
+        "claim": "neopilina-range-depth"
       }
     }
   }

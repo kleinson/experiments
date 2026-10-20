@@ -24,10 +24,10 @@ export function markMesh(mesh: Mesh, text: string, inside = false) {
 
 export type Label = { text: string; anchor: Object3D; inside: boolean }
 
-/** Every distinct label under `root`, the first of each name. */
+/** Every distinct label under `root`, the first of each name; hidden parts (an empty shell's animal) have none. */
 export function labelsIn(root: Object3D) {
   const found = new Map<string, Label>()
-  root.traverse((object) => {
+  root.traverseVisible((object) => {
     const text = object.userData.label as string | undefined
     if (!text || found.has(text)) return
     found.set(text, {

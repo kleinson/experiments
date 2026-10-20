@@ -328,6 +328,7 @@ export const reefOf: Record<string, Reef> = {
   galapagos: 'volcanic',
   'gulf-of-california': 'rocky-algae',
   'florida-keys': 'caribbean-seagrass',
+  'east-pacific-abyss': 'shallow-gulf',
   bahamas: 'caribbean-seagrass',
   bermuda: 'pink-sand',
   cuba: 'caribbean',
@@ -344,6 +345,17 @@ export const reefOf: Record<string, Reef> = {
 
 /** Place-specific notes that sharpen a reef profile. */
 const overrides: Record<string, Partial<Omit<PlaceLook, 'reef'>>> = {
+  'east-pacific-abyss': {
+    note: 'The abyss, about 2,500 to 3,600 m down: dark, soft muddy clay, and in places hard lava',
+    claim: 'neopilina-range-depth',
+    sand: [92, 84, 76],
+    rock: [[40, 40, 44]],
+    coral: 0,
+    beds: {},
+    water: [6, 20, 40],
+    clarity: 0.3,
+    fish: { colour: [0, 0, 0], count: 0 },
+  },
   'hawaiian-islands': {
     note: 'Volcanic islands: black basalt reef, and schools of yellow tang, described from Hawaii',
     claim: 'place-hawaii',

@@ -1,3 +1,4 @@
+import type { ClassKind } from './classes.ts'
 import type { Coil } from './coil.ts'
 
 /**
@@ -13,6 +14,11 @@ export type ShellShape =
       chambers?: { perTurn: number; bodyChamber: number }
     }
   | {
+      /** A bivalve, chiton, tusk shell or monoplacophoran, built whole in classes.ts. */
+      kind: 'class'
+      class: ClassKind
+    }
+  | {
       kind: 'cowrie'
       /** Width and height relative to the existing cowrie model. */
       width: number
@@ -22,6 +28,10 @@ export type ShellShape =
     }
 
 export const shapes: Record<string, ShellShape> = {
+  'giant-clam': { kind: 'class', class: 'clam' },
+  'fuzzy-chiton': { kind: 'class', class: 'chiton' },
+  'tusk-shell': { kind: 'class', class: 'tusk' },
+  monoplacophoran: { kind: 'class', class: 'cap' },
   'tiger-cowrie': { kind: 'cowrie', width: 1, height: 1, margins: 0 },
   'money-cowrie': { kind: 'cowrie', width: 1.12, height: 0.82, margins: 1 },
   'textile-cone': {

@@ -104,6 +104,12 @@ const REGIONS = [
   ],
   ['galapagos', 'Galápagos Islands', 'east-pacific', [-92.5, -1.6, -89, 1.8]],
   [
+    'east-pacific-abyss',
+    'Eastern Pacific abyss',
+    'east-pacific',
+    [-91, -20, -74, 14],
+  ],
+  [
     'gulf-of-california',
     'Gulf of California',
     'east-pacific',
@@ -165,6 +171,16 @@ const NATIVE = {
     oceans: ['indian', 'coral-triangle', 'west-pacific', 'central-pacific'],
     claim: 'nautilus-range',
   },
+  'giant-clam': {
+    oceans: ['indian', 'coral-triangle', 'west-pacific', 'central-pacific'],
+    claim: 'giant-clam-range-habitat',
+  },
+  'fuzzy-chiton': { oceans: ['atlantic'], claim: 'fuzzy-chiton-range-habitat' },
+  'tusk-shell': {
+    oceans: ['east-atlantic'],
+    claim: 'tusk-shell-range-habitat',
+  },
+  monoplacophoran: { oceans: ['east-pacific'], claim: 'neopilina-range-depth' },
 }
 
 const SPECIES = {
@@ -173,6 +189,10 @@ const SPECIES = {
   'textile-cone': 'Conus textile',
   'queen-conch': 'Aliger gigas',
   'chambered-nautilus': 'Nautilus pompilius',
+  'giant-clam': 'Tridacna gigas',
+  'fuzzy-chiton': 'Acanthopleura granulata',
+  'tusk-shell': 'Antalis vulgaris',
+  monoplacophoran: 'Neopilina galatheae',
 }
 
 /** Specimens and observations of living or dead animals; fossils and automated tag detections are left out. */

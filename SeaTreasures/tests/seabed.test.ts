@@ -109,6 +109,7 @@ test('each place has its own shells, and Hawaii its own tiger cowrie', () => {
   assert.ok(!bahamas.includes('money-cowrie'))
   const hawaii = shellsAt('hawaiian-islands', ids).map((item) => item.speciesId)
   assert.deepEqual([...hawaii].sort(), [
+    'giant-clam',
     'money-cowrie',
     'textile-cone',
     'tiger-cowrie',
@@ -129,6 +130,8 @@ test('every place with shells has water and sand matched to underwater photos', 
   const { matchedColours } = await import('../src/sim/places.ts')
   const { placesWithShells } = await import('../src/sim/ranges.ts')
   for (const { region } of placesWithShells(allSpecies.map((s) => s.id))) {
+    // No daylight reaches the abyss: there are no photos to match, and it is drawn dark.
+    if (region.id === 'east-pacific-abyss') continue
     const matched = matchedColours[region.id]
     assert.ok(matched, `${region.id} has no photo-matched colours`)
     for (const c of [...matched.water, ...matched.sand])

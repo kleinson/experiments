@@ -4,36 +4,53 @@ import {
   Color,
   CylinderGeometry,
   DoubleSide,
-  Euler,
   Float32BufferAttribute,
   Group,
-  IcosahedronGeometry,
-  InstancedMesh,
-  LatheGeometry,
   Material,
-  Matrix4,
   Mesh,
   MeshStandardMaterial,
   Object3D,
   PlaneGeometry,
   Points,
   PointsMaterial,
-  Quaternion,
   RepeatWrapping,
   SphereGeometry,
   SRGBColorSpace,
   Vector2,
   Vector3,
 } from 'three'
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import { limb } from './bodies.ts'
+import { Batch, paint, place as placed } from './kit.ts'
+import {
+  anemone,
+  barrel,
+  blade,
+  boulder,
+  brain,
+  branching,
+  cucumber,
+  elkhorn,
+  fan,
+  kelp,
+  leather,
+  plates,
+  rock,
+  seaStar,
+  seaWhip,
+  table,
+  treeCoral,
+  treeWorm,
+  tubeSponge,
+  urchin,
+} from './reef.ts'
+import { swayClock, swaying } from './sway.ts'
 import type { Rgb } from './patterns.ts'
 import { seeded } from './patterns.ts'
 import type { Bed, Setting } from './seabed.ts'
 
 /**
  * The seabed around the specimen: an illustrative diorama built from the
- * setting's mix of beds. Sizes are relative to the specimen (`extent`), so
+ * setting's mix of beds. Its pieces are drawn at real sizes in millimetres; their layout follows `extent`, so
  * the scenery is a setting, not a measured landscape.
  */
 export type Scenery = {
@@ -43,11 +60,14 @@ export type Scenery = {
   /** True when something moves with the water. */
   animated: boolean
   sway: (seconds: number) => void
+  /** Coral and rock tops fish graze, open sand goatfish root in, and anemones for clownfish. */
+  feed: Vector3[]
+  sand: Vector3[]
+  homes: Vector3[]
   dispose: () => void
 }
 
 const rgb = ([r, g, b]: Rgb) => new Color(r / 255, g / 255, b / 255)
-const UP = new Vector3(0, 1, 0)
 /** Horizontal direction toward the default camera: tall things stay out of this corridor. */
 const TOWARD_VIEWER = new Vector2(260, 520).normalize()
 /** How far the seabed reaches from the specimen; beyond it the water takes over. */
@@ -122,43 +142,24 @@ const smooth = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t)
 }
 
-/** A cylinder from `a` to `b`, tapering from `ra` to `rb`, with a round end. */
-function segment(a: Vector3, b: Vector3, ra: number, rb: number) {
-  const length = a.distanceTo(b)
-  const geometry = new CylinderGeometry(rb, ra, length, 8, 1, false)
-  geometry.translate(0, length / 2, 0)
-  const q = new Quaternion().setFromUnitVectors(
-    UP,
-    b.clone().sub(a).normalize(),
-  )
-  geometry.applyMatrix4(new Matrix4().compose(a, q, new Vector3(1, 1, 1)))
-  const tip = new SphereGeometry(rb, 8, 6)
-  tip.translate(b.x, b.y, b.z)
-  return [geometry, tip]
-}
-
-function merged(parts: BufferGeometry[], own: Own) {
-  const geometry = mergeGeometries(parts, false)
-  parts.forEach((part) => part.dispose())
-  if (!geometry) throw new Error('Scenery geometry could not be merged.')
-  return own.geometry(geometry)
-}
-
 export function buildSeafloor(
   setting: Setting,
   extent: number,
   seed: number,
+  specimen = extent,
 ): Scenery {
   const own = track()
   const group = new Group()
   group.name = 'seabed'
   const random = seeded(seed)
+  // Sizes are real millimetres. `extent` (at least about 30 cm) only lays out the scene and keeps
+  // open sand around the animal; `specimen` is the animal's own length.
   const E = extent
+  const SWAY = 300
+  /** Small things on the sand start just beyond the animal itself. */
+  const near = Math.max(specimen * 1.3, 60)
+  const URCHIN = 400
   const swayers: { object: Object3D; phase: number; amount: number }[] = []
-  let grass: {
-    mesh: InstancedMesh
-    items: { at: Vector3; yaw: number; height: number; phase: number }[]
-  } | null = null
   let snow: { points: Points; base: Float32Array; top: number } | null = null
   const mix = setting.mix
   const weight = (bed: Bed) => mix[bed] ?? 0
@@ -170,18 +171,23 @@ export function buildSeafloor(
       new MeshStandardMaterial({ color: rgb(colour), roughness, ...extra }),
     )
 
+  /** Tall things stay out of the way: never in front of the animal, nor beside it within reach. */
+  const allowed = (x: number, z: number, tall: boolean, wide = 0) => {
+    if (!tall) return true
+    const along = x * TOWARD_VIEWER.x + z * TOWARD_VIEWER.y
+    const across = Math.abs(x * TOWARD_VIEWER.y - z * TOWARD_VIEWER.x)
+    if (along > -E * 1.2 - wide && across < E * 2.4 + wide) return false
+    return Math.hypot(x, z) >= E * 2 + wide
+  }
   /** Somewhere on the seabed between `near` and `far`; tall things keep `wide` clear of the line of sight. */
   const spot = (near: number, far: number, tall: boolean, wide = 0) => {
     for (let tries = 0; tries < 30; tries++) {
       const angle = random() * Math.PI * 2
       const r = Math.sqrt(between(near * near, far * far))
-      const p = new Vector2(Math.cos(angle) * r, Math.sin(angle) * r)
-      const along = p.dot(TOWARD_VIEWER)
-      const across = Math.abs(p.x * TOWARD_VIEWER.y - p.y * TOWARD_VIEWER.x)
-      // Tall things stay out of the way: never in front of the animal, nor beside it within reach.
-      if (tall && along > -E * 1.2 - wide && across < E * 2.4 + wide) continue
-      if (tall && Math.hypot(p.x, p.y) < E * 2 + wide) continue
-      return new Vector3(p.x, groundHeight(p.x, p.y), p.y)
+      const x = Math.cos(angle) * r
+      const z = Math.sin(angle) * r
+      if (allowed(x, z, tall, wide))
+        return new Vector3(x, groundHeight(x, z), z)
     }
     return null
   }
@@ -211,7 +217,8 @@ export function buildSeafloor(
     const sandy =
       setting.scene === 'beach' ? 1 : weight('sand') + weight('seagrass') * 0.5
     const map = groundTexture(setting.ground, Math.min(1, sandy * 1.4), own)
-    map.repeat.set(size / (E * 2.2), size / (E * 2.2))
+    // Ripples a few centimetres apart, as on real sand: one tile is about 60 cm.
+    map.repeat.set(size / 600, size / 600)
     // The texture already carries the sand colour; it also lifts the ripples as relief.
     const ground = new Mesh(
       own.geometry(geometry),
@@ -231,9 +238,26 @@ export function buildSeafloor(
     group.add(ground)
   }
 
-  // Coral heads in the place's own forms and colours (places.ts): table corals in the
-  // Indo-Pacific, elkhorn and sea fans in the Caribbean, soft corals in the Red Sea.
+  // The reef: coral heads gathered on low rocky bommies, in the place's own forms and colours
+  // (places.ts): table corals in the Indo-Pacific, elkhorn and sea fans in the Caribbean, soft
+  // corals in the Red Sea. Everything is painted with vertex colours and merged into a few
+  // meshes; whatever sways does so on the GPU (sway.ts).
   const place = setting.place
+  const hard = new Batch()
+  const soft = new Batch()
+  const debris = new Batch()
+  const feed: Vector3[] = []
+  const sandSpots: Vector3[] = []
+  const homes: Vector3[] = []
+  const put = (
+    batch: Batch,
+    built: { pieces: BufferGeometry[]; top: number },
+    at: Vector3,
+    yaw = random() * Math.PI * 2,
+  ) => {
+    for (const piece of built.pieces) batch.add(placed(piece, at, yaw))
+    return built.top
+  }
   const coralColours: Rgb[] = place.palette
   const formOrder = [
     'branching',
@@ -252,416 +276,421 @@ export function buildSeafloor(
     }
     return 'massive'
   }
-  const branch = (
-    parts: BufferGeometry[],
-    from: Vector3,
-    dir: Vector3,
-    length: number,
-    radius: number,
-    depth: number,
-    flat: Vector3 | null,
-  ) => {
-    const to = from.clone().addScaledVector(dir, length)
-    parts.push(...segment(from, to, radius, radius * 0.72))
-    if (depth === 0) return
-    const forks = depth > 2 ? 2 : random() > 0.4 ? 2 : 1
-    for (let k = 0; k < forks; k++) {
-      const turn = new Vector3(
-        between(-1, 1),
-        between(0.2, 0.8),
-        between(-1, 1),
-      )
-      if (flat) turn.projectOnPlane(flat)
-      const next = dir.clone().add(turn.multiplyScalar(0.7)).normalize()
-      if (next.y < 0.15) next.y = 0.15
-      branch(
-        parts,
-        to,
-        next.normalize(),
-        length * 0.78,
-        radius * 0.72,
-        depth - 1,
-        flat,
-      )
-    }
-  }
+  const indoPacific = ![
+    'caribbean',
+    'caribbean-seagrass',
+    'pink-sand',
+    'posidonia',
+    'rocky-algae',
+  ].includes(place.reef)
+  const caribbean = ['caribbean', 'caribbean-seagrass', 'pink-sand'].includes(
+    place.reef,
+  )
+  const pale = (colour: Rgb): Rgb => [
+    colour[0] + (240 - colour[0]) * 0.45,
+    colour[1] + (232 - colour[1]) * 0.45,
+    colour[2] + (220 - colour[2]) * 0.45,
+  ]
   const coral = (at: Vector3, scale: number) => {
     const form = pickForm()
     const colour = pick(coralColours)
-    const material = standard(colour, 0.9)
-    const holder = new Group()
-    holder.position.copy(at)
-    holder.rotation.y = random() * Math.PI * 2
-    if (form === 'elkhorn') {
-      // Broad, flattened antler branches spreading out low over the reef.
-      const parts: BufferGeometry[] = []
-      const arms = 4 + Math.floor(random() * 3)
-      for (let a = 0; a < arms; a++) {
-        const angle = (a / arms) * Math.PI * 2 + random() * 0.4
-        let from = new Vector3(0, scale * 0.05, 0)
-        let dir = new Vector3(
-          Math.cos(angle),
-          0.45,
-          Math.sin(angle),
-        ).normalize()
-        let width = scale * 0.11
+    let top = 0
+    if (form === 'branching')
+      top = put(hard, branching(random, scale, colour, pale(colour)), at)
+    else if (form === 'elkhorn')
+      top = put(hard, elkhorn(random, scale, colour), at)
+    else if (form === 'table')
+      top = put(
+        hard,
+        random() > 0.3
+          ? table(random, scale, colour)
+          : plates(random, scale, colour),
+        at,
+      )
+    else if (form === 'massive') {
+      top = put(
+        hard,
+        random() > 0.45
+          ? brain(random, scale, colour, [
+              colour[0] * 0.6,
+              colour[1] * 0.6,
+              colour[2] * 0.62,
+            ])
+          : boulder(random, scale, colour),
+        at,
+      )
+      // Christmas tree worms on the big heads.
+      if (random() > 0.5)
         for (let k = 0; k < 3; k++) {
-          const to = from.clone().addScaledVector(dir, scale * 0.28)
-          const piece = new CylinderGeometry(
-            width * 0.8,
-            width,
-            scale * 0.28,
-            8,
+          const a = random() * Math.PI * 2
+          const r = scale * between(0.1, 0.3)
+          put(
+            hard,
+            treeWorm(random, scale),
+            at
+              .clone()
+              .add(
+                new Vector3(
+                  Math.cos(a) * r,
+                  top * (1 - (r / scale) * 1.2),
+                  Math.sin(a) * r,
+                ),
+              ),
           )
-          piece.scale(1, 1, 0.32)
-          piece.translate(0, scale * 0.14, 0)
-          piece.applyMatrix4(
-            new Matrix4().compose(
-              from,
-              new Quaternion().setFromUnitVectors(UP, dir),
-              new Vector3(1, 1, 1),
-            ),
-          )
-          parts.push(piece)
-          from = to
-          dir = dir
-            .clone()
-            .add(new Vector3(between(-0.4, 0.4), 0.1, between(-0.4, 0.4)))
-            .normalize()
-          width *= 0.8
         }
-      }
-      holder.add(new Mesh(merged(parts, own), material))
-    } else if (form === 'branching') {
-      const parts: BufferGeometry[] = []
-      const stems = 3 + Math.floor(random() * 3)
-      for (let s = 0; s < stems; s++) {
-        const dir = new Vector3(
-          between(-0.6, 0.6),
-          1,
-          between(-0.6, 0.6),
-        ).normalize()
-        branch(
-          parts,
-          new Vector3(
-            between(-0.1, 0.1) * scale,
-            0,
-            between(-0.1, 0.1) * scale,
-          ),
-          dir,
-          scale * 0.32,
-          scale * 0.06,
-          3,
-          null,
-        )
-      }
-      holder.add(new Mesh(merged(parts, own), material))
-    } else if (form === 'massive') {
-      const geometry = new SphereGeometry(
-        1,
-        40,
-        20,
-        0,
-        Math.PI * 2,
-        0,
-        Math.PI * 0.55,
-      )
-      const position = geometry.getAttribute('position')
-      for (let i = 0; i < position.count; i++) {
-        const p = new Vector3().fromBufferAttribute(position, i)
-        const groove = Math.sin(p.x * 14 + Math.sin(p.z * 9) * 2) * 0.035
-        p.multiplyScalar(1 + groove)
-        position.setXYZ(i, p.x, p.y, p.z)
-      }
-      geometry.computeVertexNormals()
-      geometry.scale(scale * 0.55, scale * 0.42, scale * 0.5)
-      geometry.translate(0, -scale * 0.06, 0)
-      holder.add(new Mesh(own.geometry(geometry), material))
-    } else if (form === 'table') {
-      const parts: BufferGeometry[] = [
-        new CylinderGeometry(
-          scale * 0.08,
-          scale * 0.12,
-          scale * 0.45,
-          10,
-        ).translate(0, scale * 0.22, 0),
-        new CylinderGeometry(
-          scale * 0.6,
-          scale * 0.55,
-          scale * 0.06,
-          28,
-        ).translate(0, scale * 0.47, 0),
-      ]
-      const mesh = new Mesh(merged(parts, own), material)
-      mesh.rotation.z = between(-0.15, 0.15)
-      holder.add(mesh)
-    } else if (form === 'fan') {
-      const parts: BufferGeometry[] = []
-      const plane = new Vector3(0, 0, 1)
-      branch(
-        parts,
-        new Vector3(),
-        new Vector3(0, 1, 0),
-        scale * 0.3,
-        scale * 0.025,
-        5,
-        plane,
-      )
-      const mesh = new Mesh(
-        merged(parts, own),
-        standard(
+    } else if (form === 'fan')
+      top = put(
+        soft,
+        fan(
+          random,
+          scale,
           pick([
             [170, 90, 150],
             [214, 96, 86],
             [236, 170, 90],
+            [150, 70, 160],
           ] as Rgb[]),
-          0.9,
+          SWAY,
         ),
+        at,
       )
-      holder.add(mesh)
-      swayers.push({ object: holder, phase: random() * 6, amount: 0.04 })
-    } else {
-      const parts: BufferGeometry[] = [
-        new CylinderGeometry(
-          scale * 0.12,
-          scale * 0.16,
-          scale * 0.2,
-          14,
-        ).translate(0, scale * 0.1, 0),
-      ]
-      for (let k = 0; k < 16; k++) {
-        const a = (k / 16) * Math.PI * 2
-        const base = new Vector3(
-          Math.cos(a) * scale * 0.1,
-          scale * 0.2,
-          Math.sin(a) * scale * 0.1,
-        )
-        const tip = base
-          .clone()
-          .add(
-            new Vector3(
-              Math.cos(a) * scale * 0.2,
-              scale * between(0.18, 0.3),
-              Math.sin(a) * scale * 0.2,
-            ),
-          )
-        parts.push(
-          limb(
-            [
-              base,
-              base
-                .clone()
-                .lerp(tip, 0.5)
-                .add(new Vector3(0, scale * 0.05, 0)),
-              tip,
-            ],
-            scale * 0.025,
-            0.3,
-            8,
-          ),
-        )
-      }
-      holder.add(
-        new Mesh(
-          merged(parts, own),
-          standard(
+    else {
+      const roll = random()
+      if (roll < 0.35 && indoPacific) {
+        top = put(
+          soft,
+          anemone(
+            random,
+            scale * 0.8,
             pick([
-              [240, 170, 190],
-              [180, 220, 190],
-              [250, 200, 140],
+              [214, 180, 120],
+              [170, 200, 120],
+              [230, 150, 160],
             ] as Rgb[]),
-            0.8,
+            SWAY,
           ),
-        ),
-      )
-      swayers.push({ object: holder, phase: random() * 6, amount: 0.05 })
+          at,
+        )
+        homes.push(at.clone().add(new Vector3(0, top, 0)))
+      } else if (roll < 0.7)
+        top = put(
+          soft,
+          leather(
+            random,
+            scale,
+            pick([
+              [196, 176, 120],
+              [150, 170, 110],
+              [210, 190, 150],
+            ] as Rgb[]),
+            SWAY,
+          ),
+          at,
+        )
+      else
+        top = put(
+          soft,
+          treeCoral(
+            random,
+            scale,
+            pick([
+              [240, 110, 160],
+              [190, 90, 200],
+              [250, 150, 70],
+              [240, 200, 90],
+            ] as Rgb[]),
+            SWAY,
+          ),
+          at,
+        )
     }
-    group.add(holder)
+    feed.push(at.clone().add(new Vector3(0, top, 0)))
   }
   const corals = Math.round(
-    26 * weight('coral') * (0.35 + 0.65 * place.coral) +
+    38 * weight('coral') * (0.35 + 0.65 * place.coral) +
       4 * weight('deep') * (setting.scene === 'seabed' ? 1 : 0),
   )
-  for (let i = 0; i < corals; i++) {
-    const scale = E * between(0.6, 1.5)
-    const at = spot(E * 1.15, E * 7, true, scale * 0.6)
-    if (at) coral(at, scale)
+  if (corals) {
+    // Bommies: a few low rocky mounds the corals grow on, so the reef reads as patches.
+    const mounds: Vector3[] = []
+    const moundCount = Math.max(2, Math.round(corals / 7))
+    for (let m = 0; m < moundCount; m++) {
+      const at = spot(E * 1.6, E * 7, true, 900)
+      if (!at) continue
+      mounds.push(at)
+      put(
+        hard,
+        rock(
+          random,
+          between(400, 900),
+          pick(place.rock),
+          indoPacific ? [190, 130, 140] : [150, 120, 120],
+          0.4,
+        ),
+        at.clone().add(new Vector3(0, -80, 0)),
+      )
+    }
+    for (let i = 0; i < corals; i++) {
+      // Real sizes: coral heads from about 30 cm to over a metre across.
+      const scale = between(300, 1200)
+      let at: Vector3 | null = null
+      const mound = mounds.length ? pick(mounds) : null
+      if (mound && random() > 0.25) {
+        for (let tries = 0; tries < 8 && !at; tries++) {
+          const a = random() * Math.PI * 2
+          const r = between(150, 1100)
+          const x = mound.x + Math.cos(a) * r
+          const z = mound.z + Math.sin(a) * r
+          if (allowed(x, z, true, scale * 0.5))
+            at = new Vector3(
+              x,
+              groundHeight(x, z) + (r < 600 ? 160 * (1 - r / 600) : 0),
+              z,
+            )
+        }
+      }
+      at ??= spot(E * 1.15, E * 7, true, scale * 0.6)
+      if (at) coral(at, scale)
+    }
   }
 
-  // Rubble: broken, bleached coral branches and pebbles.
+  // Sponges: tubes and barrels on Caribbean reefs; vases and sea whips on a deep slope.
+  const sponges = caribbean ? Math.round(5 * weight('coral') + 1) : deep ? 6 : 0
+  for (let i = 0; i < sponges; i++) {
+    const scale = between(400, 900)
+    const at = spot(E * 1.3, E * 6.5, true, scale * 0.4)
+    if (!at) continue
+    const colour = pick(
+      (deep
+        ? [
+            [214, 170, 104],
+            [200, 132, 98],
+            [228, 200, 150],
+          ]
+        : [
+            [150, 80, 170],
+            [230, 190, 70],
+            [200, 100, 70],
+            [170, 110, 190],
+          ]) as Rgb[],
+    )
+    const top = put(
+      hard,
+      random() > 0.5
+        ? tubeSponge(random, scale, colour)
+        : barrel(random, scale, colour),
+      at,
+    )
+    feed.push(at.clone().add(new Vector3(0, top, 0)))
+  }
+  if (deep && setting.scene === 'seabed')
+    for (let i = 0; i < 9; i++) {
+      const at = spot(E * 1.3, E * 7, true)
+      if (at)
+        put(
+          soft,
+          seaWhip(
+            random,
+            SWAY,
+            pick([
+              [214, 92, 70],
+              [236, 150, 70],
+              [190, 70, 110],
+            ] as Rgb[]),
+            SWAY,
+          ),
+          at,
+        )
+    }
+
+  // Rubble: broken, bleached coral branches.
   const bits = Math.round(46 * weight('rubble'))
-  if (bits) {
-    const parts: BufferGeometry[] = []
-    for (let i = 0; i < bits; i++) {
-      const at = spot(E * 0.75, E * 6, false)
-      if (!at) continue
-      const length = E * between(0.12, 0.35)
-      const dir = new Vector3(
-        between(-1, 1),
-        between(-0.1, 0.25),
-        between(-1, 1),
-      ).normalize()
-      const start = at.clone().add(new Vector3(0, E * 0.02, 0))
-      parts.push(
-        ...segment(
-          start,
-          start.clone().addScaledVector(dir, length),
-          E * 0.03,
-          E * 0.022,
+  for (let i = 0; i < bits; i++) {
+    const at = spot(near * 0.75, E * 6, false)
+    if (!at) continue
+    const length = between(40, 120)
+    const piece = new CylinderGeometry(7, 10, length, 6, 1, false)
+    piece.rotateZ(Math.PI / 2 - between(-0.1, 0.25))
+    piece.translate(0, 8, 0)
+    debris.add(
+      placed(
+        paint(
+          piece,
+          pick([
+            [230, 222, 206],
+            [214, 206, 190],
+            [240, 234, 222],
+          ] as Rgb[]),
         ),
-      )
-    }
-    if (parts.length) {
-      const rubble = new Mesh(
-        merged(parts, own),
-        standard([230, 222, 206], 0.95),
-      )
-      // Small debris is drawn as tone only: outlines on tiny pieces read as ink blots.
-      rubble.userData.inkGround = true
-      group.add(rubble)
-    }
+        at,
+      ),
+    )
   }
 
   // Pebbles and shell fragments on sand.
   const pebbles = Math.round(
-    36 * (weight('sand') + weight('rubble') * 0.5 + weight('seagrass') * 0.3),
+    40 * (weight('sand') + weight('rubble') * 0.5 + weight('seagrass') * 0.3),
   )
   for (let i = 0; i < pebbles; i++) {
-    const at = spot(E * 0.7, E * 6, false)
+    const at = spot(near * 0.7, E * 6, false)
     if (!at) continue
-    const r = E * between(0.025, 0.08)
+    const r = between(6, 30)
     const shard = random() > 0.75
     const geometry = shard
       ? new SphereGeometry(
           r * 1.4,
           10,
-          6,
+          4,
           0,
           Math.PI * between(0.6, 1.2),
           0,
           Math.PI * 0.4,
         )
-      : new SphereGeometry(r, 10, 8)
-    const mesh = new Mesh(
-      own.geometry(geometry),
-      standard(
-        shard
-          ? [238, 226, 214]
-          : pick([
-              [176, 168, 156],
-              [204, 196, 182],
-              [140, 132, 124],
-            ] as Rgb[]),
-        0.9,
-        { side: DoubleSide },
+      : new SphereGeometry(r, 8, 6)
+    if (shard) geometry.rotateX(Math.PI)
+    else geometry.scale(1, 0.55, 1)
+    geometry.translate(0, r * 0.25, 0)
+    debris.add(
+      placed(
+        paint(
+          geometry,
+          shard
+            ? [238, 226, 214]
+            : pick([
+                [176, 168, 156],
+                [204, 196, 182],
+                [140, 132, 124],
+              ] as Rgb[]),
+        ),
+        at,
       ),
     )
-    mesh.scale.set(1, shard ? 1 : 0.55, 1)
-    mesh.position.copy(at).add(new Vector3(0, r * 0.25, 0))
-    mesh.userData.inkGround = true
-    mesh.rotation.set(
-      shard ? Math.PI : 0,
-      random() * 6,
-      shard ? between(-0.3, 0.3) : 0,
-    )
-    group.add(mesh)
   }
 
-  // Rocks: rounded boulders; dark and pitted on volcanic coasts, with a few urchins.
+  // Life on the sand: sea stars and sea cucumbers.
+  if (
+    setting.scene === 'seabed' &&
+    (weight('sand') + weight('seagrass') + weight('rubble') > 0.2 || corals > 0)
+  ) {
+    const stars = 2 + Math.floor(random() * 3)
+    for (let i = 0; i < stars; i++) {
+      const at = spot(E * 1.6, E * 5, false)
+      if (at)
+        put(
+          hard,
+          seaStar(
+            random,
+            between(180, 400),
+            pick(
+              (indoPacific
+                ? [
+                    [60, 110, 200],
+                    [230, 120, 60],
+                    [200, 60, 60],
+                  ]
+                : [
+                    [230, 150, 70],
+                    [200, 80, 60],
+                    [214, 170, 90],
+                  ]) as Rgb[],
+            ),
+          ),
+          at,
+        )
+    }
+    const cukes = 1 + Math.floor(random() * 3)
+    for (let i = 0; i < cukes; i++) {
+      const at = spot(E * 1.6, E * 5, false)
+      if (at)
+        put(
+          hard,
+          cucumber(
+            random,
+            between(350, 650),
+            pick([
+              [40, 32, 30],
+              [110, 80, 50],
+              [70, 60, 40],
+            ] as Rgb[]),
+          ),
+          at,
+        )
+    }
+  }
+  for (let i = 0; i < 24; i++) {
+    const at = spot(near, E * 5.5, false)
+    if (at) sandSpots.push(at)
+  }
+
+  // Rocks: weathered boulders, dark on volcanic coasts, with algae or encrusting growth on top,
+  // and long-spined urchins in their shelter.
   const rocks = Math.round(16 * weight('rock') + (deep ? 6 : 0))
   const volcanic = setting.coast === 'volcanic'
   for (let i = 0; i < rocks; i++) {
-    // Granite weathers into big rounded boulders; basalt into rougher, flatter blocks.
     const granite = place.reef === 'granite'
-    const r = E * (granite ? between(0.8, 2.2) : between(0.35, 1.3))
-    const at = spot(E * 1.2, E * 7, r > E * 0.3, r)
+    const r = granite ? between(600, 1800) : between(150, 650)
+    const at = spot(E * 1.2, E * 7, r > 150, r)
     if (!at) continue
-    const geometry = new IcosahedronGeometry(1, 3)
-    const position = geometry.getAttribute('position')
-    const k = random() * 10
-    for (let v = 0; v < position.count; v++) {
-      const p = new Vector3().fromBufferAttribute(position, v)
-      const bump =
-        1 +
-        0.12 * Math.sin(p.x * 3 + k) * Math.cos(p.z * 2.6 + k) +
-        0.05 * Math.sin(p.y * 7 + k)
-      p.multiplyScalar(bump)
-      position.setXYZ(v, p.x, p.y, p.z)
-    }
-    geometry.computeVertexNormals()
-    const mesh = new Mesh(
-      own.geometry(geometry),
-      standard(
-        deep && !volcanic
-          ? pick([
-              [84, 80, 78],
-              [104, 98, 94],
-            ] as Rgb[])
-          : pick(place.rock),
-        0.95,
+    const colour =
+      deep && !volcanic
+        ? pick([
+            [84, 80, 78],
+            [104, 98, 94],
+          ] as Rgb[])
+        : pick(place.rock)
+    const cover: Rgb | null = deep
+      ? null
+      : volcanic
+        ? [96, 120, 70]
+        : granite
+          ? [150, 150, 110]
+          : [184, 132, 140]
+    const top = put(
+      hard,
+      rock(
+        random,
+        r,
+        colour,
+        cover,
+        granite ? between(0.6, 0.85) : between(0.45, 0.7),
       ),
+      at.clone().add(new Vector3(0, -r * 0.12, 0)),
     )
-    mesh.scale.set(
-      r,
-      r * (granite ? between(0.6, 0.85) : between(0.45, 0.7)),
-      r * between(0.7, 1),
-    )
-    mesh.position.copy(at).add(new Vector3(0, -r * 0.12, 0))
-    mesh.rotation.y = random() * 6
-    group.add(mesh)
-    if ((volcanic || weight('rock') > 0.5) && random() > 0.55) {
-      const parts: BufferGeometry[] = [new SphereGeometry(E * 0.08, 14, 10)]
-      for (let s = 0; s < 40; s++) {
-        const d = new Vector3(
-          between(-1, 1),
-          between(0, 1),
-          between(-1, 1),
-        ).normalize()
-        parts.push(
-          ...segment(
-            d.clone().multiplyScalar(E * 0.07),
-            d.clone().multiplyScalar(E * 0.22),
-            E * 0.008,
-            E * 0.002,
-          ),
-        )
-      }
-      const urchin = new Mesh(merged(parts, own), standard([70, 40, 72], 0.7))
-      const top = at
-        .clone()
-        .add(
-          new Vector3(between(-0.4, 0.4) * r, r * 0.45, between(-0.4, 0.4) * r),
-        )
-      urchin.position.copy(top)
-      group.add(urchin)
-    }
+    feed.push(at.clone().add(new Vector3(0, top - r * 0.12, 0)))
+    if ((volcanic || weight('rock') > 0.5 || corals > 0) && random() > 0.55)
+      put(
+        hard,
+        urchin(random, URCHIN),
+        at
+          .clone()
+          .add(new Vector3(between(-0.6, 0.6) * r, 0, r * between(0.7, 1)))
+          .setY(groundHeight(at.x, at.z + r)),
+      )
   }
-
-  // Seagrass: many ribbon blades in patches, swaying together.
-  const blades = Math.round(900 * weight('seagrass'))
-  if (blades) {
-    // Turtle grass has broad, short, bright ribbons; Neptune grass long, narrow, darker ones.
-    const kind = place.grass
-    const bladeWidth =
-      kind === 'turtle' ? 0.065 : kind === 'posidonia' ? 0.035 : 0.04
-    const tall = kind === 'posidonia' ? 1.8 : kind === 'turtle' ? 0.8 : 1
-    const geometry = new PlaneGeometry(E * bladeWidth, 1, 1, 6)
-    geometry.translate(0, 0.5, 0)
-    const position = geometry.getAttribute('position')
-    for (let i = 0; i < position.count; i++) {
-      const y = position.getY(i)
-      position.setZ(i, y * y * E * 0.25)
+  if (corals > 0)
+    for (let i = 0; i < 3; i++) {
+      const at = spot(E * 2, E * 5, true)
+      if (at) put(hard, urchin(random, URCHIN), at)
     }
-    geometry.computeVertexNormals()
-    const material = standard([92, 146, 82], 0.8, { side: DoubleSide })
-    const items: { at: Vector3; yaw: number; height: number; phase: number }[] =
-      []
+
+  // Seagrass: many ribbon blades in patches. Turtle grass has broad, short, bright ribbons;
+  // Neptune grass long, narrow, darker ones.
+  const blades = Math.round(1100 * weight('seagrass'))
+  if (blades) {
+    const kind = place.grass
+    // Real blades: turtle grass about a centimetre wide and up to 35 cm long; Neptune grass
+    // about as wide and up to a metre long.
+    const bladeWidth = kind === 'turtle' ? 10 : kind === 'posidonia' ? 9 : 5
+    const tall = kind === 'posidonia' ? 2 : kind === 'turtle' ? 0.9 : 0.8
+    const colour: Rgb = kind === 'posidonia' ? [70, 100, 46] : [92, 150, 80]
     const patches = Math.max(4, Math.round(16 * weight('seagrass')))
-    for (let p = 0; p < patches && items.length < blades; p++) {
+    let made = 0
+    for (let p = 0; p < patches && made < blades; p++) {
       const centre = spot(E * 1.0, E * 6.5, false)
       if (!centre) continue
       const reach = E * between(0.6, 1.4)
       const per = Math.ceil(blades / patches)
+      const phase = random() * 6
       for (let b = 0; b < per; b++) {
         const a = random() * Math.PI * 2
         const d = Math.sqrt(random()) * reach
@@ -671,178 +700,64 @@ export function buildSeafloor(
         const along = x * TOWARD_VIEWER.x + z * TOWARD_VIEWER.y
         const across = Math.abs(x * TOWARD_VIEWER.y - z * TOWARD_VIEWER.x)
         const low = along > -E * 0.4 || across < E * 1.6
-        items.push({
-          at: new Vector3(x, groundHeight(x, z), z),
-          yaw: random() * Math.PI * 2,
-          height: E * tall * (low ? between(0.12, 0.28) : between(0.35, 0.9)),
-          phase: random() * 6,
-        })
+        const height = tall * (low ? between(80, 160) : between(160, 380))
+        const shade: Rgb = [
+          colour[0] * between(0.85, 1.15),
+          colour[1] * between(0.9, 1.1),
+          colour[2] * between(0.85, 1.15),
+        ]
+        soft.add(
+          placed(
+            blade(random, bladeWidth, height, shade, SWAY, phase + x * 0.002),
+            new Vector3(x, groundHeight(x, z), z),
+            random() * Math.PI * 2,
+          ),
+        )
+        made++
       }
     }
-    const mesh = new InstancedMesh(
-      own.geometry(geometry),
-      material,
-      items.length,
-    )
-    const colour = new Color()
-    items.forEach((_, i) => {
-      if (kind === 'posidonia')
-        colour.setRGB(
-          between(0.24, 0.32),
-          between(0.36, 0.44),
-          between(0.14, 0.2),
-        )
-      else
-        colour.setRGB(
-          between(0.32, 0.42),
-          between(0.55, 0.66),
-          between(0.28, 0.36),
-        )
-      mesh.setColorAt(i, colour)
-    })
-    mesh.castShadow = false
-    group.add(mesh)
-    grass = { mesh, items }
   }
 
   // Kelp and brown algae: tall stipes with blades and floats, and bushy Sargassum-like clumps.
   const plants = Math.round(22 * weight('kelp'))
   for (let i = 0; i < plants; i++) {
     const tall = random() > 0.45
-    const height = E * (tall ? between(3, 7) : between(0.8, 1.8))
     const at = spot(E * 1.3, E * 8, true, E * 0.3)
-    if (!at) continue
-    const plant = new Group()
-    plant.position.copy(at)
-    const stipe: BufferGeometry[] = []
-    const leaves: BufferGeometry[] = []
-    const floats: BufferGeometry[] = []
-    const stems = tall ? 1 : 4
-    for (let s = 0; s < stems; s++) {
-      const lean = new Vector3(
-        between(-0.25, 0.25),
-        1,
-        between(-0.25, 0.25),
-      ).normalize()
-      const points = [0, 0.33, 0.66, 1].map((f) =>
-        lean
-          .clone()
-          .multiplyScalar(height * f)
-          .add(new Vector3(Math.sin(f * 3 + s) * E * 0.15, 0, 0)),
-      )
-      stipe.push(limb(points, E * (tall ? 0.03 : 0.018), 0.6, 16))
-      const count = tall ? Math.floor(height / (E * 0.35)) : 10
-      for (let k = 1; k < count; k++) {
-        const f = k / count
-        const base = points[0]!.clone().lerp(points[3]!, f)
-        const length = E * (tall ? between(0.5, 0.9) : between(0.12, 0.22))
-        const blade = new PlaneGeometry(
-          length * (tall ? 0.28 : 0.4),
-          length,
-          1,
-          4,
-        )
-        blade.translate(0, length / 2, 0)
-        const bp = blade.getAttribute('position')
-        for (let v = 0; v < bp.count; v++) {
-          const y = bp.getY(v) / length
-          bp.setX(
-            v,
-            bp.getX(v) * Math.sin(Math.PI * Math.min(1, y * 1.1 + 0.05)),
-          )
-          bp.setZ(v, y * y * length * 0.3)
-        }
-        blade.computeVertexNormals()
-        const side = k % 2 ? 1 : -1
-        blade.applyMatrix4(
-          new Matrix4().compose(
-            base,
-            new Quaternion().setFromEuler(
-              new Euler(0, (k * 2.4) % 6.28, side * 0.9),
-            ),
-            new Vector3(1, 1, 1),
-          ),
-        )
-        leaves.push(blade)
-        if (random() > 0.5) {
-          const bladder = new SphereGeometry(E * (tall ? 0.05 : 0.025), 10, 8)
-          bladder.translate(base.x + side * E * 0.06, base.y + E * 0.04, base.z)
-          floats.push(bladder)
-        }
-      }
-    }
-    plant.add(new Mesh(merged(stipe, own), standard([118, 98, 46], 0.8)))
-    plant.add(
-      new Mesh(
-        merged(leaves, own),
-        standard(tall ? [132, 116, 52] : [150, 120, 50], 0.8, {
-          side: DoubleSide,
-        }),
-      ),
-    )
-    if (floats.length)
-      plant.add(new Mesh(merged(floats, own), standard([168, 140, 64], 0.6)))
-    group.add(plant)
-    swayers.push({
-      object: plant,
-      phase: random() * 6,
-      amount: tall ? 0.05 : 0.08,
-    })
+    if (at) put(soft, kelp(random, 400, tall), at)
   }
 
-  // Deep slope: vase sponges and slender sea whips.
-  if (deep && setting.scene === 'seabed') {
-    for (let i = 0; i < 7; i++) {
-      const scale = E * between(0.5, 1.2)
-      const at = spot(E * 1.3, E * 6.5, true, scale * 0.4)
-      if (!at) continue
-      const profile = [0, 0.15, 0.4, 0.7, 1].map(
-        (f) => new Vector2(scale * (0.12 + 0.28 * Math.pow(f, 1.4)), scale * f),
-      )
-      const vase = new Mesh(
-        own.geometry(new LatheGeometry(profile, 24)),
-        standard(
-          pick([
-            [214, 170, 104],
-            [200, 132, 98],
-            [228, 200, 150],
-          ] as Rgb[]),
-          0.9,
-          { side: DoubleSide },
-        ),
-      )
-      vase.position.copy(at)
-      group.add(vase)
-    }
-    for (let i = 0; i < 9; i++) {
-      const height = E * between(1.2, 2.8)
-      const at = spot(E * 1.3, E * 7, true)
-      if (!at) continue
-      const whip = new Group()
-      whip.position.copy(at)
-      const bend = between(-0.4, 0.4)
-      const points = [0, 0.4, 0.75, 1].map(
-        (f) =>
-          new Vector3(Math.sin(f * 2) * bend * height * 0.3, height * f, 0),
-      )
-      whip.add(
-        new Mesh(
-          own.geometry(limb(points, E * 0.022, 0.25, 16)),
-          standard(
-            pick([
-              [214, 92, 70],
-              [236, 150, 70],
-              [190, 70, 110],
-            ] as Rgb[]),
-            0.8,
-          ),
-        ),
-      )
-      whip.rotation.y = random() * 6
-      group.add(whip)
-      swayers.push({ object: whip, phase: random() * 6, amount: 0.05 })
-    }
+  const reefMesh = (batch: Batch, material: Material, ground = false) => {
+    const geometry = batch.merge()
+    if (!geometry) return
+    const mesh = new Mesh(own.geometry(geometry), own.material(material))
+    // Small debris is drawn as tone only: outlines on tiny pieces read as ink blots.
+    if (ground) mesh.userData.inkGround = true
+    group.add(mesh)
   }
+  reefMesh(
+    hard,
+    new MeshStandardMaterial({
+      vertexColors: true,
+      roughness: 0.85,
+      side: DoubleSide,
+    }),
+  )
+  const swaysNow = soft.size > 0
+  reefMesh(
+    soft,
+    swaying(
+      new MeshStandardMaterial({
+        vertexColors: true,
+        roughness: 0.75,
+        side: DoubleSide,
+      }),
+    ),
+  )
+  reefMesh(
+    debris,
+    new MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }),
+    true,
+  )
 
   // The beach: wet sand, the water's edge and its foam line.
   if (setting.scene === 'beach') {
@@ -921,11 +836,8 @@ export function buildSeafloor(
     snow = { points, base, top }
   }
 
-  const matrix = new Matrix4()
-  const q = new Quaternion()
-  const euler = new Euler()
-  const one = new Vector3(1, 1, 1)
   const sway = (t: number) => {
+    swayClock.value = t
     for (const item of swayers) {
       if (item.amount === 0) {
         item.object.position.x = Math.sin(t * 0.5) * E * 0.25
@@ -933,17 +845,6 @@ export function buildSeafloor(
       }
       item.object.rotation.x = Math.sin(t * 0.7 + item.phase) * item.amount
       item.object.rotation.z = Math.cos(t * 0.5 + item.phase) * item.amount
-    }
-    if (grass) {
-      grass.items.forEach((item, i) => {
-        const bend = Math.sin(t * 1.1 + item.phase + item.at.x / E) * 0.22
-        euler.set(bend, item.yaw, bend * 0.4)
-        q.setFromEuler(euler)
-        matrix.compose(item.at, q, one.set(1, item.height, 1))
-        grass!.mesh.setMatrixAt(i, matrix)
-      })
-      grass.mesh.instanceMatrix.needsUpdate = true
-      grass.mesh.computeBoundingSphere()
     }
     if (snow) {
       const position = snow.points.geometry.getAttribute('position')
@@ -967,7 +868,10 @@ export function buildSeafloor(
   return {
     group,
     ground: setting.scene !== 'open-water',
-    animated: swayers.length > 0 || grass !== null || snow !== null,
+    animated: swayers.length > 0 || swaysNow || snow !== null,
+    feed,
+    sand: sandSpots,
+    homes,
     sway,
     dispose: own.dispose,
   }

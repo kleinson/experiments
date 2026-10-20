@@ -1,31 +1,28 @@
 import {
-  AdditiveBlending,
   BufferGeometry,
   Color,
-  ConeGeometry,
-  SRGBColorSpace,
-  DoubleSide,
+  DataTexture,
+  LinearFilter,
+  LinearMipmapLinearFilter,
+  RepeatWrapping,
   Float32BufferAttribute,
   Group,
-  InstancedMesh,
   Material,
-  Matrix4,
   Mesh,
-  MeshBasicMaterial,
   MeshStandardMaterial,
   Object3D,
-  Quaternion,
+  Points,
   ShaderMaterial,
-  SphereGeometry,
+  Vector2,
   Vector3,
   Vector4,
 } from 'three'
 import type { WebGLProgramParametersWithUniforms } from 'three'
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import { seeded } from './patterns.ts'
 import type { Rgb } from './patterns.ts'
 import type { Setting } from './seabed.ts'
 import { daylightAt } from './depth.ts'
+import { buildFish } from './fish.ts'
 
 /**
  * Light under water: what makes the seabed read as the sea floor rather than
@@ -63,10 +60,9 @@ export const water = {
 const WINDOW = /* glsl */ `
   if (stWindow.w > 0.0) {
     float stR = length(stWorld.xz - stWindow.xz) / stWindow.w;
-    float stInside = 1.0 - smoothstep(0.78, 0.96, stR);
-    diffuseColor.a *= mix(1.0, 0.16, stInside);
-    float stRim = smoothstep(0.9, 0.97, stR) * (1.0 - smoothstep(0.97, 1.04, stR));
-    outgoingLight *= 1.0 - stRim * 0.5;
+    // Just thin enough to see the animal: a soft-edged patch, no ring.
+    float stInside = 1.0 - smoothstep(0.45, 1.0, stR);
+    diffuseColor.a *= mix(1.0, 0.42, stInside);
   }`
 
 /**
@@ -102,28 +98,60 @@ export function windowed(material: Material) {
   return material
 }
 
-const NOISE = /* glsl */ `
-float stHash(vec2 p) {
-  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-}
-// Voronoi-style caustic web: bright where cells meet, which is how focused light looks on sand.
-float stCaustic(vec2 p, float t) {
-  vec2 i = floor(p);
-  vec2 f = fract(p);
-  float first = 8.0;
-  float second = 8.0;
-  for (int y = -1; y <= 1; y++)
-    for (int x = -1; x <= 1; x++) {
-      vec2 g = vec2(float(x), float(y));
-      vec2 o = vec2(stHash(i + g), stHash(i + g + 17.0));
-      o = 0.5 + 0.42 * sin(t + 6.2831 * o);
-      float d = length(g + o - f);
-      if (d < first) { second = first; first = d; }
-      else if (d < second) second = d;
+/**
+ * The caustic web, drawn once into a small tileable texture: bright where
+ * Voronoi cells meet, which is how light focused by surface waves looks on
+ * sand. The shader slides two copies of it across each other, which costs two
+ * texture reads instead of evaluating the cells for every pixel.
+ */
+let causticMap: DataTexture | null = null
+function caustics() {
+  if (causticMap) return causticMap
+  const size = 256
+  const cells = 6
+  const random = seeded(31)
+  const points = Array.from({ length: cells * cells }, () => [
+    0.12 + 0.76 * random(),
+    0.12 + 0.76 * random(),
+  ])
+  const data = new Uint8Array(size * size * 4)
+  for (let y = 0; y < size; y++)
+    for (let x = 0; x < size; x++) {
+      const px = (x / size) * cells
+      const py = (y / size) * cells
+      const cx = Math.floor(px)
+      const cy = Math.floor(py)
+      let first = 9
+      let second = 9
+      for (let j = -1; j <= 1; j++)
+        for (let i = -1; i <= 1; i++) {
+          const gx = cx + i
+          const gy = cy + j
+          const point =
+            points[
+              (((gy % cells) + cells) % cells) * cells +
+                (((gx % cells) + cells) % cells)
+            ]!
+          const d = Math.hypot(gx + point[0]! - px, gy + point[1]! - py)
+          if (d < first) {
+            second = first
+            first = d
+          } else if (d < second) second = d
+        }
+      const edge = Math.max(0, 1 - (second - first) / 0.16)
+      const value = Math.round(255 * edge * edge * (3 - 2 * edge))
+      const k = (y * size + x) * 4
+      data[k] = data[k + 1] = data[k + 2] = value
+      data[k + 3] = 255
     }
-  return 1.0 - smoothstep(0.0, 0.12, second - first);
+  causticMap = new DataTexture(data, size, size)
+  causticMap.wrapS = causticMap.wrapT = RepeatWrapping
+  causticMap.magFilter = LinearFilter
+  causticMap.minFilter = LinearMipmapLinearFilter
+  causticMap.generateMipmaps = true
+  causticMap.needsUpdate = true
+  return causticMap
 }
-`
 
 /**
  * Adds caustics and water absorption to a lit material. Idempotent. `near`
@@ -143,6 +171,7 @@ export function underwater(material: Material, near = false) {
     previous?.call(material, shader, renderer)
     shader.uniforms.stTime = water.time
     shader.uniforms.stCaustics = water.caustics
+    shader.uniforms.stCausticMap = { value: caustics() }
     shader.uniforms.stScale = water.scale
     shader.uniforms.stWater = water.colour
     shader.uniforms.stNear = water.near
@@ -178,9 +207,9 @@ export function underwater(material: Material, near = false) {
         uniform vec3 stCentre;
         uniform vec4 stWindow;
         uniform vec3 stCast;
+        uniform sampler2D stCausticMap;
         varying vec3 stWorld;
-        varying vec3 stNormalW;
-        ${NOISE}`,
+        varying vec3 stNormalW;`,
       )
       .replace(
         '#include <opaque_fragment>',
@@ -188,10 +217,10 @@ export function underwater(material: Material, near = false) {
         {
           vec2 q = stWorld.xz / stScale;
           float t = stTime * 0.6;
-          // Two layers at different scales and speeds, slightly split by colour like real caustics.
-          float c1 = stCaustic(q + vec2(t * 0.11, t * 0.07), t);
-          float c2 = stCaustic(q * 1.7 - vec2(t * 0.05, t * 0.09) + 3.1, t * 1.3);
-          float c = c1 * 0.65 + c2 * 0.45;
+          // Two layers of the web drifting across each other: where they cross, the light focuses.
+          float c1 = texture2D(stCausticMap, q / 6.0 + vec2(t * 0.018, t * 0.012)).r;
+          float c2 = texture2D(stCausticMap, q / 3.5 - vec2(t * 0.011, t * 0.016) + 0.37).r;
+          float c = min(c1, c2) * 1.4 + (c1 + c2) * 0.18;
           float up = smoothstep(-0.1, 0.8, stNormalW.y);
           outgoingLight += diffuseColor.rgb * vec3(0.55, 0.62, 0.65) * c * up * stCaustics * ${strength};
           // The water tints everything in it, as in photographs taken there; the specimen a little less.
@@ -295,7 +324,14 @@ export function waterFor(
  * The water around the seabed: the surface seen from below, shafts of light
  * and a few small fish. Returns its own animate and dispose.
  */
-export function buildWater(setting: Setting, extent: number, seed: number) {
+export function buildWater(
+  setting: Setting,
+  extent: number,
+  seed: number,
+  life: { feed: Vector3[]; sand: Vector3[]; homes: Vector3[] } | null = null,
+  avoid: Vector3 = new Vector3(),
+) {
+  const disposers: (() => void)[] = []
   const group = new Group()
   group.name = 'water'
   const geometries: BufferGeometry[] = []
@@ -308,183 +344,126 @@ export function buildWater(setting: Setting, extent: number, seed: number) {
   const updates: ((t: number) => void)[] = []
 
   if (setting.scene !== 'beach') {
-    // The bright surface overhead is the page's own gradient behind the canvas; an orthographic
+    // The surface, the sun and its shafts are drawn behind the scene (sky.ts): an orthographic
     // camera would draw a surface plane across the whole view.
-    const surfaceY = deep ? E * 14 : E * 7
-
-    // God rays: tall soft cones from the surface, additive and slowly breathing.
-    const rays: Mesh[] = []
-    const rayCount = 0
-    for (let i = 0; i < rayCount; i++) {
-      const height = surfaceY * 1.1
-      const geometry = own(
-        new ConeGeometry(E * (0.6 + random() * 1.2), height, 24, 1, true),
+    // Reef fish of familiar kinds, schooling, grazing and resting (fish.ts). None in the deep
+    // or on a deep slope, and they are hidden on a night dive.
+    if (!deep && setting.depthM <= 60 && life) {
+      const fishLife = buildFish(
+        setting.place.reef,
+        // The seabed's own layout (seafloor.ts), so fish keep their real size beside a small shell.
+        Math.max(E, 300),
+        random,
+        life.feed,
+        life.sand,
+        life.homes,
+        setting.scene === 'open-water' ? 0.5 : 1,
       )
-      geometry.translate(0, -height / 2, 0)
-      const material = mat(
-        new ShaderMaterial({
-          transparent: true,
-          depthWrite: false,
-          blending: AdditiveBlending,
-          side: DoubleSide,
-          uniforms: {
-            strength: { value: (deep ? 0.05 : 0.09) * (0.6 + random() * 0.6) },
-          },
-          vertexShader: /* glsl */ `
-            varying float vY;
-            varying vec3 vN;
-            varying vec3 vView;
-            void main() {
-              vY = uv.y;
-              vec4 world = modelMatrix * vec4(position, 1.0);
-              vN = normalize(mat3(modelMatrix) * normal);
-              vView = normalize(cameraPosition - world.xyz);
-              gl_Position = projectionMatrix * viewMatrix * world;
-            }`,
-          fragmentShader: /* glsl */ `
-            uniform float strength;
-            varying float vY;
-            varying vec3 vN;
-            varying vec3 vView;
-            void main() {
-              float edge = pow(abs(dot(vN, vView)), 1.6);
-              float a = strength * edge * smoothstep(0.0, 0.45, vY) * smoothstep(1.0, 0.85, vY);
-              gl_FragColor = vec4(vec3(0.9, 1.0, 1.0) * a, a);
-            }`,
-        }),
-      )
-      const ray = new Mesh(geometry, material)
-      const angle = random() * Math.PI * 2
-      const r = E * (2 + random() * 6)
-      ray.position.set(
-        Math.cos(angle) * r,
-        surfaceY,
-        Math.sin(angle) * r - E * 2,
-      )
-      ray.rotation.set(0.18 + random() * 0.1, 0, -0.25 - random() * 0.1)
-      ray.userData.noInk = true
-      ray.renderOrder = 2
-      rays.push(ray)
-      group.add(ray)
-    }
-    updates.push((t) => {
-      rays.forEach((ray, i) => {
-        ray.scale.x = ray.scale.z = 1 + Math.sin(t * 0.3 + i * 1.7) * 0.12
-      })
-    })
-
-    // A small school of reef fish circling at a distance (not identified to species).
-    const fishCount = deep || setting.depthM > 60 ? 0 : setting.place.fish.count
-    if (fishCount) {
-      const body = new SphereGeometry(1, 12, 8)
-      body.scale(1, 0.38, 0.2)
-      const tail = new ConeGeometry(0.32, 0.55, 4)
-      tail.rotateZ(Math.PI / 2)
-      tail.translate(-1.1, 0, 0)
-      const geometry = own(mergeGeometries([body, tail])!)
-      body.dispose()
-      tail.dispose()
-      const [r, g, b] = setting.place.fish.colour
-      const fishColour = new Color().setRGB(
-        r / 255,
-        g / 255,
-        b / 255,
-        SRGBColorSpace,
-      )
-      const material = mat(
-        underwater(
-          new MeshStandardMaterial({ color: fishColour, roughness: 0.5 }),
-        ),
-      )
-      const school = new InstancedMesh(geometry, material, fishCount)
-      school.userData.fish = true
-      school.userData.noInk = true
-      const fish = Array.from({ length: fishCount }, (_, i) => ({
-        radius: E * (3.5 + random() * 1.5),
-        height: E * (1.6 + random() * 1.2),
-        speed: 0.12 + random() * 0.05,
-        phase: (i / fishCount) * 0.9 + random() * 0.15,
-        size: E * (0.09 + random() * 0.05),
-        wobble: random() * 6,
-      }))
-      const matrix = new Matrix4()
-      const q = new Quaternion()
-      const up = new Vector3(0, 1, 0)
-      const at = new Vector3()
-      const scale = new Vector3()
-      const centre = new Vector3(-E * 2, 0, -E * 3)
-      updates.push((t) => {
-        fish.forEach((f, i) => {
-          const a = t * f.speed + f.phase * Math.PI * 2
-          at.set(
-            centre.x + Math.cos(a) * f.radius,
-            f.height + Math.sin(t * 0.8 + f.wobble) * E * 0.08,
-            centre.z + Math.sin(a) * f.radius * 0.6,
-          )
-          q.setFromAxisAngle(up, -a - Math.PI / 2)
-          scale.setScalar(f.size)
-          matrix.compose(at, q, scale)
-          school.setMatrixAt(i, matrix)
-        })
-        school.instanceMatrix.needsUpdate = true
-        school.computeBoundingSphere()
-      })
-      group.add(school)
+      for (const mesh of fishLife.meshes) {
+        underwater(mesh.material as Material)
+        group.add(mesh)
+      }
+      disposers.push(fishLife.dispose)
+      updates.push((t) => fishLife.animate(t, avoid))
     }
   }
 
-  // Fine suspended particles catching the light, everywhere but the beach.
+  // Marine snow: flakes of drifting organic matter and fine silt, sinking slowly through the
+  // light. They are moved on the GPU, so a few thousand cost nothing on the CPU, and drawn at
+  // their real size (0.1 to 3 mm) unless that is under a pixel.
+  let snowLight: ((day: number) => void) | null = null
+  let snowView: ((width: number, height: number) => void) | null = null
   if (setting.scene !== 'beach') {
-    const count = 700
+    const count = deep ? 1600 : 1300
+    // The box is fitted to the view every frame (see `view`), so it is as full when looking at a
+    // 1 mm larva as at a metre of reef. Positions are stored as fractions of it.
+    const box = new Vector3(E * 12, E * 8, E * 12)
     const positions = new Float32Array(count * 3)
+    const sizes = new Float32Array(count)
+    const seeds = new Float32Array(count)
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (random() - 0.5) * E * 16
-      positions[i * 3 + 1] = random() * E * 6
-      positions[i * 3 + 2] = (random() - 0.5) * E * 16
+      positions[i * 3] = random() - 0.5
+      positions[i * 3 + 1] = random() - 0.5
+      positions[i * 3 + 2] = random() - 0.5
+      // Mostly fine silt and plankton, about a quarter larger flakes of marine snow.
+      const flake = random() < 0.28
+      sizes[i] = flake ? 0.5 + random() ** 2 * 2.5 : 0.1 + random() * 0.3
+      seeds[i] = random()
     }
     const geometry = own(new BufferGeometry())
     geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
-    const dust = new Mesh(
-      own(new SphereGeometry(E * 0.008, 4, 3)),
-      mat(
-        new MeshBasicMaterial({
-          color: 0xffffff,
-          transparent: true,
-          opacity: 0.35,
-        }),
-      ),
+    geometry.setAttribute('size', new Float32BufferAttribute(sizes, 1))
+    geometry.setAttribute('seed', new Float32BufferAttribute(seeds, 1))
+    const uniforms = {
+      time: { value: 0 },
+      viewH: { value: 800 },
+      box: { value: box },
+      // The box wraps round what the camera looks at, so the snow always fills the view.
+      centre: water.centre,
+      // Real speeds in mm/s: marine snow sinks about 1 mm/s (tens of metres a day); the current
+      // carries it sideways a little faster and the swell rocks it.
+      sink: { value: 0.9 },
+      drift: { value: 6 },
+      sway: { value: 20 },
+      light: { value: 1 },
+    }
+    const material = mat(
+      new ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        uniforms,
+        vertexShader: /* glsl */ `
+          uniform float time, viewH, sink, drift, sway, light;
+          uniform vec3 box, centre;
+          attribute float size;
+          attribute float seed;
+          varying float vAlpha;
+          void main() {
+            vec3 p = position * box;
+            float pace = 0.5 + seed;
+            p.y -= time * sink * pace;
+            p.x += time * drift + sin(time * 0.35 + seed * 40.0) * sway;
+            p.z += cos(time * 0.28 + seed * 31.0) * sway * 0.7;
+            vec3 halfBox = box * 0.5;
+            p = mod(p - centre + halfBox, box) - halfBox;
+            vec4 view = modelViewMatrix * vec4(p + centre, 1.0);
+            gl_Position = projectionMatrix * view;
+            float px = size * projectionMatrix[1][1] * viewH * 0.5;
+            gl_PointSize = clamp(px, 2.6, 16.0);
+            // Fade in and out at the edges of the box, so wrapping round never pops.
+            vec3 edge = abs(p / halfBox);
+            float fade = (1.0 - smoothstep(0.75, 1.0, edge.x))
+              * (1.0 - smoothstep(0.75, 1.0, edge.y))
+              * (1.0 - smoothstep(0.75, 1.0, edge.z));
+            vAlpha = fade * light * (0.55 + 0.4 * seed);
+          }`,
+        fragmentShader: /* glsl */ `
+          varying float vAlpha;
+          void main() {
+            float d = length(gl_PointCoord - 0.5);
+            // A bright core in a soft halo: a flake catching the light.
+            float a = (smoothstep(0.5, 0.05, d) * 0.55 + smoothstep(0.22, 0.0, d) * 0.45) * vAlpha;
+            gl_FragColor = vec4(vec3(0.97, 0.98, 0.94), a);
+          }`,
+      }),
     )
-    const motes = new InstancedMesh(
-      dust.geometry,
-      dust.material as Material,
-      count,
-    )
-    const m = new Matrix4()
-    const base = Array.from(
-      { length: count },
-      (_, i) =>
-        new Vector3(
-          positions[i * 3],
-          positions[i * 3 + 1],
-          positions[i * 3 + 2],
-        ),
-    )
-    const p = new Vector3()
-    updates.push((t) => {
-      base.forEach((b, i) => {
-        p.set(
-          b.x + Math.sin(t * 0.2 + i) * E * 0.1,
-          b.y + Math.sin(t * 0.15 + i * 0.7) * E * 0.06,
-          b.z + Math.cos(t * 0.18 + i) * E * 0.1,
-        )
-        m.makeTranslation(p.x, p.y, p.z)
-        motes.setMatrixAt(i, m)
-      })
-      motes.instanceMatrix.needsUpdate = true
-    })
-    motes.userData.noInk = true
-    motes.frustumCulled = false
-    group.add(motes)
+    const snow = new Points(geometry, material)
+    const buffer = new Vector2()
+    snow.onBeforeRender = (renderer) => {
+      uniforms.viewH.value = renderer.getDrawingBufferSize(buffer).y
+    }
+    snow.userData.noInk = true
+    snow.frustumCulled = false
+    snow.renderOrder = 3
+    group.add(snow)
+    updates.push((t) => (uniforms.time.value = t))
+    snowLight = (day) => (uniforms.light.value = 0.35 + 0.65 * day)
+    snowView = (width, height) => {
+      box.set(width * 1.4, height * 1.6, width * 1.4)
+      // The swell's sway is real (about 20 mm) but kept inside a small box.
+      uniforms.sway.value = Math.min(20, width * 0.05)
+      uniforms.drift.value = Math.min(6, width * 0.02)
+    }
   }
 
   const animate = (t: number) => updates.forEach((update) => update(t))
@@ -492,9 +471,18 @@ export function buildWater(setting: Setting, extent: number, seed: number) {
   return {
     group,
     animate,
+    /** Dims the snow with the daylight that reaches it. */
+    light(day: number) {
+      snowLight?.(day)
+    },
+    /** Fits the snow to the visible water, in mm. */
+    view(width: number, height: number) {
+      snowView?.(width, height)
+    },
     dispose() {
       geometries.forEach((g) => g.dispose())
       materials.forEach((m) => m.dispose())
+      disposers.forEach((dispose) => dispose())
     },
   }
 }
