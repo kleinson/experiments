@@ -190,14 +190,31 @@ Safari's pinch gestures), touch pinch, the + and − keys and the zoom buttons
 all zoom towards the point under the cursor. Zoomed all the way out, scrolling
 carries on down the page; Home or “Reset view” goes back to the whole animal.
 
-**On the move.** While it lives, the animal slowly makes its way over the
-sea floor in a loose figure of eight, turned the way it is going, with the
-camera, light and shadow following so the seabed slides past
-(`src/sim/crawl.ts`). Snails creep slowly and steadily on their muscular
-foot; the nautilus drifts backwards, shell first, as it swims by jet
-propulsion. The pace is sped up to be watchable. It rests
-while it hides in its shell, while it is taken apart or a part is being read,
-and stays still with reduced motion.
+**On the move, stage by stage.** How the animal moves follows its sources for
+each stage of life and for day or night (light mode is day, dark mode a night
+dive), and the life panel says how, with evidence (`src/sim/crawl.ts`, claims
+in `data/research/movement.json`):
+
+- **Egg:** the capsules stay put; a tiger cowrie mother covers hers with her
+  foot until they hatch.
+- **Larva:** a veliger swims by beating the cilia on its velum and pulls the
+  velum in to sink; near settling, a cowrie larva swims less, spends more time
+  on the bottom, then starts to crawl.
+- **Growing:** once settled, the young snail moves about on its foot; a young
+  queen conch stays buried in the sediment through its first year.
+- **Adult:** snails crawl on waves of muscle along the foot, sliding on mucus.
+  The tiger cowrie hides by day and forages at night; the textile cone lies
+  buried by day and comes out at night; the money cowrie grazes in daylight.
+  The queen conch does not crawl: it vaults on its operculum, low and with long
+  rests. The nautilus rests around 200 m by day and keeps moving at night,
+  jetting backwards, shell first.
+- **Death and after:** the animal no longer moves; currents, waves and hermit
+  crabs move the shell.
+
+A travelling animal follows a loose figure of eight with the camera, light and
+shadow following, so the seabed slides past. The pace is sped up to be
+watchable. It stops while it hides in its shell, while it is taken apart or a
+part is being read; with reduced motion it never travels.
 
 **Attached to its shell.** A crawling snail is posed with its opening down on
 its foot; the body runs out of the opening onto the foot, and the camera
@@ -351,7 +368,7 @@ offline use.
 | `src/sim/species.ts`     | Typed, validated species data                                 |
 | `src/sim/ranges.ts`      | GBIF records per sea and island, levels and outliers          |
 | `src/sim/WhereFound.tsx` | World map and place list; picking a place sets the origin     |
-| `src/sim/crawl.ts`       | How each animal moves, and its slow route over the sea floor  |
+| `src/sim/crawl.ts`       | How each animal moves at each stage, day and night, and where |
 | `src/sim/forms.ts`       | Sourced local forms, such as the Hawaiian tiger cowrie        |
 | `src/sim/thumbs.ts`      | Studio pictures of each shell, its underside and its animal   |
 | `src/sim/bodies.ts`      | Soft bodies: skins, head-foot, tapered limbs, papillae        |

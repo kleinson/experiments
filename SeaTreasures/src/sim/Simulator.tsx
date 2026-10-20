@@ -92,6 +92,8 @@ import {
   settingLabel,
 } from './seabed.ts'
 import type { Bed, Setting } from './seabed.ts'
+import { activity } from './crawl.ts'
+import type { Mode } from './crawl.ts'
 import { drawThumbs } from './thumbs.ts'
 import { localForm } from './forms.ts'
 import { formatDepth } from './depth.ts'
@@ -396,6 +398,56 @@ function actionFor(
     case 'found':
       return { hint: 'Tap the shell to pick it up', button: 'Pick it up' }
   }
+}
+
+const moveWords: Record<Mode, string> = {
+  crawl: 'Crawling',
+  vault: 'Vaulting',
+  swim: 'Swimming',
+  hover: 'Resting in the water',
+  hidden: 'Hiding',
+  buried: 'Buried',
+  still: 'Swimming larva',
+}
+
+/** How the animal moves at this stage, by day or night, from its sources. */
+function HowItMoves({
+  species,
+  phase,
+  night,
+  onNight,
+}: {
+  species: Species
+  phase: PhaseId
+  night: boolean
+  onNight: () => void
+}) {
+  const now = activity(species, phase, night)
+  if (!now.facts.length) return null
+  return (
+    <section className="how-it-moves grid gap-2" aria-label="How it moves">
+      <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+        How it moves · {moveWords[now.mode]}
+        {now.daily ? (night ? ' at night' : ' by day') : ''}
+      </p>
+      {now.facts.map((fact) => (
+        <Fact key={fact.claim + fact.text} claim={fact.claim}>
+          {fact.text}
+        </Fact>
+      ))}
+      {now.wakesAtNight && !night && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="justify-self-start rounded-full"
+          onClick={onNight}
+        >
+          <Moon />
+          Watch it at night
+        </Button>
+      )}
+    </section>
+  )
 }
 
 function PhaseStory({
@@ -1607,6 +1659,12 @@ export function Simulator() {
                       : action.button}
                   </Button>
                 )}
+                <HowItMoves
+                  species={species}
+                  phase={frame.phase}
+                  night={night}
+                  onNight={() => setTheme('dark')}
+                />
                 <div className="phase-story">
                   <PhaseStory
                     species={species}

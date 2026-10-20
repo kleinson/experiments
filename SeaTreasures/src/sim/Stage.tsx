@@ -34,7 +34,7 @@ import {
 } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
-import { along, gaitFor, travelled } from './crawl.ts'
+import { activity, along, lift, sunk, travelled, travels } from './crawl.ts'
 import { InkPass, inkify, LIGHTS } from './ink.ts'
 import type { Look } from './ink.ts'
 import { labelsIn } from './labels.ts'
@@ -428,6 +428,10 @@ export default function Stage({
     const crawl = {
       species: '',
       seconds: 0,
+      distance: 0,
+      /** How far it is sunk into the sand now, and the specimen's height (mm). */
+      sink: 0,
+      height: 0,
       last: 0,
       active: false,
       applied: new Vector3(),
@@ -601,6 +605,10 @@ export default function Stage({
       shade.near = span * 0.5
       shade.far = span * 9
       shade.updateProjectionMatrix()
+      const outline = new Box3().setFromObject(built.specimen)
+      crawl.height = Number.isFinite(outline.min.y)
+        ? outline.max.y - outline.min.y
+        : 0
       crawl.keyTarget.copy(key.target.position)
       crawl.keyAt.copy(key.position)
       crawl.paper.copy(paper.position)
@@ -632,10 +640,12 @@ export default function Stage({
     const pivot = new Vector3()
     const moved = new Vector3()
     /**
-     * Moves the living animal along its route, turned the way it is going, and
-     * carries the camera, light and shadow with it. It rests while it hides in
-     * its shell, while it is taken apart or a part is being read, and never
-     * moves with reduced motion. True only while the camera has to catch up.
+     * Moves the living animal as its sources say for its stage and the time of
+     * day (see crawl.ts), turned the way it is going, and carries the camera,
+     * light and shadow with it. A buried animal sinks into the sand. It stops
+     * while it hides in its shell, while it is taken apart or a part is being
+     * read, and never travels with reduced motion. True while it is sinking or
+     * rising.
      */
     const roam = (t: number, calm: boolean) => {
       if (!built) return false
@@ -644,39 +654,65 @@ export default function Stage({
       if (crawl.species !== species.id) {
         crawl.species = species.id
         crawl.seconds = 0
+        crawl.distance = 0
       }
       const living =
         (frame.phase === 'adult' || frame.phase === 'growth') &&
         frame.animal > 0 &&
         frame.larva === 0 &&
         !frame.beach
-      const gait = gaitFor(species)
+      const night = document.documentElement.dataset.theme === 'dark'
+      const mode = living
+        ? activity(species, frame.phase, night).mode
+        : ('still' as const)
       const hiding =
         Number.isFinite(t - motion.withdraw) && t - motion.withdraw < 2.6
       const go =
-        living && !calm && !hiding && motion.apart < 0.01 && selected === null
-      if (go) crawl.seconds += Math.min(0.1, Math.max(0, t - crawl.last))
+        living &&
+        travels(mode) &&
+        !calm &&
+        !hiding &&
+        motion.apart < 0.01 &&
+        selected === null
+      if (go) {
+        const step = Math.min(0.1, Math.max(0, t - crawl.last))
+        // Distance is kept apart from time, so changing gait never jumps.
+        crawl.distance +=
+          travelled(mode, crawl.seconds + step) - travelled(mode, crawl.seconds)
+        crawl.seconds += step
+      }
       crawl.last = t
       crawl.active = living && !calm
-      const state = crawl.active ? (go ? 'moving' : 'resting') : ''
+      const state = crawl.active
+        ? mode === 'buried'
+          ? 'buried'
+          : go
+            ? 'moving'
+            : 'resting'
+        : ''
       if (renderer.domElement.dataset.crawl !== state) {
         if (state) renderer.domElement.dataset.crawl = state
         else delete renderer.domElement.dataset.crawl
       }
+      const deep = living ? sunk(mode) * crawl.height : 0
+      crawl.sink = calm ? deep : crawl.sink + (deep - crawl.sink) * 0.06
+      const settling = Math.abs(deep - crawl.sink) > crawl.height * 0.002
+      if (!settling) crawl.sink = deep
       moved.set(0, 0, 0)
-      if (crawl.active) {
+      if (living) {
         const body = built.extent * Math.max(frame.size, 0.05)
-        const place = along(travelled(gait, crawl.seconds), gait === 'swim')
-        turn.setFromAxisAngle(UP, place.heading)
+        const place = along(crawl.distance, mode === 'swim' || mode === 'hover')
+        turn.setFromAxisAngle(UP, calm ? 0 : place.heading)
         // Turn about the middle of what is shown, then carry it along the route.
         pivot.copy((built.close ?? built.view).target).setY(0)
         specimen.quaternion.copy(turn)
-        specimen.position
-          .sub(pivot)
-          .applyQuaternion(turn)
-          .add(pivot)
-          .add(moved.set(place.x * body, 0, place.z * body))
-      } else if (living) specimen.quaternion.identity()
+        specimen.position.sub(pivot).applyQuaternion(turn).add(pivot)
+        if (!calm) {
+          specimen.position.add(moved.set(place.x * body, 0, place.z * body))
+          specimen.position.y += lift(mode, crawl.seconds) * body
+        }
+        specimen.position.y -= crawl.sink
+      }
       const delta = moved.clone().sub(crawl.applied)
       if (delta.lengthSq() > 0) {
         crawl.applied.copy(moved)
@@ -687,7 +723,7 @@ export default function Stage({
         key.position.copy(crawl.keyAt).add(moved)
         paper.position.copy(crawl.paper).add(moved)
       }
-      return false
+      return settling
     }
 
     /** Applies every transient motion; true while something is still moving. */

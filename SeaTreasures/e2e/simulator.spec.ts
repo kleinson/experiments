@@ -607,4 +607,25 @@ test.describe('with motion', () => {
     await phase(page, 'Empty shell')
     await expect(canvas).not.toHaveAttribute('data-crawl')
   })
+
+  test('each animal moves as its sources say, by day and at night', async ({
+    page,
+  }) => {
+    await page.goto('./?species=textile-cone')
+    const canvas = page.locator('[data-sim-canvas]')
+    const moves = page.getByRole('region', { name: 'How it moves' })
+    // By day the textile cone lies buried in the sand.
+    await expect(canvas).toHaveAttribute('data-crawl', 'buried', {
+      timeout: 25_000,
+    })
+    await expect(moves).toContainText('Buried by day')
+    await moves.getByRole('button', { name: 'Watch it at night' }).click()
+    await expect(canvas).toHaveAttribute('data-crawl', 'moving')
+    await expect(moves).toContainText('Crawling at night')
+    await expect(moves).toContainText('waves of muscle')
+    // The conch vaults rather than crawls, day or night.
+    await chooseShell(page, 'Queen conch')
+    await expect(moves).toContainText('it vaults')
+    await expect(canvas).toHaveAttribute('data-crawl', 'moving')
+  })
 })
