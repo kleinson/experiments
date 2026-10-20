@@ -15,6 +15,7 @@ const fragments = [
   'research/figure-terms.json',
   'research/places.json',
   'research/part-functions.json',
+  'research/movement.json',
 ]
   .filter((file) => existsSync(root + file))
   .map((file) => ({

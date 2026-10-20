@@ -837,6 +837,42 @@
       "accessedAt": "2026-10-19",
       "kind": "encyclopedia",
       "accessNote": "Anatomy and function sections read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-snail",
+      "title": "Snail",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Snail",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Foot and locomotion section read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "shedd-2026-conch-hopping",
+      "title": "Hop to It: Research from Shedd Aquarium Tracks Conch Movement to Set New Conservation Guidance",
+      "publisher": "Shedd Aquarium press release on Kough et al., Conservation Biology (doi:10.1111/cobi.70203)",
+      "url": "https://www.sheddaquarium.org/about-shedd/press-releases/conch-hopping-research-sets-new-conservation-guidance",
+      "accessedAt": "2026-10-19",
+      "kind": "specialist",
+      "accessNote": "Press release read directly; it summarises a peer-reviewed study that tracked 42 adult queen conch with biologgers. The paper itself was not read."
+    },
+    {
+      "id": "dunstan-2011-nautilus-movement",
+      "title": "Vertical distribution and migration patterns of Nautilus pompilius",
+      "publisher": "PLOS ONE (Dunstan, Ward & Marshall, 2011, 6(2): e16311)",
+      "url": "https://doi.org/10.1371/journal.pone.0016311",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Open-access discussion read directly: acoustic tracking of N. pompilius at Osprey Reef, Coral Sea."
+    },
+    {
+      "id": "neil-askew-2018-nautilus-swimming",
+      "title": "Swimming mechanics and propulsive efficiency in the chambered nautilus",
+      "publisher": "Royal Society Open Science (Neil & Askew, 2018, 5: 170467; PMC5830708)",
+      "url": "https://doi.org/10.1098/rsos.170467",
+      "accessedAt": "2026-10-19",
+      "kind": "peer-reviewed",
+      "accessNote": "Open-access abstract and methods read directly on PubMed Central."
     }
   ],
   "claims": [
@@ -1909,6 +1945,65 @@
       "scope": "mollusks",
       "confidence": "moderate",
       "evidenceNote": "Read for what the part does. Applies to the group named in the claim; species-specific details cite their own source."
+    },
+    {
+      "id": "move-snail-crawl",
+      "text": "Sea snails crawl on their foot: its muscles contract in waves that run along it and deform a thin layer of mucus beneath. The mucus lowers friction and seals the gaps under the foot, so it grips and slides at once.",
+      "sourceIds": ["wikipedia-snail"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Describes land and sea snails generally; not measured for the species shown."
+    },
+    {
+      "id": "move-juvenile-foot",
+      "text": "Once a veliger has settled and metamorphosed, the young snail moves about on the seabed with its foot.",
+      "sourceIds": ["wikipedia-veliger"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "General description of gastropod veligers."
+    },
+    {
+      "id": "move-cowrie-settling",
+      "text": "In the related cowrie Mauritia arabica, larvae ready to settle swam less and spread their velum less often, then spent more time on the bottom. They began crawling about 60 days after hatching and metamorphosed, losing the velum, at about 70 days.",
+      "sourceIds": ["tay-2023-cowrie-larvae"],
+      "scope": "other-cowries",
+      "confidence": "moderate",
+      "evidenceNote": "Laboratory observations; in the same study tiger cowrie larvae did not settle, so this comes from a different cowrie."
+    },
+    {
+      "id": "move-conch-buried-young",
+      "text": "Young queen conch usually stay buried in the sediment for their first year of life.",
+      "sourceIds": ["wikipedia-aliger-gigas"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Tertiary source summarising the species' life cycle."
+    },
+    {
+      "id": "move-conch-hops",
+      "text": "Queen conch do not crawl slowly along leaving slime trails. They hop: the foot pushes against the bottom and propels the shell up and forward. A study tracked 42 adults with loggers that record when each one is hopping or staying still.",
+      "sourceIds": ["shedd-2026-conch-hopping", "wikipedia-aliger-gigas"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "From a press release on a peer-reviewed study and an encyclopedia account; the paper itself was not read."
+    },
+    {
+      "id": "move-nautilus-jet",
+      "text": "A nautilus squirts water through its funnel (hyponome) to thrust itself backwards and to make turns. It can swim head first or shell first; the faster it goes, the more efficient shell-first swimming becomes.",
+      "sourceIds": [
+        "noaa-chambered-nautilus",
+        "neil-askew-2018-nautilus-swimming"
+      ],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Government species profile and a laboratory study of swimming nautiluses."
+    },
+    {
+      "id": "move-nautilus-day-night",
+      "text": "Nautiluses tracked at Osprey Reef in the Coral Sea spent the day resting at about 200 m or foraging below about 490 m, and the night moving continually between about 100 m and more than 700 m.",
+      "sourceIds": ["dunstan-2011-nautilus-movement"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "One tracked population; the study notes that nautiluses at Palau were deeper by day."
     }
   ]
 }

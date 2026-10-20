@@ -2,26 +2,59 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import manifest from '../data/claims.json' with { type: 'json' }
 import {
+  activity,
   along,
-  gaitClaim,
-  gaitFor,
+  lift,
   routeLength,
+  sunk,
   travelled,
+  travels,
 } from '../src/sim/crawl.ts'
-import { allSpecies } from '../src/sim/species.ts'
+import { phases } from '../src/sim/life.ts'
+import { allSpecies, getSpecies } from '../src/sim/species.ts'
 
-test('each animal moves the way its sources say', () => {
-  const ids = new Set(manifest.claims.map((claim) => claim.id))
-  for (const claim of Object.values(gaitClaim)) assert.ok(ids.has(claim), claim)
-  const gaits = Object.fromEntries(allSpecies.map((s) => [s.id, gaitFor(s)]))
-  for (const id of [
-    'tiger-cowrie',
-    'money-cowrie',
-    'textile-cone',
-    'queen-conch',
-  ])
-    assert.equal(gaits[id], 'crawl', id)
-  assert.equal(gaits['chambered-nautilus'], 'swim')
+const ids = new Set(manifest.claims.map((claim) => claim.id))
+const mode = (
+  id: string,
+  phase: (typeof phases)[number]['id'],
+  night = false,
+) => activity(getSpecies(id), phase, night).mode
+
+test('every movement fact rests on a claim that exists', () => {
+  for (const species of allSpecies)
+    for (const { id } of phases)
+      for (const night of [false, true])
+        for (const fact of activity(species, id, night).facts)
+          assert.ok(ids.has(fact.claim), `${species.id} ${id}: ${fact.claim}`)
+})
+
+test('each stage moves as its sources say', () => {
+  for (const species of allSpecies) {
+    // Eggs, the dead and empty shells do not move by themselves.
+    for (const phase of ['egg', 'death', 'remains', 'beach', 'found'] as const)
+      assert.equal(mode(species.id, phase), 'still', `${species.id} ${phase}`)
+  }
+  // Snails crawl on their foot; the queen conch vaults instead.
+  assert.equal(mode('money-cowrie', 'adult'), 'crawl')
+  assert.equal(mode('money-cowrie', 'growth'), 'crawl')
+  assert.equal(mode('queen-conch', 'adult'), 'vault')
+  // Young conch stay buried their first year.
+  assert.equal(mode('queen-conch', 'growth'), 'buried')
+  // Night foragers rest by day and come out at night.
+  assert.equal(mode('tiger-cowrie', 'adult'), 'hidden')
+  assert.equal(mode('tiger-cowrie', 'adult', true), 'crawl')
+  assert.equal(mode('textile-cone', 'adult'), 'buried')
+  assert.equal(mode('textile-cone', 'adult', true), 'crawl')
+  assert.ok(activity(getSpecies('textile-cone'), 'adult', false).wakesAtNight)
+  // A nautilus rests by day and swims at night, shell first.
+  assert.equal(mode('chambered-nautilus', 'adult'), 'hover')
+  assert.equal(mode('chambered-nautilus', 'adult', true), 'swim')
+  // A swimming veliger is explained in the larva stage.
+  assert.ok(
+    activity(getSpecies('tiger-cowrie'), 'larva', false).facts.some(
+      (fact) => fact.claim === 'term-veliger-velum',
+    ),
+  )
 })
 
 test('the route is a closed loop over the clear sand around the start', () => {
@@ -47,7 +80,7 @@ test('the route is a closed loop over the clear sand around the start', () => {
   assert.ok(Math.abs(Math.cos(back - forward) + 1) < 1e-9)
 })
 
-test('every animal creeps slowly and steadily, without jumps', () => {
+test('crawling is slow and steady; a vault is low and followed by a long rest', () => {
   for (const gait of ['crawl', 'swim'] as const) {
     const step = travelled(gait, 0.5)
     for (let s = 0; s < 30; s += 0.5)
@@ -55,7 +88,32 @@ test('every animal creeps slowly and steadily, without jumps', () => {
         Math.abs(travelled(gait, s + 0.5) - travelled(gait, s) - step) < 1e-9,
         gait,
       )
-    // Slow: well under half a body length every ten seconds.
-    assert.ok(travelled(gait, 10) < 0.5, gait)
+    assert.equal(lift(gait, 0.3), 0)
   }
+  for (const gait of ['crawl', 'vault', 'swim'] as const) {
+    assert.ok(travels(gait))
+    // Well under a body length every ten seconds.
+    assert.ok(travelled(gait, 10) < 0.6, gait)
+  }
+  for (const still of ['hover', 'hidden', 'buried', 'still'] as const) {
+    assert.ok(!travels(still))
+    assert.equal(travelled(still, 10), 0)
+  }
+  // The conch rests between vaults, and barely leaves the sand.
+  assert.equal(travelled('vault', 1.5), travelled('vault', 3.5))
+  assert.ok(lift('vault', 0.45) > 0 && lift('vault', 0.45) <= 0.03)
+  assert.equal(lift('vault', 2), 0)
+  assert.ok(sunk('buried') > 0.3)
+  assert.equal(sunk('crawl'), 0)
+})
+
+test('only what changes with the time of day is told by day or by night', () => {
+  const daily = (id: string, phase: 'growth' | 'adult') =>
+    activity(getSpecies(id), phase, false).daily
+  assert.ok(daily('tiger-cowrie', 'adult'))
+  assert.ok(daily('textile-cone', 'adult'))
+  assert.ok(daily('chambered-nautilus', 'adult'))
+  assert.ok(!daily('queen-conch', 'growth'))
+  assert.ok(!daily('queen-conch', 'adult'))
+  assert.ok(!daily('money-cowrie', 'adult'))
 })
