@@ -1437,9 +1437,16 @@ html[data-theme='dark'] .sim-view::after {
 .sim .ocean .part-card,
 .sim .ocean .take-apart {
   border: 1px solid var(--border) !important;
-  background: var(--card) !important;
+  background: color-mix(in srgb, var(--card) 95%, transparent) !important;
   box-shadow: var(--float-shadow) !important;
-  backdrop-filter: none !important;
+  backdrop-filter: blur(12px) !important;
+}
+.sim .ocean .action-hint,
+.sim .ocean .view-badge,
+.sim .ocean .scale-bar,
+.sim .ocean .sim-labels li button {
+  background: color-mix(in srgb, var(--card) 95%, transparent);
+  backdrop-filter: blur(10px);
 }
 .sim .ocean .filter-bar .filter-pill {
   font-size: 13px;
@@ -1455,6 +1462,10 @@ html[data-theme='dark'] .sim-view::after {
 .sim .ocean [data-state='on'] {
   background: var(--primary) !important;
   color: var(--primary-foreground) !important;
+}
+.view-menu .tool-toggle[data-state='on'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 .sim .ocean .float-title {
   padding: 18px 20px;

@@ -28,6 +28,7 @@ import {
   BookOpen,
   ChevronDown,
   CircleDot,
+  Eye,
   Hand,
   Layers,
   MapPin,
@@ -1773,76 +1774,6 @@ export function Simulator() {
                 </div>
               </CardContent>
             </Card>
-            <div
-              className="float view-controls pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md flex flex-wrap gap-1 p-1"
-              role="group"
-              aria-label="View"
-            >
-              <Toggle
-                size="lg"
-                pressed={cut}
-                onPressedChange={setCut}
-                disabled={frame.size === 0}
-                className="tool-toggle rounded-xl data-[state=on]:bg-foreground data-[state=on]:text-background"
-              >
-                <Scissors />
-                Cut open
-              </Toggle>
-              <Toggle
-                size="lg"
-                pressed={xray}
-                onPressedChange={setXray}
-                disabled={frame.size === 0}
-                className="tool-toggle rounded-xl data-[state=on]:bg-foreground data-[state=on]:text-background"
-              >
-                <ScanEye />
-                See-through
-              </Toggle>
-              {pearlKind && (
-                <Toggle
-                  size="lg"
-                  pressed={pearlShown != null}
-                  onPressedChange={(on) => setPearlStep(on ? 2 : null)}
-                  disabled={!pearlReady}
-                  title={
-                    pearlReady
-                      ? 'Look inside for a pearl and watch it grow'
-                      : 'A pearl grows inside the living clam'
-                  }
-                  className="tool-toggle rounded-xl data-[state=on]:bg-foreground data-[state=on]:text-background"
-                >
-                  <CircleDot />
-                  Pearl
-                </Toggle>
-              )}
-              <Toggle
-                size="lg"
-                pressed={labels}
-                onPressedChange={setLabels}
-                className="tool-toggle rounded-xl data-[state=on]:bg-foreground data-[state=on]:text-background"
-              >
-                <Tag />
-                Labels
-              </Toggle>
-              <Toggle
-                size="lg"
-                pressed={actual}
-                onPressedChange={setActual}
-                className="tool-toggle rounded-xl data-[state=on]:bg-foreground data-[state=on]:text-background"
-              >
-                <Ruler />
-                Actual size
-              </Toggle>
-              {actual && (
-                <Button
-                  variant="link"
-                  size="lg"
-                  onClick={() => setCalibrateOpen(true)}
-                >
-                  Calibrate
-                </Button>
-              )}
-            </div>
             {pearlKind && pearlShown != null && (
               <PearlCard
                 kind={pearlKind}
@@ -1933,6 +1864,92 @@ export function Simulator() {
               <RotateCcw />
               Reset view
             </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="rounded-full"
+                  aria-label="View options"
+                >
+                  <Eye />
+                  <span className="max-md:sr-only">View</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="end"
+                className="view-menu grid w-60 gap-1 bg-popover/95 p-2 backdrop-blur-md"
+              >
+                <p className="px-2 pt-1 pb-1.5 text-xs font-medium text-muted-foreground">
+                  View
+                </p>
+                <Toggle
+                  size="lg"
+                  pressed={cut}
+                  onPressedChange={setCut}
+                  disabled={frame.size === 0}
+                  className="tool-toggle w-full justify-start"
+                >
+                  <Scissors />
+                  Cut open
+                </Toggle>
+                <Toggle
+                  size="lg"
+                  pressed={xray}
+                  onPressedChange={setXray}
+                  disabled={frame.size === 0}
+                  className="tool-toggle w-full justify-start"
+                >
+                  <ScanEye />
+                  See-through
+                </Toggle>
+                {pearlKind && (
+                  <Toggle
+                    size="lg"
+                    pressed={pearlShown != null}
+                    onPressedChange={(on) => setPearlStep(on ? 2 : null)}
+                    disabled={!pearlReady}
+                    title={
+                      pearlReady
+                        ? 'Look inside for a pearl and watch it grow'
+                        : 'A pearl grows inside the living clam'
+                    }
+                    className="tool-toggle w-full justify-start"
+                  >
+                    <CircleDot />
+                    Pearl
+                  </Toggle>
+                )}
+                <Toggle
+                  size="lg"
+                  pressed={labels}
+                  onPressedChange={setLabels}
+                  className="tool-toggle w-full justify-start"
+                >
+                  <Tag />
+                  Labels
+                </Toggle>
+                <Toggle
+                  size="lg"
+                  pressed={actual}
+                  onPressedChange={setActual}
+                  className="tool-toggle w-full justify-start"
+                >
+                  <Ruler />
+                  Actual size
+                </Toggle>
+                {actual && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start"
+                    onClick={() => setCalibrateOpen(true)}
+                  >
+                    Calibrate actual size
+                  </Button>
+                )}
+              </PopoverContent>
+            </Popover>
             <Button
               variant="ghost"
               size="lg"
