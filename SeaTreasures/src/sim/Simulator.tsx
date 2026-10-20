@@ -1969,7 +1969,7 @@ export function Simulator() {
             role="complementary"
           >
             <ScrollArea className="min-h-0 flex-1">
-              <div className="grid gap-4 p-5">
+              <div className="grid gap-5 p-6">
                 <div className="grid gap-1">
                   <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
                     {String(phaseIndex + 1).padStart(2, '0')} /{' '}

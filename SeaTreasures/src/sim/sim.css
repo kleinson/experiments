@@ -1038,13 +1038,7 @@ html[data-theme='dark'] .sim-view::after {
   min-height: 680px;
   border-radius: 0;
   box-shadow: none;
-  font-family:
-    'Segoe UI',
-    Aptos,
-    Calibri,
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
+  font-family: var(--font-sans);
   /* The water itself: the stage sets --water from the setting, so the seabed fades into it. */
   --water: color-mix(in srgb, var(--cp-link) 40%, var(--cp-bg-elevated));
   background:
@@ -1076,12 +1070,12 @@ html[data-theme='dark'] .sim-view::after {
 /* The filters: shell, place and habitat, three separate floating pills, front and centre. */
 .filter-bar {
   z-index: 9;
-  top: 16px;
+  top: 18px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   max-width: calc(100% - 32px);
   pointer-events: none;
 }
@@ -1121,7 +1115,7 @@ html[data-theme='dark'] .sim-view::after {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
   pointer-events: none;
 }
 .float-left > * {
@@ -1463,7 +1457,7 @@ html[data-theme='dark'] .sim-view::after {
   color: var(--primary-foreground) !important;
 }
 .sim .ocean .float-title {
-  padding: 14px 16px;
+  padding: 18px 20px;
 }
 .sim .ocean .float-title h1,
 .sim .ocean .life-panel h2 {
@@ -1489,8 +1483,14 @@ html[data-theme='dark'] .sim-view::after {
 }
 .sim .ocean .fact p {
   color: var(--card-foreground);
-  font-size: 14px;
-  line-height: 1.55;
+  font-family: var(--font-serif);
+  font-size: 15px;
+  line-height: 1.65;
+}
+.sim .ocean .sim-taxon,
+.sim .ocean .model-note,
+.sim .ocean .history-card p {
+  font-family: var(--font-serif);
 }
 .sim .ocean .fact details,
 .sim .ocean .model-note {
@@ -1505,7 +1505,7 @@ html[data-theme='dark'] .sim-view::after {
   font-size: 12px;
 }
 .sim .ocean .float-bottom {
-  padding: 12px 14px;
+  padding: 14px 18px;
 }
 .sim .ocean .float-bottom [data-slot='separator'] {
   background: var(--border);
@@ -1521,6 +1521,7 @@ html[data-theme='dark'] .sim-view::after {
   gap: 10px;
 }
 .sim .ocean .history-card {
+  padding: 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--muted);
@@ -1534,7 +1535,7 @@ html[data-theme='dark'] .sim-view::after {
 }
 .sim .ocean .history-card p,
 .sim .ocean .history-card a {
-  font-family: var(--font-sans);
+  font-family: var(--font-serif);
 }
 @media (max-height: 860px) {
   .ocean .depth-card .fact + .fact {

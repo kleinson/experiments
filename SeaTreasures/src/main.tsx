@@ -1,6 +1,8 @@
 import { StrictMode, Component } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
+import '@fontsource-variable/inter'
+import '@fontsource-variable/source-serif-4'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Simulator } from './sim/Simulator.tsx'
 import './index.css'

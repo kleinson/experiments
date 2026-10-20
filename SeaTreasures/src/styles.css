@@ -2,13 +2,7 @@
   --cp-shell: var(--cp-bg-elevated);
   --cp-shell-spot: var(--cp-text);
   --cp-shell-lip: var(--cp-surface);
-  font-family:
-    'Segoe UI',
-    Aptos,
-    Calibri,
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
+  font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
