@@ -26,6 +26,13 @@ async function chooseShell(page: Page, name: string) {
     .click()
 }
 
+async function openViewOptions(page: Page) {
+  const menu = page.locator('.view-menu')
+  if (!(await menu.isVisible()))
+    await page.getByRole('button', { name: 'View options' }).click()
+  await expect(menu).toBeVisible()
+}
+
 /** Fraction of the stage's pixels that differ clearly from its corner: something is drawn. */
 async function drawn(page: Page) {
   const png = (await page.locator('[data-sim-canvas]').screenshot()).toString(
@@ -143,6 +150,7 @@ test('see through, cut open and take apart all change the drawing', async ({
     expect
       .poll(async () => (await canvas.screenshot()).equals(plain))
       .toBe(false)
+  await openViewOptions(page)
   await page.getByRole('button', { name: 'See-through' }).click()
   await changed()
   await page.getByRole('button', { name: 'See-through' }).click()
@@ -153,6 +161,7 @@ test('see through, cut open and take apart all change the drawing', async ({
   await page.keyboard.press('End')
   await changed()
   await phase(page, 'Egg')
+  await openViewOptions(page)
   await expect(page.getByRole('button', { name: 'See-through' })).toBeDisabled()
 })
 
@@ -169,7 +178,9 @@ test('labels name the parts and each opens a sourced explanation', async ({
   // One short TL;DR: what it is, why and how, with its evidence.
   await expect(card).toContainText('TL;DR')
   await expect(card).toContainText('vaulting pole to throw the shell forward')
-  await expect(card).toContainText('Evidence · 3 claims')
+  const evidence = card.locator('details').first()
+  await expect(evidence.locator('summary')).toContainText('Evidence')
+  await expect(evidence.locator('summary')).toContainText('3 claims')
   // The card opens right beside the label that was tapped.
   const tag = (await parts
     .getByRole('button', { name: 'Operculum' })
@@ -189,8 +200,10 @@ test('labels name the parts and each opens a sourced explanation', async ({
   )
   await page.getByRole('button', { name: 'Close Operculum' }).click()
   await expect(parts.getByRole('button', { name: 'Columella' })).toBeHidden()
+  await openViewOptions(page)
   await page.getByRole('button', { name: 'Cut open' }).click()
   await expect(parts.getByRole('button', { name: 'Columella' })).toBeVisible()
+  await openViewOptions(page)
   await page.getByRole('button', { name: 'Labels' }).click()
   await expect(parts).toBeHidden()
 })
@@ -423,6 +436,7 @@ test('actual size draws the shell at a millimetre scale and can be calibrated', 
   page,
 }) => {
   await page.goto('./?species=money-cowrie')
+  await openViewOptions(page)
   await page.getByRole('button', { name: 'Actual size' }).click()
   await expect(page.locator('.view-badge')).toHaveText('Actual size · estimate')
   const bar = page.locator('.scale-bar span')
@@ -439,6 +453,7 @@ test('actual size draws the shell at a millimetre scale and can be calibrated', 
   await expect(page.locator('.view-badge')).toHaveText('Actual size')
   await expect.poll(ratio).toBe(5)
   await page.reload()
+  await openViewOptions(page)
   await page.getByRole('button', { name: 'Actual size' }).click()
   await expect(page.locator('.view-badge')).toHaveText('Actual size')
 })
@@ -510,11 +525,17 @@ test('light and dark appearance both keep text readable', async ({ page }) => {
         .locator(selector)
         .first()
         .evaluate((element) => {
-          const rgb = (value: string) =>
-            value
-              .match(/\d+(\.\d+)?/g)!
-              .slice(0, 3)
-              .map(Number)
+          const rgb = (value: string) => {
+            const canvas = document.createElement('canvas')
+            canvas.width = 1
+            canvas.height = 1
+            const context = canvas.getContext('2d', {
+              willReadFrequently: true,
+            })!
+            context.fillStyle = value
+            context.fillRect(0, 0, 1, 1)
+            return Array.from(context.getImageData(0, 0, 1, 1).data).slice(0, 3)
+          }
           const lum = (value: string) => {
             const [r, g, b] = rgb(value).map((c) => {
               const v = c / 255
@@ -727,6 +748,7 @@ test.describe('a swimming larva', () => {
 
 test('a pearl grows step by step inside the giant clam', async ({ page }) => {
   await page.goto('./?species=giant-clam')
+  await openViewOptions(page)
   const toggle = page.getByRole('button', { name: 'Pearl', exact: true })
   await expect(toggle).toBeEnabled()
   await toggle.click()
@@ -746,6 +768,7 @@ test('a pearl grows step by step inside the giant clam', async ({ page }) => {
   await expect(
     page.getByRole('list', { name: 'Labelled parts' }),
   ).toContainText('Growth layers')
+  await openViewOptions(page)
   await page
     .getByRole('button', { name: 'Pearl', exact: true, pressed: true })
     .click()
@@ -754,6 +777,7 @@ test('a pearl grows step by step inside the giant clam', async ({ page }) => {
 
 test('species without pearls have no pearl tool', async ({ page }) => {
   await page.goto('./?species=queen-conch')
+  await openViewOptions(page)
   await expect(
     page.getByRole('button', { name: 'Pearl', exact: true }),
   ).toHaveCount(0)
