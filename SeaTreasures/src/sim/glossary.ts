@@ -1,125 +1,192 @@
-/** One labelled part: a short explanation and the claim it rests on. */
-export type Term = { text: string; claim: string }
+/**
+ * One labelled part: what it is, what the animal uses it for, and the claim
+ * that use rests on. `what` is a short name-level description; `use` is the
+ * real information, and every sentence of it comes from the cited claim.
+ */
+export type Term = { what: string; use: string; claim: string }
 
 /**
- * What each label in the figure means. Every line is drawn from the claim it
- * cites; parts are named, not described beyond what the sources say.
+ * What each label in the figure means. Some parts work differently in
+ * different animals, so a species can have its own entry (see `termFor`).
  */
 export const glossary: Record<string, Term> = {
   Apex: {
-    text: 'The tip of the spire: the larval shell the animal started life in.',
-    claim: 'term-gastropod-shell-parts',
+    what: 'The tip of the spire.',
+    use: 'This is the larval shell the animal built as an embryo or larva, the protoconch. Every later whorl grew on from it; in some snails it dissolves once the juvenile shell starts forming.',
+    claim: 'part-protoconch',
   },
   Aperture: {
-    text: 'The opening. New shell is added only at its growing edge.',
-    claim: 'shell-mantle-secretes',
+    what: 'The main opening of the shell.',
+    use: 'It is where the shell grows: the mantle’s edge lays thin new layers on its rim, so the opening is always the newest part of the shell.',
+    claim: 'part-aperture',
   },
   'Body whorl': {
-    text: 'The last and largest turn of the coil, ending at the opening.',
+    what: 'The last and largest turn of the coil.',
+    use: 'It ends at the opening. The whorls grow steadily larger from the larval shell at the apex, so each earlier whorl is the shell at a younger, smaller size.',
     claim: 'term-gastropod-shell-parts',
   },
   Columella: {
-    text: 'The central pillar the coil turns around.',
-    claim: 'term-gastropod-shell-parts',
+    what: 'The central pillar the coil turns around.',
+    use: 'The columellar muscle is anchored along it. Contracting that muscle pulls the foot and head into the shell, away from predators and drying out, and draws the operculum shut.',
+    claim: 'part-columella',
   },
   'Thick lip': {
-    text: 'Once mature, the conch stops growing longer; the lip only thickens.',
-    claim: 'queen-conch-maturity',
+    what: 'The flared outer lip of the opening.',
+    use: 'Juveniles have none: the lip flares once the conch reaches breeding age, and keeps thickening, so the thicker the lip, the older the animal.',
+    claim: 'part-conch-lip',
   },
   'Toothed aperture': {
-    text: 'A narrow, tooth-lined opening on the underside that forms at maturity.',
-    claim: 'aperture-teeth-at-maturity',
+    what: 'A narrow, tooth-lined opening underneath.',
+    use: 'It forms only at maturity, when the outer lip thickens and curls inward; after that the cowrie stops getting longer. Juveniles have a wide, thin-lipped opening.',
+    claim: 'cowrie-juvenile-bulla-to-adult',
   },
   Dorsum: {
-    text: 'The domed back. The mantle spreads over it and keeps it glossy.',
+    what: 'The domed back of the shell.',
+    use: 'While the animal is active its mantle spreads up and over it and keeps the surface smooth; that is why living cowries are so glossy.',
     claim: 'mantle-coating-and-polish',
   },
   'Young spire': {
-    text: 'A juvenile cowrie still shows its coil; the last whorl later grows over it.',
+    what: 'The coil of a juvenile cowrie.',
+    use: 'Young cowries still show an ordinary snail spiral. As they mature the last whorl grows over and hides all the earlier ones.',
     claim: 'cowrie-inner-whorls',
   },
   Mantle: {
-    text: 'Soft lobes that secrete the shell and can cover it while active.',
-    claim: 'mantle-coating-and-polish',
+    what: 'The soft body wall over the organs.',
+    use: 'Its skin secretes calcium carbonate and protein to build the shell. In cowries it also spreads out over the outside of the shell, partly or fully covering it.',
+    claim: 'part-mantle',
   },
   'Visceral mass': {
-    text: 'Organs coiled inside the whorls: gonad, digestive gland, heart, kidney.',
+    what: 'The organs coiled up inside the whorls.',
+    use: 'Gonad, digestive gland, heart, kidney and part of the gut sit coiled inside the whorls; the gill lies in the mantle cavity.',
     claim: 'gastropod-internal-anatomy',
   },
   Foot: {
-    text: 'A single muscular foot the animal crawls on.',
-    claim: 'mollusca-body-plan',
+    what: 'The single muscular foot under the body.',
+    use: 'Most molluscs move on a single muscular foot. The name gastropod means “stomach-foot”, because the foot lies beneath the guts.',
+    claim: 'part-gastropod-head-foot',
   },
   Tentacle: {
-    text: 'A pair of tentacles on the head, with an eye near each.',
-    claim: 'cowrie-animal-anatomy',
+    what: 'A sensory tentacle on the head.',
+    use: 'Snails carry two or four sensory tentacles with eyes; many smell their surroundings through receptors in the tentacle skin.',
+    claim: 'part-gastropod-head-foot',
   },
   'Eye stalk': {
-    text: 'Long eye stalks that move independently.',
-    claim: 'queen-conch-appearance',
+    what: 'One of two long eye stalks.',
+    use: 'Each carries a well-developed eye, held up clear of the heavy shell; extra sensory tentacles sit beside them.',
+    claim: 'part-conch-body',
   },
   Proboscis: {
-    text: 'A tube-like mouth it reaches out to feed.',
-    claim: 'queen-conch-appearance',
+    what: 'The long, tube-like snout.',
+    use: 'With it the conch browses algae and plant material in seagrass beds, and scavenges decaying plant matter.',
+    claim: 'part-conch-body',
   },
   Operculum: {
-    text: 'A brown, rough plate it can seal the opening with.',
-    claim: 'queen-conch-appearance',
+    what: 'A hard plate on the foot.',
+    use: 'It works as a trapdoor: when the animal withdraws, it closes the opening, mainly to stop it drying out and, where it seals tightly, against predators.',
+    claim: 'part-operculum',
   },
   Siphon: {
-    text: 'A tube that draws water in from the front of the opening.',
-    claim: 'cowrie-animal-anatomy',
+    what: 'A soft tube at the front of the opening.',
+    use: 'It draws water into the mantle cavity and over the gill for breathing, and its chemoreceptors “smell” or “taste” the water to find food.',
+    claim: 'part-siphon',
   },
   'Banded siphon': {
-    text: 'The textile cone’s siphon is banded black and red.',
-    claim: 'textile-cone-size-pattern',
+    what: 'The black-and-red banded siphon.',
+    use: 'It draws water into the mantle cavity and over the gill for breathing, and its chemoreceptors taste the water to hunt for food.',
+    claim: 'part-siphon',
   },
   Septum: {
-    text: 'A thin wall closing off an old chamber, built as the animal moves forward.',
+    what: 'A thin wall across the coil.',
+    use: 'As the nautilus grows it moves forward into a new living chamber and builds a septum behind it, sealing off the old one. A tube, the siphuncle, pierces each wall.',
     claim: 'term-nautilus-chambers',
   },
   Siphuncle: {
-    text: 'A tube through every chamber, used to adjust buoyancy.',
-    claim: 'nautilus-buoyancy',
+    what: 'A strand of tissue through every chamber.',
+    use: 'It empties water from new chambers: the blood inside is made saltier, water leaves by osmosis and gases diffuse in. It works passively, not by pumping.',
+    claim: 'part-siphuncle',
   },
   'Living chamber': {
-    text: 'The newest, largest chamber, where the animal lives.',
+    what: 'The newest, largest chamber.',
+    use: 'The whole animal lives here. It uses the older chambers behind it, and the tube running through them, to control its buoyancy.',
     claim: 'nautilus-buoyancy',
   },
   Hood: {
-    text: 'A leathery hood, formed from two folded tentacles, that closes the opening.',
+    what: 'A leathery lid over the opening.',
+    use: 'It is made of two folded tentacles. When the nautilus withdraws completely into its shell, the hood closes the opening behind it.',
     claim: 'term-nautilus-chambers',
   },
   Tentacles: {
-    text: 'More than 90 tentacles, without suckers.',
-    claim: 'nautilus-appearance',
+    what: '50 to over 90 slender tentacles.',
+    use: 'Those beside the eyes are for sensing; the rest ring the mouth. They have no suckers, yet grip with an adhesive from ridges on their surface and let go by contracting.',
+    claim: 'part-nautilus-tentacles',
   },
   Funnel: {
-    text: 'Pushes water out to swim backwards by jet propulsion.',
-    claim: 'term-nautilus-chambers',
+    what: 'The muscular funnel, or hyponome.',
+    use: 'The nautilus swims by jet propulsion, pushing water in and out of its living chamber through the funnel, and proves efficient at it compared with squid and jellyfish.',
+    claim: 'part-nautilus-funnel',
   },
   'Egg capsule': {
-    text: 'Nearly all molluscs lay eggs; these hatch as larvae or small adults.',
+    what: 'A protective case around the eggs.',
+    use: 'Nearly all molluscs lay eggs. Depending on the group they hatch as swimming larvae or as miniature adults.',
     claim: 'mollusca-larvae',
   },
   Velum: {
-    text: 'Ciliated lobes the larva swims and feeds with, lost when it settles.',
+    what: 'The larva’s ciliated lobes.',
+    use: 'The beating cilia let the veliger swim and gather food particles; both velum and foot can be pulled into the shell for safety. It is lost when the larva settles.',
     claim: 'term-veliger-velum',
   },
   'Larval shell': {
-    text: 'The first shell. It stays on as the apex of the adult.',
-    claim: 'term-gastropod-shell-parts',
+    what: 'The first, larval shell.',
+    use: 'Built by the embryo or larva, it is where the adult shell grows on from, so it stays as the tip of the spire; in some snails it later dissolves.',
+    claim: 'part-protoconch',
   },
   'Hermit crab': {
-    text: 'Empty shells are commonly reused by hermit crabs as portable homes.',
-    claim: 'hermit-crab-shell-reuse',
+    what: 'A crab living in the empty shell.',
+    use: 'Its abdomen is soft and not hardened by calcium, so it must borrow a shell made by another animal; almost 800 species carry snail shells around.',
+    claim: 'part-hermit-crab',
   },
   'Drill hole': {
-    text: 'Moon snails, murex snails and octopuses can leave holes like this.',
-    claim: 'predator-drill-holes',
+    what: 'A neat round hole in the shell.',
+    use: 'Moon snails plough through sand hunting shellfish and drill countersunk holes like this to reach the animal inside.',
+    claim: 'part-naticid-drilling',
   },
   'Broken lip': {
-    text: 'Crabs and other predators can break the shell’s edge.',
+    what: 'Chips in the shell’s edge.',
+    use: 'Crabs, octopuses, birds and predatory snails can all leave damage and holes in mollusc shells.',
     claim: 'predator-drill-holes',
   },
 }
+
+/** Where a species uses a part its own way, its sourced entry replaces the general one. */
+const bySpecies: Record<string, Record<string, Term>> = {
+  'queen-conch': {
+    Foot: {
+      what: 'A large, powerful foot.',
+      use: 'The conch leaps rather than crawls: it digs its operculum into the sand, extends the foot and throws the shell forward. Only the front third touches the ground, which may stop predators following its scent trail.',
+      claim: 'part-conch-leap',
+    },
+    Operculum: {
+      what: 'A brown, sickle-shaped operculum.',
+      use: 'Besides closing the opening when the conch withdraws, its point is dug into the sand like an anchor to vault the shell forward.',
+      claim: 'part-conch-leap',
+    },
+    'Body whorl': {
+      what: 'The last and largest turn of the coil.',
+      use: 'The conch’s visceral hump stays inside it and holds the internal organs, while the strong foot and head come out of the opening.',
+      claim: 'part-conch-lip',
+    },
+  },
+  'tiger-cowrie': {
+    Mantle: {
+      what: 'Two mantle lobes with short papillae.',
+      use: 'They secrete the shell and spread right over it while the animal is active, keeping the shell smooth and glossy.',
+      claim: 'mantle-coating-and-polish',
+    },
+  },
+}
+
+export function termFor(name: string, speciesId: string): Term | undefined {
+  return bySpecies[speciesId]?.[name] ?? glossary[name]
+}
+
+export const speciesTerms = bySpecies

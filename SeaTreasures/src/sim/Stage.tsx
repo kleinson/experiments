@@ -5,6 +5,8 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react'
+import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import {
   AmbientLight,
   Box3,
@@ -134,6 +136,7 @@ export default function Stage({
   look,
   turntable,
   selected,
+  card,
   onPart,
   onMeasure,
   onEvent,
@@ -157,12 +160,18 @@ export default function Stage({
   turntable: boolean
   /** The label the reader opened, if any. */
   selected: string | null
+  /** The explanation for the selected label, shown beside it. */
+  card?: ReactNode
   onPart: (text: string) => void
   onMeasure: (measure: Measure) => void
   onEvent: (event: StageEvent) => void
 }) {
   const host = useRef<HTMLDivElement>(null)
   const layer = useRef<HTMLDivElement>(null)
+  const pop = useRef<HTMLDivElement>(null)
+  // The card renders above the floating panels, in the ocean section that holds them all.
+  const [cardHost, setCardHost] = useState<HTMLElement | null>(null)
+  useEffect(() => setCardHost(host.current?.parentElement ?? null), [])
   const api = useRef<{
     update: () => void
     nudge: () => void
@@ -213,7 +222,16 @@ export default function Stage({
   useEffect(() => {
     latest.current = { ...latest.current, labels, look, turntable }
     api.current?.nudge()
-  }, [labels, look, turntable, parts, cut, xray])
+  }, [labels, look, turntable, parts, cut, xray, selected])
+
+  // The card's size changes as its evidence opens: place it again whenever it does.
+  useEffect(() => {
+    const element = pop.current
+    if (!element) return
+    const watch = new ResizeObserver(() => api.current?.nudge())
+    watch.observe(element)
+    return () => watch.disconnect()
+  }, [selected, Boolean(card)])
 
   useEffect(() => {
     latest.current = { ...latest.current, setting }
@@ -758,6 +776,110 @@ export default function Stage({
         dot.setAttribute('cx', String(item.x))
         dot.setAttribute('cy', String(item.y))
       })
+      placeCard(root, shown, width, height)
+    }
+
+    /**
+     * Puts the part card right beside its label: on the label's outer side when
+     * there is room, otherwise the other side, otherwise below; always inside
+     * the space the floating panels leave free.
+     */
+    const placeCard = (
+      root: HTMLElement,
+      shown: Map<string, { lx: number; ly: number; side: number }>,
+      width: number,
+      height: number,
+    ) => {
+      const card = pop.current
+      if (!card) return
+      const name = card.dataset.card ?? ''
+      const item = shown.get(name)
+      const tag = root.querySelector<HTMLElement>(
+        `[data-part="${CSS.escape(name)}"]`,
+      )
+      if (!item || !tag) {
+        card.hidden = true
+        return
+      }
+      card.hidden = false
+      // On a phone there is no room beside a label: the card becomes a sheet along the stage's foot.
+      if (width < 600) {
+        card.dataset.side = 'sheet'
+        card.style.transform = ''
+        return
+      }
+      const gap = 12
+      const w = card.offsetWidth
+      const h = card.offsetHeight
+      const tagW = tag.offsetWidth
+      const tagH = tag.offsetHeight
+      const tagLeft = item.side > 0 ? item.lx : item.lx - tagW
+      const tagRight = tagLeft + tagW
+      // The floating panels, in the same coordinates: the card avoids covering them.
+      const origin = container.getBoundingClientRect()
+      const panels = [
+        ...(container.parentElement?.querySelectorAll<HTMLElement>(
+          ':scope > .float, :scope > .float-left > *',
+        ) ?? []),
+      ]
+        .map((panel) => panel.getBoundingClientRect())
+        .filter((box) => box.width && box.height)
+        .map((box) => ({
+          x: box.left - origin.left,
+          y: box.top - origin.top,
+          w: box.width,
+          h: box.height,
+        }))
+      const overlap = (x: number, y: number) =>
+        panels.reduce((sum, box) => {
+          const ox = Math.min(x + w, box.x + box.w) - Math.max(x, box.x)
+          const oy = Math.min(y + h, box.y + box.h) - Math.max(y, box.y)
+          return sum + (ox > 0 && oy > 0 ? ox * oy : 0)
+        }, 0)
+      const fit = (x: number, y: number) => ({
+        x: Math.min(Math.max(x, 8), Math.max(8, width - w - 8)),
+        y: Math.min(Math.max(y, 8), Math.max(8, height - h - 8)),
+      })
+      const outer = item.side > 0 ? 'right' : 'left'
+      const sides =
+        outer === 'right'
+          ? (['right', 'left', 'below', 'above'] as const)
+          : (['left', 'right', 'below', 'above'] as const)
+      let best: {
+        side: (typeof sides)[number]
+        x: number
+        y: number
+        cost: number
+      } | null = null
+      sides.forEach((side, rank) => {
+        const raw =
+          side === 'right'
+            ? { x: tagRight + gap, y: item.ly - Math.min(28, h / 2) }
+            : side === 'left'
+              ? { x: tagLeft - gap - w, y: item.ly - Math.min(28, h / 2) }
+              : side === 'below'
+                ? { x: tagLeft + tagW / 2 - w / 2, y: item.ly + tagH / 2 + gap }
+                : {
+                    x: tagLeft + tagW / 2 - w / 2,
+                    y: item.ly - tagH / 2 - gap - h,
+                  }
+        const at = fit(raw.x, raw.y)
+        // Being pushed off its side (by the screen edge) or onto a panel costs; so does a later preference.
+        const shift = Math.abs(at.x - raw.x) + Math.abs(at.y - raw.y)
+        const cost = overlap(at.x, at.y) + shift * 40 + rank * 400
+        if (!best || cost < best.cost) best = { side, ...at, cost }
+      })
+      const chosen = best!
+      card.dataset.side = chosen.side
+      card.style.transform = `translate(${Math.round(chosen.x)}px, ${Math.round(chosen.y)}px)`
+      const aim =
+        chosen.side === 'below' || chosen.side === 'above'
+          ? tagLeft + tagW / 2 - chosen.x
+          : item.ly - chosen.y
+      card.style.setProperty(
+        '--aim',
+        `${Math.round(Math.min(Math.max(aim, 16), (chosen.side === 'below' || chosen.side === 'above' ? w : h) - 16))}px`,
+      )
     }
 
     const draw = () => {
@@ -1163,6 +1285,15 @@ export default function Stage({
           ))}
         </ul>
       </div>
+      {card &&
+        selected &&
+        cardHost &&
+        createPortal(
+          <div className="part-pop" data-card={selected} ref={pop} hidden>
+            {card}
+          </div>,
+          cardHost,
+        )}
     </div>
   )
 }

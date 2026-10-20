@@ -82,7 +82,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import { glossary } from './glossary.ts'
+import { termFor } from './glossary.ts'
 import {
   bedLabels,
   beds,
@@ -860,6 +860,7 @@ export function Simulator() {
     [base, inRemains, crabCalled, floatCalled, waves, species],
   )
   const night = theme === 'dark'
+  const term = part ? termFor(part, species.id) : undefined
   const setting = useMemo(
     () => seabedFor(species, origin.id, frame.phase, bedChoice, depthChoice),
     [species, origin.id, frame.phase, bedChoice, depthChoice],
@@ -1064,6 +1065,66 @@ export function Simulator() {
               look={look}
               turntable={turntable}
               selected={part}
+              card={
+                labels && term && part ? (
+                  <Card
+                    className="part-card w-[min(340px,calc(100vw-2rem))] gap-2 rounded-2xl border-0 bg-card/97 py-3 shadow-[0_0_0_1px_var(--cp-border),0_16px_40px_color-mix(in_srgb,var(--cp-text)_18%,transparent)] backdrop-blur-md"
+                    role="region"
+                    aria-label={part}
+                  >
+                    <CardHeader className="grid-cols-[1fr_auto] items-start gap-0.5 px-4">
+                      <div className="grid gap-0.5">
+                        <h3 className="font-mono text-xs font-semibold tracking-[0.12em] uppercase">
+                          {part}
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          {term.what}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Close ${part}`}
+                        onClick={() => setPart(null)}
+                      >
+                        <X />
+                      </Button>
+                    </CardHeader>
+                    <CardContent className="grid gap-2.5 px-4">
+                      <div className="grid gap-1">
+                        <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+                          What it’s for
+                        </p>
+                        <Fact claim={term.claim}>{term.use}</Fact>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setPulse({
+                              kind: 'focus',
+                              part,
+                              at: performance.now(),
+                            })
+                          }
+                        >
+                          <ZoomIn />
+                          Zoom to {part.toLowerCase()}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => act('reset')}
+                        >
+                          <Maximize />
+                          Show whole
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : null
+              }
               onPart={(text) => setPart(part === text ? null : text)}
               onMeasure={setMeasure}
               onEvent={onStage}
@@ -1354,50 +1415,6 @@ export function Simulator() {
               </TooltipContent>
             </Tooltip>
           </div>
-          {labels && part && glossary[part] && (
-            <Card
-              className="part-card pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md gap-2 py-3"
-              role="region"
-              aria-label={part}
-            >
-              <CardHeader className="grid-cols-[1fr_auto] items-center px-4">
-                <h3 className="font-mono text-xs font-semibold tracking-[0.12em] uppercase">
-                  {part}
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={`Close ${part}`}
-                  onClick={() => setPart(null)}
-                >
-                  <X />
-                </Button>
-              </CardHeader>
-              <CardContent className="grid gap-2 px-4">
-                <Fact claim={glossary[part].claim}>{glossary[part].text}</Fact>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setPulse({ kind: 'focus', part, at: performance.now() })
-                    }
-                  >
-                    <ZoomIn />
-                    Zoom to {part.toLowerCase()}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => act('reset')}
-                  >
-                    <Maximize />
-                    Show whole
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           <Card
             className="float life-panel pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md gap-0 py-0"

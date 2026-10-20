@@ -260,7 +260,7 @@ html[data-theme='dark'] .sim-view::after {
 .sim-labels li[hidden] {
   display: none;
 }
-.sim-labels button {
+.sim-labels li button {
   pointer-events: auto;
   min-height: 28px;
   padding: 2px 8px;
@@ -277,8 +277,8 @@ html[data-theme='dark'] .sim-view::after {
   white-space: nowrap;
   cursor: pointer;
 }
-.sim-labels button:hover,
-.sim-labels button[aria-pressed='true'] {
+.sim-labels li button:hover,
+.sim-labels li button[aria-pressed='true'] {
   background: var(--cp-text);
   color: var(--cp-bg-elevated);
 }
@@ -1178,18 +1178,6 @@ html[data-theme='dark'] .sim-view::after {
   border-radius: 10px;
   background: var(--cp-panel-strong);
 }
-.ocean .part-card {
-  position: absolute;
-  width: min(330px, calc(100% - 32px));
-  right: auto;
-  left: 220px;
-  bottom: 184px;
-  z-index: 5;
-  /* Never grows up over the title and its tools: long evidence scrolls inside. */
-  max-height: max(160px, calc(100% - 184px - 330px));
-  overflow: auto;
-  overscroll-behavior: contain;
-}
 
 /* Short screens: keep the title panel compact so it clears the timeline. */
 @media (max-height: 860px) {
@@ -1249,8 +1237,7 @@ html[data-theme='dark'] .sim-view::after {
     transform: translateX(-50%);
   }
   .ocean .view-badge,
-  .ocean .scale-bar,
-  .ocean .part-card {
+  .ocean .scale-bar {
     top: auto;
     bottom: auto;
   }
@@ -1259,12 +1246,6 @@ html[data-theme='dark'] .sim-view::after {
   }
   .ocean .scale-bar {
     top: calc(var(--stage) - 222px);
-  }
-  .ocean .part-card {
-    left: 16px;
-    top: calc(var(--stage) - 180px);
-    transform: translateY(-100%);
-    max-height: max(140px, calc(var(--stage) - 190px - var(--safe-top)));
   }
   .sim .ocean .life-panel {
     position: static;
@@ -1330,7 +1311,7 @@ html[data-theme='dark'] .sim-view::after {
   .ocean .figure-views {
     margin-left: 0;
   }
-  .sim-labels button {
+  .sim-labels li button {
     min-height: 24px;
     padding: 2px 5px;
     font-size: 10px;
@@ -1359,6 +1340,81 @@ html[data-theme='dark'] .sim-view::after {
 }
 @media (max-width: 760px) {
   .ocean .depth-card .text-xs {
+    display: none;
+  }
+}
+
+/* The part card floats beside the label it explains, with a pointer at it. */
+.part-pop {
+  position: absolute;
+  z-index: 9;
+  top: 0;
+  left: 0;
+  pointer-events: auto;
+  will-change: transform;
+}
+.part-pop[hidden] {
+  display: none;
+}
+.part-pop .part-card {
+  max-height: min(60dvh, 460px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.part-pop::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--cp-panel-strong);
+  box-shadow: -1px 1px 0 var(--cp-border);
+  transform: rotate(45deg);
+}
+.part-pop[data-side='right']::before {
+  left: -6px;
+  top: calc(var(--aim, 24px) - 6px);
+}
+.part-pop[data-side='left']::before {
+  right: -6px;
+  top: calc(var(--aim, 24px) - 6px);
+  transform: rotate(225deg);
+}
+.part-pop[data-side='above']::before {
+  bottom: -6px;
+  left: calc(var(--aim, 24px) - 6px);
+  transform: rotate(-45deg);
+}
+.part-pop[data-side='below']::before {
+  top: -6px;
+  left: calc(var(--aim, 24px) - 6px);
+  transform: rotate(135deg);
+}
+.part-pop .fact p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .part-pop .part-card {
+    animation: part-pop-in 160ms ease-out;
+  }
+}
+@keyframes part-pop-in {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+@media (max-width: 599px) {
+  .part-pop[data-side='sheet'] {
+    position: fixed;
+    inset: auto 8px max(8px, env(safe-area-inset-bottom));
+    transform: none !important;
+  }
+  .part-pop[data-side='sheet'] .part-card {
+    width: auto;
+    max-height: 55dvh;
+  }
+  .part-pop[data-side='sheet']::before {
     display: none;
   }
 }
