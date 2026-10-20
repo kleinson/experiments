@@ -4,7 +4,6 @@
  * below its utilities, so components win where both style an element.
  * Every colour maps to the --cp-* theme tokens, so light and dark follow the page.
  */
-@layer theme, base, legacy, components, utilities;
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import './shadcn-variants.css';
@@ -12,7 +11,9 @@
 @import './styles.css' layer(legacy);
 @import './sim/sim.css' layer(legacy);
 
-@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+@layer theme, base, legacy, components, utilities;
+
+@custom-variant dark (&:is(.dark *, [data-theme='dark'], [data-theme='dark'] *));
 
 @theme inline {
   --font-sans:
