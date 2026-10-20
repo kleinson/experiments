@@ -1348,3 +1348,17 @@ html[data-theme='dark'] .sim-view::after {
 .sim .sim-view.ocean::after {
   display: none;
 }
+.sim .ocean .depth-card {
+  position: relative;
+  width: min(330px, 100%);
+}
+@media (max-height: 860px) {
+  .ocean .depth-card .fact + .fact {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .ocean .depth-card .text-xs {
+    display: none;
+  }
+}

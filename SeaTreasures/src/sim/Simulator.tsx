@@ -92,6 +92,8 @@ import {
 } from './seabed.ts'
 import type { Bed, Setting } from './seabed.ts'
 import { drawThumbs } from './thumbs.ts'
+import { formatDepth } from './depth.ts'
+import { reefLabels } from './places.ts'
 import type { Thumbs } from './thumbs.ts'
 import type { PhaseId } from './life.ts'
 import { addToShelf, parseShelf, shelfKey } from './shelf.ts'
@@ -126,6 +128,7 @@ const scopeLabel: Record<string, string> = {
   family: 'its family',
   mollusks: 'molluscs generally',
   'other-cowries': 'other cowries',
+  place: 'this place',
   'demo-limitation': 'a limit of this demo',
 }
 
@@ -595,6 +598,25 @@ function settingNote(setting: Setting, choice: Bed | null) {
     : ` · from its habitat, with this coast's ${coastLabels[setting.coast]}`
 }
 
+const PANEL =
+  'pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md'
+
+/** What each animal does at night, where sourced. */
+const nightNote: Record<string, { text: string; claim: string }> = {
+  'tiger-cowrie': {
+    text: 'At night tiger cowries come out of hiding to forage.',
+    claim: 'ecology-nocturnal-foraging',
+  },
+  'textile-cone': {
+    text: 'Buried in sand by day, it emerges to feed at night.',
+    claim: 'depth-textile-cone',
+  },
+  'money-cowrie': {
+    text: 'Money cowries graze in broad daylight, unlike nocturnal cowries.',
+    claim: 'money-cowrie-habitat-behavior',
+  },
+}
+
 const groupLabel: Record<string, string> = {
   gastropod: 'Sea snail',
   cephalopod: 'Cephalopod',
@@ -740,6 +762,7 @@ export function Simulator() {
   const habitat =
     species.origins.find((item) => item.id === origin.id) ?? species.origins[0]!
   const [bedChoice, setBedChoice] = useState<Bed | null>(null)
+  const [depthChoice, setDepthChoice] = useState<number | null>(null)
   const [thumbs, setThumbs] = useState<Record<string, Thumbs>>({})
   // The menu's drawings are made the first time it opens, so they never slow the first view.
   const [menuOpened, setMenuOpened] = useState(false)
@@ -836,9 +859,10 @@ export function Simulator() {
     }),
     [base, inRemains, crabCalled, floatCalled, waves, species],
   )
+  const night = theme === 'dark'
   const setting = useMemo(
-    () => seabedFor(species, origin.id, frame.phase, bedChoice),
-    [species, origin.id, frame.phase, bedChoice],
+    () => seabedFor(species, origin.id, frame.phase, bedChoice, depthChoice),
+    [species, origin.id, frame.phase, bedChoice, depthChoice],
   )
   const action = actionFor(frame.phase, species)
   const { index: phaseIndex, phase } = phaseAt(t)
@@ -970,6 +994,7 @@ export function Simulator() {
 
   function chooseSpecies(id: string) {
     const next = getSpecies(id)
+    setDepthChoice(null)
     setSpeciesId(id)
     setOriginId(firstOrigin(next))
     setDeathId(next.deaths[0]?.id ?? '')
@@ -1093,7 +1118,13 @@ export function Simulator() {
                     onChoose={chooseSpecies}
                     onOpen={() => setMenuOpened(true)}
                   />
-                  <Select value={origin.id} onValueChange={setOriginId}>
+                  <Select
+                    value={origin.id}
+                    onValueChange={(id) => {
+                      setOriginId(id)
+                      setDepthChoice(null)
+                    }}
+                  >
                     <SelectTrigger
                       id="origin"
                       aria-label="Place"
@@ -1161,6 +1192,12 @@ export function Simulator() {
                     <strong>{settingLabel(setting)}</strong>
                     {settingNote(setting, bedChoice)}
                   </Fact>
+                  {setting.scene === 'seabed' && (
+                    <Fact claim={setting.place.claim}>
+                      <strong>{reefLabels[setting.place.reef]}</strong> ·{' '}
+                      {setting.place.note}
+                    </Fact>
+                  )}
                   <Fact claim={habitat.claim}>
                     {habitat.habitat}
                     {habitat.depthM &&
@@ -1229,6 +1266,54 @@ export function Simulator() {
                 </Button>
               )}
             </div>
+            {setting.scene !== 'beach' && (
+              <Card
+                className={`float depth-card ${PANEL} gap-1.5 px-4 py-3`}
+                role="group"
+                aria-label="Depth"
+              >
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+                    Depth{night ? ' · night dive' : ''}
+                  </span>
+                  <span className="depth-value font-mono text-sm">
+                    ≈ {formatDepth(setting.depthM)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[10px] whitespace-nowrap text-muted-foreground">
+                    {formatDepth(setting.depth.reach[0])}
+                  </span>
+                  <Slider
+                    min={setting.depth.reach[0]}
+                    max={setting.depth.reach[1]}
+                    step={setting.depth.reach[1] > 100 ? 10 : 0.5}
+                    value={[setting.depthM]}
+                    onValueChange={([value]) => setDepthChoice(value ?? null)}
+                    thumbProps={{
+                      'aria-label': 'Depth',
+                      'aria-valuetext': `About ${formatDepth(setting.depthM)} deep`,
+                    }}
+                  />
+                  <span className="font-mono text-[10px] whitespace-nowrap text-muted-foreground">
+                    {formatDepth(setting.depth.reach[1])}
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  <Fact claim={setting.depth.claim}>
+                    {setting.depth.range
+                      ? `Recorded ${setting.depth.range[0]}–${setting.depth.range[1]} m · `
+                      : 'Depth in metres not established · '}
+                    {setting.depth.words}
+                  </Fact>
+                  {night && nightNote[species.id] && (
+                    <Fact claim={nightNote[species.id]!.claim}>
+                      {nightNote[species.id]!.text}
+                    </Fact>
+                  )}
+                </div>
+              </Card>
+            )}
           </div>
           <div className="float float-actions pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md flex items-center gap-1 rounded-full p-1">
             <Button

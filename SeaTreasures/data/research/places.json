@@ -1,0 +1,468 @@
+{
+  "sources": [
+    {
+      "id": "wikipedia-coral-triangle",
+      "title": "Coral Triangle",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Coral_Triangle",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-acropora",
+      "title": "Acropora",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Acropora",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-red-sea",
+      "title": "Red Sea",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Red_Sea",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-chagos",
+      "title": "Chagos Archipelago",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Chagos_Archipelago",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-maldives",
+      "title": "Maldives",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Maldives",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-seychelles",
+      "title": "Seychelles",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Seychelles",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-hawaiian-islands",
+      "title": "Hawaiian Islands",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Hawaiian_Islands",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-yellow-tang",
+      "title": "Yellow tang",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Yellow_tang",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-easter-island",
+      "title": "Easter Island",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Easter_Island",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-canary-islands",
+      "title": "Canary Islands",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Canary_Islands",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-cape-verde",
+      "title": "Cape Verde",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Cape_Verde",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-elkhorn-coral",
+      "title": "Elkhorn coral",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Elkhorn_coral",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-turtle-grass",
+      "title": "Thalassia testudinum",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Thalassia_testudinum",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-florida-reef",
+      "title": "Florida Reef",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Florida_Reef",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-bermuda",
+      "title": "Bermuda",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Bermuda",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-gulf-of-california",
+      "title": "Gulf of California",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Gulf_of_California",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-sargassum",
+      "title": "Sargassum",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Sargassum",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-posidonia",
+      "title": "Posidonia oceanica",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Posidonia_oceanica",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-mediterranean",
+      "title": "Mediterranean Sea",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Mediterranean_Sea",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-persian-gulf",
+      "title": "Persian Gulf",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Persian_Gulf",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-mauritius",
+      "title": "Mauritius",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Mauritius",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-ningaloo",
+      "title": "Ningaloo Coast",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Ningaloo_Coast",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-okinawa",
+      "title": "Okinawa Prefecture",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Okinawa_Prefecture",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-cypraea-tigris",
+      "title": "Cypraea tigris",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Cypraea_tigris",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-monetaria-moneta",
+      "title": "Monetaria moneta",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Monetaria_moneta",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-conus-textile",
+      "title": "Conus textile",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Conus_textile",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-nautilus",
+      "title": "Nautilus",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Nautilus",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-color-of-water",
+      "title": "Color of water",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Color_of_water",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    },
+    {
+      "id": "wikipedia-photic-zone",
+      "title": "Photic zone",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Photic_zone",
+      "accessedAt": "2026-10-19",
+      "kind": "encyclopedia",
+      "accessNote": "Read directly. A tertiary source; claims built on it are moderate confidence."
+    }
+  ],
+  "claims": [
+    {
+      "id": "place-coral-triangle",
+      "text": "The Coral Triangle holds at least 500 species of reef-building coral in each of its ecoregions, the richest reefs anywhere.",
+      "sourceIds": ["wikipedia-coral-triangle"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-acropora",
+      "text": "Acropora corals, which include table, elkhorn and staghorn corals, are spread across the Indo-Pacific with over 100 species, and the Caribbean with three.",
+      "sourceIds": ["wikipedia-acropora"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-red-sea",
+      "text": "The Red Sea's extensive shallow shelves have more than 200 kinds of soft and hard coral, and its reefs are among the healthiest in the world.",
+      "sourceIds": ["wikipedia-red-sea"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-atoll",
+      "text": "Atolls such as the Chagos and the Maldives are low-lying rings of islands set around lagoons.",
+      "sourceIds": ["wikipedia-chagos", "wikipedia-maldives"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-seychelles-granite",
+      "text": "The Seychelles sit atop a large submerged block of granite, a fragment of Gondwana between Madagascar and India.",
+      "sourceIds": ["wikipedia-seychelles"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-volcanic",
+      "text": "Many of these islands are volcanic: exposed peaks of undersea mountain ranges built by volcanic activity.",
+      "sourceIds": ["wikipedia-hawaiian-islands"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-hawaii",
+      "text": "The Hawaiian Islands are eight major volcanic islands, the exposed peaks of an undersea mountain range; the yellow tang was first described from fish collected there.",
+      "sourceIds": ["wikipedia-hawaiian-islands", "wikipedia-yellow-tang"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it. The yellow school is drawn as yellow tang only at Hawaii."
+    },
+    {
+      "id": "place-rapa-nui",
+      "text": "Rapa Nui is a volcanic island on the Salas y Gómez Ridge, a mostly submarine mountain range of seamounts formed by a hotspot.",
+      "sourceIds": ["wikipedia-easter-island"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-canary",
+      "text": "The Canary Islands are volcanic; Lanzarote, the easternmost, shows evidence of recent volcanic activity.",
+      "sourceIds": ["wikipedia-canary-islands"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-cape-verde",
+      "text": "Cape Verde is ten volcanic islands, made mostly of igneous rock and pyroclastic debris.",
+      "sourceIds": ["wikipedia-cape-verde"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-caribbean",
+      "text": "Elkhorn coral, a branching coral whose many branches resemble elk antlers, is an important reef builder in the Caribbean; turtle grass forms meadows in calm, shallow, sandy water across the Caribbean.",
+      "sourceIds": ["wikipedia-elkhorn-coral", "wikipedia-turtle-grass"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-florida-seagrass",
+      "text": "Off the Florida Keys, sand ridges are covered by large beds of seagrass with patch reefs scattered across them.",
+      "sourceIds": ["wikipedia-florida-reef"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-turtle-grass",
+      "text": "Turtle grass grows in meadows in calm, shallow, sandy water throughout the Caribbean Sea and the Gulf of Mexico.",
+      "sourceIds": ["wikipedia-turtle-grass"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-bermuda",
+      "text": "Bermuda is known for pink sand beaches and clear, blue water, and for reefs and wrecks in shallow water with virtually unlimited visibility.",
+      "sourceIds": ["wikipedia-bermuda"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-gulf-of-california",
+      "text": "The Gulf of California has three general types of shore: rocky shore, sandy beach and tidal flat. Sargassum, a brown seaweed, is widespread in tropical and subtropical seas.",
+      "sourceIds": ["wikipedia-gulf-of-california", "wikipedia-sargassum"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it. Brown algae here are drawn as Sargassum-like clumps, not identified to species."
+    },
+    {
+      "id": "place-posidonia",
+      "text": "Neptune grass (Posidonia oceanica) is a seagrass found only in the Mediterranean, one of the most nutrient-poor seas in the world.",
+      "sourceIds": ["wikipedia-posidonia", "wikipedia-mediterranean"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-persian-gulf",
+      "text": "The Persian Gulf is very shallow: at most about 90 m deep and about 50 m on average.",
+      "sourceIds": ["wikipedia-persian-gulf"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-mauritius",
+      "text": "Mauritius is surrounded by white sandy beaches, and its lagoons are protected from the open sea by one of the largest coral reefs in the world.",
+      "sourceIds": ["wikipedia-mauritius"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-ningaloo",
+      "text": "Ningaloo Reef is Australia's largest fringing coral reef, and the only large reef positioned very close to a landmass.",
+      "sourceIds": ["wikipedia-ningaloo"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "place-okinawa",
+      "text": "The islands of Okinawa are surrounded by some of the most abundant coral reefs in the world.",
+      "sourceIds": ["wikipedia-okinawa"],
+      "scope": "place",
+      "confidence": "moderate",
+      "evidenceNote": "The scenery draws this as an illustration: shapes and colours suggest the place, they are not a survey of it."
+    },
+    {
+      "id": "depth-tiger-cowrie",
+      "text": "The tiger cowrie is found at depths of 10 to 40 metres, often with live coral such as table-forming Acropora.",
+      "sourceIds": ["wikipedia-cypraea-tigris"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Wikipedia cites FAO for the depth range."
+    },
+    {
+      "id": "depth-money-cowrie",
+      "text": "The money cowrie lives in intertidal rocky areas and shallow tide pools, on and under rocks in shallow water and on reefs exposed at low tide.",
+      "sourceIds": ["wikipedia-monetaria-moneta"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "No depth in metres is given, so the simulator draws it in the shallowest water and says so."
+    },
+    {
+      "id": "depth-textile-cone",
+      "text": "The textile cone is found in estuaries, on rocky shores and in rock pools; by day it is usually buried in sand, and it emerges to feed at night.",
+      "sourceIds": ["wikipedia-conus-textile"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "No depth in metres is given, so the simulator draws it in shallow water and says so."
+    },
+    {
+      "id": "depth-nautilus",
+      "text": "Nautiluses usually live several hundred metres down; equatorial populations are usually deeper than 100 m, and only around New Caledonia, the Loyalty Islands and Vanuatu are they seen as shallow as 5 m. Their shells are thought to implode around 800 m.",
+      "sourceIds": ["wikipedia-nautilus"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Depth ranges vary between populations; the simulator draws the deep range except at Vanuatu and New Caledonia."
+    },
+    {
+      "id": "water-light-depth",
+      "text": "Water absorbs red light first, which is why it looks blue; sunlight reaches down only through the photic zone, roughly the top 200 metres, below which there is little light.",
+      "sourceIds": ["wikipedia-color-of-water", "wikipedia-photic-zone"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Used to tint and darken the scene with depth; the exact colours are illustrative."
+    }
+  ],
+  "species": {}
+}

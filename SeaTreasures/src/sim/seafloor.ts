@@ -178,7 +178,9 @@ export function buildSeafloor(
       const p = new Vector2(Math.cos(angle) * r, Math.sin(angle) * r)
       const along = p.dot(TOWARD_VIEWER)
       const across = Math.abs(p.x * TOWARD_VIEWER.y - p.y * TOWARD_VIEWER.x)
-      if (tall && along > -E * 0.6 - wide && across < E * 1.7 + wide) continue
+      // Tall things stay out of the way: never in front of the animal, nor beside it within reach.
+      if (tall && along > -E * 1.2 - wide && across < E * 2.4 + wide) continue
+      if (tall && Math.hypot(p.x, p.y) < E * 2 + wide) continue
       return new Vector3(p.x, groundHeight(p.x, p.y), p.y)
     }
     return null
@@ -229,17 +231,27 @@ export function buildSeafloor(
     group.add(ground)
   }
 
-  // Coral heads: branching, brain, table, fan and soft corals in reef colours.
-  // Living reef colours: mostly browns, ochres and olives from their algae, with a few purples and pinks.
-  const coralColours: Rgb[] = [
-    [150, 104, 70],
-    [190, 140, 86],
-    [128, 92, 128],
-    [112, 128, 82],
-    [204, 120, 96],
-    [222, 182, 108],
-    [176, 96, 116],
-  ]
+  // Coral heads in the place's own forms and colours (places.ts): table corals in the
+  // Indo-Pacific, elkhorn and sea fans in the Caribbean, soft corals in the Red Sea.
+  const place = setting.place
+  const coralColours: Rgb[] = place.palette
+  const formOrder = [
+    'branching',
+    'massive',
+    'table',
+    'fan',
+    'soft',
+    'elkhorn',
+  ] as const
+  const formTotal = formOrder.reduce((sum, form) => sum + place.forms[form], 0)
+  const pickForm = () => {
+    let roll = random() * formTotal
+    for (const form of formOrder) {
+      roll -= place.forms[form]
+      if (roll <= 0) return form
+    }
+    return 'massive'
+  }
   const branch = (
     parts: BufferGeometry[],
     from: Vector3,
@@ -274,13 +286,53 @@ export function buildSeafloor(
     }
   }
   const coral = (at: Vector3, scale: number) => {
-    const kind = random()
+    const form = pickForm()
     const colour = pick(coralColours)
     const material = standard(colour, 0.9)
     const holder = new Group()
     holder.position.copy(at)
     holder.rotation.y = random() * Math.PI * 2
-    if (kind < 0.38) {
+    if (form === 'elkhorn') {
+      // Broad, flattened antler branches spreading out low over the reef.
+      const parts: BufferGeometry[] = []
+      const arms = 4 + Math.floor(random() * 3)
+      for (let a = 0; a < arms; a++) {
+        const angle = (a / arms) * Math.PI * 2 + random() * 0.4
+        let from = new Vector3(0, scale * 0.05, 0)
+        let dir = new Vector3(
+          Math.cos(angle),
+          0.45,
+          Math.sin(angle),
+        ).normalize()
+        let width = scale * 0.11
+        for (let k = 0; k < 3; k++) {
+          const to = from.clone().addScaledVector(dir, scale * 0.28)
+          const piece = new CylinderGeometry(
+            width * 0.8,
+            width,
+            scale * 0.28,
+            8,
+          )
+          piece.scale(1, 1, 0.32)
+          piece.translate(0, scale * 0.14, 0)
+          piece.applyMatrix4(
+            new Matrix4().compose(
+              from,
+              new Quaternion().setFromUnitVectors(UP, dir),
+              new Vector3(1, 1, 1),
+            ),
+          )
+          parts.push(piece)
+          from = to
+          dir = dir
+            .clone()
+            .add(new Vector3(between(-0.4, 0.4), 0.1, between(-0.4, 0.4)))
+            .normalize()
+          width *= 0.8
+        }
+      }
+      holder.add(new Mesh(merged(parts, own), material))
+    } else if (form === 'branching') {
       const parts: BufferGeometry[] = []
       const stems = 3 + Math.floor(random() * 3)
       for (let s = 0; s < stems; s++) {
@@ -304,7 +356,7 @@ export function buildSeafloor(
         )
       }
       holder.add(new Mesh(merged(parts, own), material))
-    } else if (kind < 0.62) {
+    } else if (form === 'massive') {
       const geometry = new SphereGeometry(
         1,
         40,
@@ -325,7 +377,7 @@ export function buildSeafloor(
       geometry.scale(scale * 0.55, scale * 0.42, scale * 0.5)
       geometry.translate(0, -scale * 0.06, 0)
       holder.add(new Mesh(own.geometry(geometry), material))
-    } else if (kind < 0.78) {
+    } else if (form === 'table') {
       const parts: BufferGeometry[] = [
         new CylinderGeometry(
           scale * 0.08,
@@ -343,7 +395,7 @@ export function buildSeafloor(
       const mesh = new Mesh(merged(parts, own), material)
       mesh.rotation.z = between(-0.15, 0.15)
       holder.add(mesh)
-    } else if (kind < 0.9) {
+    } else if (form === 'fan') {
       const parts: BufferGeometry[] = []
       const plane = new Vector3(0, 0, 1)
       branch(
@@ -427,11 +479,11 @@ export function buildSeafloor(
     group.add(holder)
   }
   const corals = Math.round(
-    22 * weight('coral') +
+    26 * weight('coral') * (0.35 + 0.65 * place.coral) +
       4 * weight('deep') * (setting.scene === 'seabed' ? 1 : 0),
   )
   for (let i = 0; i < corals; i++) {
-    const scale = E * between(0.7, 1.8)
+    const scale = E * between(0.6, 1.5)
     const at = spot(E * 1.15, E * 7, true, scale * 0.6)
     if (at) coral(at, scale)
   }
@@ -519,7 +571,9 @@ export function buildSeafloor(
   const rocks = Math.round(16 * weight('rock') + (deep ? 6 : 0))
   const volcanic = setting.coast === 'volcanic'
   for (let i = 0; i < rocks; i++) {
-    const r = E * between(0.35, 1.3)
+    // Granite weathers into big rounded boulders; basalt into rougher, flatter blocks.
+    const granite = place.reef === 'granite'
+    const r = E * (granite ? between(0.8, 2.2) : between(0.35, 1.3))
     const at = spot(E * 1.2, E * 7, r > E * 0.3, r)
     if (!at) continue
     const geometry = new IcosahedronGeometry(1, 3)
@@ -538,19 +592,20 @@ export function buildSeafloor(
     const mesh = new Mesh(
       own.geometry(geometry),
       standard(
-        volcanic || deep
+        deep && !volcanic
           ? pick([
               [84, 80, 78],
               [104, 98, 94],
             ] as Rgb[])
-          : pick([
-              [150, 144, 132],
-              [170, 160, 140],
-            ] as Rgb[]),
+          : pick(place.rock),
         0.95,
       ),
     )
-    mesh.scale.set(r, r * between(0.45, 0.7), r * between(0.7, 1))
+    mesh.scale.set(
+      r,
+      r * (granite ? between(0.6, 0.85) : between(0.45, 0.7)),
+      r * between(0.7, 1),
+    )
     mesh.position.copy(at).add(new Vector3(0, -r * 0.12, 0))
     mesh.rotation.y = random() * 6
     group.add(mesh)
@@ -585,7 +640,12 @@ export function buildSeafloor(
   // Seagrass: many ribbon blades in patches, swaying together.
   const blades = Math.round(900 * weight('seagrass'))
   if (blades) {
-    const geometry = new PlaneGeometry(E * 0.04, 1, 1, 6)
+    // Turtle grass has broad, short, bright ribbons; Neptune grass long, narrow, darker ones.
+    const kind = place.grass
+    const bladeWidth =
+      kind === 'turtle' ? 0.065 : kind === 'posidonia' ? 0.035 : 0.04
+    const tall = kind === 'posidonia' ? 1.8 : kind === 'turtle' ? 0.8 : 1
+    const geometry = new PlaneGeometry(E * bladeWidth, 1, 1, 6)
     geometry.translate(0, 0.5, 0)
     const position = geometry.getAttribute('position')
     for (let i = 0; i < position.count; i++) {
@@ -614,7 +674,7 @@ export function buildSeafloor(
         items.push({
           at: new Vector3(x, groundHeight(x, z), z),
           yaw: random() * Math.PI * 2,
-          height: E * (low ? between(0.12, 0.28) : between(0.35, 0.9)),
+          height: E * tall * (low ? between(0.12, 0.28) : between(0.35, 0.9)),
           phase: random() * 6,
         })
       }
@@ -626,11 +686,18 @@ export function buildSeafloor(
     )
     const colour = new Color()
     items.forEach((_, i) => {
-      colour.setRGB(
-        between(0.32, 0.42),
-        between(0.55, 0.66),
-        between(0.28, 0.36),
-      )
+      if (kind === 'posidonia')
+        colour.setRGB(
+          between(0.24, 0.32),
+          between(0.36, 0.44),
+          between(0.14, 0.2),
+        )
+      else
+        colour.setRGB(
+          between(0.32, 0.42),
+          between(0.55, 0.66),
+          between(0.28, 0.36),
+        )
       mesh.setColorAt(i, colour)
     })
     mesh.castShadow = false

@@ -266,6 +266,29 @@ test('reset view and zoom to a part', async ({ page }) => {
     .toBe(false)
 })
 
+test('the camera stays above the sea floor and depth follows the sources', async ({
+  page,
+}) => {
+  await page.goto('./?species=tiger-cowrie')
+  await expect.poll(() => drawn(page)).toBeGreaterThan(0.02)
+  await page.locator('.sim-stage').focus()
+  for (let i = 0; i < 20; i++) await page.keyboard.press('ArrowDown')
+  const low = await page.locator('[data-sim-canvas]').screenshot()
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('ArrowDown')
+  // Already at the lowest angle: further presses change nothing.
+  expect(
+    (await page.locator('[data-sim-canvas]').screenshot()).equals(low),
+  ).toBe(true)
+  const depth = page.getByRole('group', { name: 'Depth' })
+  await expect(depth).toContainText('Recorded 10–40 m')
+  await page.getByRole('slider', { name: 'Depth', exact: true }).focus()
+  await page.keyboard.press('End')
+  await expect(depth).toContainText('40 m')
+  await chooseShell(page, 'Chambered nautilus')
+  await expect(depth).toContainText('several hundred metres')
+})
+
 test('actual size draws the shell at a millimetre scale and can be calibrated', async ({
   page,
 }) => {

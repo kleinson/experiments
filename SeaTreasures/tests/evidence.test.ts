@@ -54,6 +54,7 @@ test('claim references, scopes, access dates and external source links are expli
         'mollusks',
         'other-cowries',
         'demo-limitation',
+        'place',
       ].includes(claim.scope),
     )
     assert.equal(new Set(claim.sourceIds).size, claim.sourceIds.length)

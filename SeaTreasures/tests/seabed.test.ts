@@ -1,7 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import manifest from '../data/claims.json' with { type: 'json' }
-import { beds, coastOf, seabedFor } from '../src/sim/seabed.ts'
+import { beds, seabedFor } from '../src/sim/seabed.ts'
+import { placeLook, reefOf } from '../src/sim/places.ts'
+import { depthFor } from '../src/sim/depth.ts'
 import { allSpecies, getSpecies } from '../src/sim/species.ts'
 import { ranges } from '../src/sim/ranges.ts'
 
@@ -34,7 +36,7 @@ test('the place changes the seabed: volcanic islands, seagrass and kelp coasts',
     'adult',
   )
   assert.ok((cone.mix.kelp ?? 0) > 0, 'brown algae in the Gulf of California')
-  for (const id of Object.keys(coastOf))
+  for (const id of Object.keys(reefOf))
     assert.ok(
       ranges.regions.some((region) => region.id === id),
       `${id} is a known region`,
@@ -63,4 +65,37 @@ test('a picked bed is drawn but flagged when it is not the species habitat', () 
     (item) => item.id === 'seabed-setting-illustrative',
   )
   assert.equal(claim?.scope, 'demo-limitation')
+})
+
+test('every region has a sourced place profile and every species a sourced depth', () => {
+  const ids = new Set(manifest.claims.map((claim) => claim.id))
+  for (const region of ranges.regions) {
+    assert.ok(reefOf[region.id], `${region.id} has a reef profile`)
+    const look = placeLook(region.id)
+    assert.ok(ids.has(look.claim), `${region.id} cites ${look.claim}`)
+  }
+  assert.equal(placeLook('bermuda').reef, 'pink-sand')
+  assert.equal(placeLook('hawaiian-islands').fish.colour[0], 252)
+  assert.ok(placeLook('seychelles').rock.length > 1, 'granite boulders')
+  for (const species of allSpecies) {
+    const depth = depthFor(species, species.origins[0]!.id)
+    assert.ok(ids.has(depth.claim), `${species.id} depth cites ${depth.claim}`)
+    assert.ok(depth.drawn >= depth.reach[0] && depth.drawn <= depth.reach[1])
+  }
+  const nautilus = getSpecies('chambered-nautilus')
+  assert.equal(depthFor(nautilus, 'vanuatu').range?.[0], 5)
+  assert.equal(depthFor(nautilus, 'philippines').range?.[0], 100)
+  assert.equal(depthFor(getSpecies('tiger-cowrie'), 'red-sea').range?.[1], 40)
+  const clamped = seabedFor(
+    getSpecies('tiger-cowrie'),
+    'red-sea',
+    'adult',
+    null,
+    500,
+  )
+  assert.equal(clamped.depthM, 40)
+  assert.equal(
+    seabedFor(getSpecies('queen-conch'), 'bahamas', 'beach').depthM,
+    0,
+  )
 })
