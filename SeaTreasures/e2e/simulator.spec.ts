@@ -161,7 +161,20 @@ test('labels name the parts and each opens a sourced explanation', async ({
     await expect(parts.getByRole('button', { name })).toBeVisible()
   await parts.getByRole('button', { name: 'Operculum' }).click()
   const card = page.getByRole('region', { name: 'Operculum' })
-  await expect(card).toContainText('seal the opening')
+  await expect(card).toContainText('What it’s for')
+  await expect(card).toContainText('vault the shell forward')
+  // The card opens right beside the label that was tapped.
+  const tag = (await parts
+    .getByRole('button', { name: 'Operculum' })
+    .boundingBox())!
+  const box = (await card.boundingBox())!
+  const distance = Math.max(
+    box.x - (tag.x + tag.width),
+    tag.x - (box.x + box.width),
+    box.y - (tag.y + tag.height),
+    tag.y - (box.y + box.height),
+  )
+  expect(distance).toBeLessThan(30)
   await card.locator('summary').click()
   await expect(card.getByRole('link').first()).toHaveAttribute(
     'href',

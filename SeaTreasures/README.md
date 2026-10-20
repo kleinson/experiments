@@ -186,8 +186,12 @@ dorsum and toothed aperture on a cowrie; septum, siphuncle and living chamber
 on a nautilus; foot, mantle, siphon, eye stalks, proboscis, operculum, hood,
 tentacles and funnel on the animals; egg capsules, the velum and the larval
 shell early in life; and drill holes or a hermit crab later. Parts inside the
-shell appear only when it is cut open or seen through. Tapping a label opens a
-short explanation with its evidence (`src/sim/glossary.ts`). Part names come
+shell appear only when it is cut open or seen through. Tapping a label opens a card
+right beside it saying what the part is and what the animal uses it for (the
+operculum as a trapdoor and, for the conch, an anchor for leaping; the siphon
+for breathing and tasting the water; the siphuncle for emptying chambers),
+with its evidence (`src/sim/glossary.ts`, claims in
+`data/research/part-functions.json`). Part names come
 from the Gastropod shell, Veliger, Nautilus and Septum articles, recorded as
 claims in `data/research/figure-terms.json`.
 
