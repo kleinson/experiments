@@ -184,11 +184,17 @@ function Fact({
       <p>{children}</p>
       <details>
         <summary>
-          Evidence ·{' '}
-          {claims.length > 1
-            ? `${claims.length} claims`
-            : (scopeLabel[first.scope] ?? first.scope)}{' '}
-          · {weakest.confidence}
+          <span>
+            <strong>Evidence</strong>
+            <span className="evidence-meta">
+              {claims.length > 1
+                ? `${claims.length} claims`
+                : (scopeLabel[first.scope] ?? first.scope)}
+              {' · '}
+              {weakest.confidence}
+            </span>
+          </span>
+          <ChevronDown className="evidence-chevron" aria-hidden="true" />
         </summary>
         {claims.map((claim) => (
           <div key={claim.id} className="fact-claim">
