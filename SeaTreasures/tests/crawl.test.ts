@@ -5,7 +5,6 @@ import {
   along,
   gaitClaim,
   gaitFor,
-  hop,
   routeLength,
   travelled,
 } from '../src/sim/crawl.ts'
@@ -15,10 +14,14 @@ test('each animal moves the way its sources say', () => {
   const ids = new Set(manifest.claims.map((claim) => claim.id))
   for (const claim of Object.values(gaitClaim)) assert.ok(ids.has(claim), claim)
   const gaits = Object.fromEntries(allSpecies.map((s) => [s.id, gaitFor(s)]))
-  assert.equal(gaits['tiger-cowrie'], 'glide')
-  assert.equal(gaits['textile-cone'], 'glide')
-  assert.equal(gaits['queen-conch'], 'leap')
-  assert.equal(gaits['chambered-nautilus'], 'jet')
+  for (const id of [
+    'tiger-cowrie',
+    'money-cowrie',
+    'textile-cone',
+    'queen-conch',
+  ])
+    assert.equal(gaits[id], 'crawl', id)
+  assert.equal(gaits['chambered-nautilus'], 'swim')
 })
 
 test('the route is a closed loop over the clear sand around the start', () => {
@@ -44,16 +47,15 @@ test('the route is a closed loop over the clear sand around the start', () => {
   assert.ok(Math.abs(Math.cos(back - forward) + 1) < 1e-9)
 })
 
-test('a glide is steady, a leap comes in strokes and leaves the sand', () => {
-  for (let s = 0; s < 20; s += 0.25)
-    assert.ok(travelled('glide', s + 0.25) > travelled('glide', s))
-  // A conch rests between leaps: no progress for a while after each one.
-  assert.equal(travelled('leap', 1.0), travelled('leap', 2.0))
-  assert.ok(travelled('leap', 2.9) > travelled('leap', 2.0))
-  assert.ok(hop('leap', 0.27) > 0.05)
-  assert.equal(hop('leap', 1.5), 0)
-  assert.equal(hop('glide', 0.27), 0)
-  // Slow: well under a body length every few seconds.
-  for (const gait of ['glide', 'leap', 'jet'] as const)
-    assert.ok(travelled(gait, 10) < 1, gait)
+test('every animal creeps slowly and steadily, without jumps', () => {
+  for (const gait of ['crawl', 'swim'] as const) {
+    const step = travelled(gait, 0.5)
+    for (let s = 0; s < 30; s += 0.5)
+      assert.ok(
+        Math.abs(travelled(gait, s + 0.5) - travelled(gait, s) - step) < 1e-9,
+        gait,
+      )
+    // Slow: well under half a body length every ten seconds.
+    assert.ok(travelled(gait, 10) < 0.5, gait)
+  }
 })
