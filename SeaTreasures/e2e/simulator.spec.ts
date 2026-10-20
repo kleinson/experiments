@@ -302,6 +302,38 @@ test('the camera stays above the sea floor and depth follows the sources', async
   await expect(depth).toContainText('several hundred metres')
 })
 
+test('the scroll wheel, trackpad pinch, keys and buttons zoom the view', async ({
+  page,
+}) => {
+  await page.goto('./?species=queen-conch')
+  await expect.poll(() => drawn(page)).toBeGreaterThan(0.02)
+  const scale = async () => {
+    const width = (await page.locator('.scale-bar span').boundingBox())!.width
+    return width / mmOf(await page.locator('.scale-bar').textContent())
+  }
+  const start = await scale()
+  const stage = (await page.locator('[data-sim-canvas]').boundingBox())!
+  await page.mouse.move(
+    stage.x + stage.width * 0.45,
+    stage.y + stage.height * 0.5,
+  )
+  await page.mouse.wheel(0, -300)
+  await expect.poll(scale).toBeGreaterThan(start * 1.2)
+  const zoomed = await scale()
+  // A trackpad pinch arrives as a wheel event with ctrlKey held.
+  await page.keyboard.down('Control')
+  await page.mouse.wheel(0, 40)
+  await page.keyboard.up('Control')
+  await expect.poll(scale).toBeLessThan(zoomed)
+  const pinched = await scale()
+  await page.getByRole('button', { name: 'Zoom in' }).click()
+  await expect.poll(scale).toBeGreaterThan(pinched)
+  await page.locator('.sim-stage').focus()
+  await page.keyboard.press('Home')
+  await expect.poll(scale).toBeCloseTo(start, 1)
+  expect(await page.evaluate(() => scrollY)).toBe(0)
+})
+
 test('actual size draws the shell at a millimetre scale and can be calibrated', async ({
   page,
 }) => {

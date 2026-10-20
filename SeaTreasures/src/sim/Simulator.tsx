@@ -44,6 +44,7 @@ import {
   Waves,
   X,
   ZoomIn,
+  ZoomOut,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -1377,6 +1378,28 @@ export function Simulator() {
             )}
           </div>
           <div className="float float-actions pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md flex items-center gap-1 rounded-full p-1">
+            <div className="flex items-center" role="group" aria-label="Zoom">
+              <Button
+                variant="ghost"
+                size="icon-lg"
+                className="rounded-full"
+                aria-label="Zoom in"
+                disabled={actual}
+                onClick={() => act('zoom-in')}
+              >
+                <ZoomIn />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-lg"
+                className="rounded-full"
+                aria-label="Zoom out"
+                disabled={actual}
+                onClick={() => act('zoom-out')}
+              >
+                <ZoomOut />
+              </Button>
+            </div>
             <Button
               variant="ghost"
               size="lg"
