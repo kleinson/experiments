@@ -2,7 +2,6 @@ import {
   BufferGeometry,
   Camera,
   Color,
-  CylinderGeometry,
   DoubleSide,
   Float32BufferAttribute,
   Group,
@@ -10,12 +9,13 @@ import {
   Matrix4,
   MeshStandardMaterial,
   Quaternion,
-  SphereGeometry,
-  TorusGeometry,
+  Mesh,
   Vector3,
 } from 'three'
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import { underwater } from './water.ts'
+import { buildGastropodLarva } from './larvae.ts'
+import type { Material } from 'three'
 
 /**
  * Sibling veligers: larvae from the same brood or spawning drifting around the
@@ -43,32 +43,35 @@ const tinted = (geometry: BufferGeometry, rgb: [number, number, number]) => {
  * each edged with its band of cilia.
  */
 function veligerGeometry() {
-  const shell = tinted(
-    new SphereGeometry(0.26, 16, 12).scale(1, 0.82, 0.78).translate(0, -0.2, 0),
-    [0.88, 0.78, 0.78],
-  )
-  const whorl = tinted(
-    new SphereGeometry(0.1, 10, 8).translate(-0.2, -0.1, 0.02),
-    [0.62, 0.36, 0.42],
-  )
-  const lobe = (side: number) => [
-    tinted(
-      new CylinderGeometry(0.27, 0.27, 0.025, 24)
-        .rotateZ(side * 0.18)
-        .translate(side * 0.25, 0.08, 0),
-      [0.9, 0.94, 0.94],
-    ),
-    tinted(
-      new TorusGeometry(0.27, 0.022, 5, 28)
-        .rotateX(Math.PI / 2)
-        .rotateZ(side * 0.18)
-        .translate(side * 0.25, 0.08, 0),
-      [0.98, 0.96, 0.88],
-    ),
-  ]
-  const parts = [shell, whorl, ...lobe(1), ...lobe(-1)]
+  const geometries: BufferGeometry[] = []
+  const materials: Material[] = []
+  const larva = buildGastropodLarva(1, {
+    geometry<T extends BufferGeometry>(geometry: T) {
+      geometries.push(geometry)
+      return geometry
+    },
+    material<T extends Material>(material: T) {
+      materials.push(material)
+      return material
+    },
+  })
+  larva.group.updateMatrixWorld(true)
+  const parts: BufferGeometry[] = []
+  larva.group.traverse((object) => {
+    if (!(object instanceof Mesh)) return
+    const geometry = object.geometry.clone().applyMatrix4(object.matrixWorld)
+    geometry.deleteAttribute('uv')
+    const material = object.material
+    const color =
+      material instanceof MeshStandardMaterial
+        ? material.color.clone().convertLinearToSRGB()
+        : new Color(0xe0d8ce)
+    parts.push(tinted(geometry, [color.r, color.g, color.b]))
+  })
   const merged = mergeGeometries(parts, false)
   for (const part of parts) part.dispose()
+  geometries.forEach((geometry) => geometry.dispose())
+  materials.forEach((material) => material.dispose())
   if (!merged) throw new Error('Veliger pieces could not be merged.')
   return merged
 }
@@ -96,7 +99,7 @@ export function buildSiblings(
   spread: number,
   centre: Vector3,
   random: () => number,
-  count = 12,
+  count = 6,
 ): Siblings {
   const geometry = veligerGeometry()
   const material = underwater(
@@ -105,7 +108,7 @@ export function buildSiblings(
       roughness: 0.35,
       metalness: 0,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.25,
       depthWrite: false,
       side: DoubleSide,
     }),
@@ -132,7 +135,7 @@ export function buildSiblings(
       home,
       // Siblings are the same size (newly hatched tiger cowrie veligers are 200–240 µm), but
       // they drift 1.5 to 3 times farther from the lens, so a photo would show them smaller.
-      scale: (size * between(0.92, 1.05)) / between(1.5, 3),
+      scale: (size * between(0.92, 1.05)) / between(2.5, 4),
       phase: random() * 100,
       spin: between(0.08, 0.2) * (random() < 0.5 ? -1 : 1),
       tilt: between(-0.35, 0.35),
@@ -160,7 +163,8 @@ export function buildSiblings(
       at.x += Math.sin(t * 0.21 + p) * size * 0.8
       at.z += Math.sin(t * 0.17 + p * 1.3) * size * 0.8
       at.y +=
-        Math.sin(t * 1.8 + p) * size * 0.1 + Math.sin(t * 0.13 + p) * size * 0.5
+        Math.sin(t * 0.35 + p) * size * 0.04 +
+        Math.sin(t * 0.09 + p) * size * 0.15
       // Always behind the larva being shown, as seen from the camera, never in front of it.
       off.copy(at).sub(centre)
       const along = off.dot(toCamera)

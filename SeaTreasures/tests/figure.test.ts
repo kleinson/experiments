@@ -7,7 +7,8 @@ import { glossary, speciesTerms } from '../src/sim/glossary.ts'
 const claimIds = new Set(manifest.claims.map((claim) => claim.id))
 const read = (file: string) =>
   readFileSync(new URL(`../src/sim/${file}`, import.meta.url), 'utf8')
-const scene = read('scene.ts') + read('velum.ts') + read('classes.ts')
+const scene =
+  read('scene.ts') + read('velum.ts') + read('classes.ts') + read('larvae.ts')
 /** Sentences end in . ! or ? before a capital (or a quote) or the end. */
 const sentences = (text: string) =>
   text.split(/(?<=[.!?])\s+(?=[A-Z“‘])/).filter(Boolean).length

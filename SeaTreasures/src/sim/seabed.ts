@@ -1,6 +1,7 @@
 import type { PhaseId } from './life.ts'
 import type { Rgb } from './patterns.ts'
 import { depthFor } from './depth.ts'
+import { nestFor, onRock } from './nests.ts'
 import type { Depth } from './depth.ts'
 import { placeLook } from './places.ts'
 import type { PlaceLook } from './places.ts'
@@ -159,10 +160,12 @@ export function seabedFor(
   const coast = coastFor(place)
   const depth = depthFor(species, regionId)
   const habitat = habitatAt(species, regionId)
+  const nest = phase === 'egg' ? nestFor(species.id).kind : null
   const scene: Scene =
     phase === 'beach' || phase === 'found'
       ? 'beach'
-      : phase === 'larva' && species.group !== 'cephalopod'
+      : (phase === 'larva' && species.group !== 'cephalopod') ||
+          nest === 'water'
         ? 'open-water'
         : 'seabed'
   const own = habitatBeds(species, regionId)
@@ -181,6 +184,22 @@ export function seabedFor(
       delete mix.seagrass
       delete mix.kelp
       mix.deep = Math.max(mix.deep ?? 0, 1)
+    }
+    // Eggs are shown where the species lays them (nests.ts): rubble and rock for those that
+    // glue them to hard surfaces, clean sand for the queen conch, with a little of the habitat.
+    if (nest && !override && !(mix.deep && metres > 60)) {
+      const around = (bed: Bed) => (mix[bed] ? 0.15 : 0)
+      if (onRock(nest))
+        mix = {
+          rubble: 0.55,
+          rock: 0.3,
+          ...(around('coral') ? { coral: 0.15 } : {}),
+        }
+      else if (nest === 'sand')
+        mix = {
+          sand: 0.85,
+          ...(around('seagrass') ? { seagrass: 0.15 } : {}),
+        }
     }
   }
   if (scene === 'beach') {

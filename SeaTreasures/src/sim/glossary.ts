@@ -137,8 +137,23 @@ export const glossary: Record<string, Term> = {
   },
   'Egg capsule': {
     what: 'A protective case around the eggs.',
-    tldr: 'Nearly all molluscs lay eggs; cone snails, for example, lay them in capsules attached to the seabed. Depending on the group they hatch as swimming larvae or as miniature adults.',
-    claims: ['mollusca-larvae', 'textile-cone-egg-genus'],
+    tldr: 'Cone snails glue each egg capsule by its base to a hard surface, usually the underside of a rock or dead coral. Its thin, translucent walls hold from 80 to about 10,000 eggs, which hatch as swimming larvae.',
+    claims: ['conus-egg-site', 'textile-cone-egg-genus'],
+  },
+  'Egg mass': {
+    what: 'Egg capsules glued in layers to a hard surface.',
+    tldr: 'Most cowries glue their egg capsules to a hard surface and cover the mass with the foot until the larvae hatch. Each capsule holds hundreds of developing larvae.',
+    claims: ['cowrie-egg-brooding', 'cowrie-hatch-together'],
+  },
+  'Egg strand': {
+    what: 'One long sticky egg tube, folded into a clump.',
+    tldr: 'The queen conch lays its eggs on clean coral sand as one long tube that folds and sticks into a compact clump. Sand grains stick to it and hide it. It holds hundreds of thousands of eggs, which hatch after about five days.',
+    claims: ['queen-conch-egg-site', 'queen-conch-eggs'],
+  },
+  Egg: {
+    what: 'A single egg.',
+    tldr: 'Nearly all molluscs lay eggs, in which the embryo develops before hatching. Depending on the group they hatch as swimming larvae or as miniature adults.',
+    claims: ['mollusca-larvae'],
   },
   Velum: {
     what: 'Two thin, wing-like lobes on the larva’s head.',
@@ -154,6 +169,11 @@ export const glossary: Record<string, Term> = {
     what: 'The first, larval shell.',
     tldr: 'The larval shell, or protoconch, is the first shell, built by the embryo or larva. The adult shell later grows on from its rim, so it stays as the tip of the spire; in some snails it dissolves.',
     claims: ['part-protoconch', 'term-gastropod-shell-parts'],
+  },
+  'Larval foot': {
+    what: 'The small developing foot beside the shell opening.',
+    tldr: 'A cowrie veliger already has a rudimentary foot, but swims with its ciliated velum rather than crawling like an adult. The foot becomes useful for exploring the bottom as the larva approaches settlement.',
+    claims: ['tiger-cowrie-larval-form', 'move-cowrie-settling'],
   },
   Valve: {
     what: 'One of the two halves of a bivalve shell.',
@@ -355,6 +375,16 @@ const bySpecies: Record<string, Record<string, Term>> = {
     },
   },
   'tiger-cowrie': {
+    'Larval shell': {
+      what: 'A thin, translucent first whorl.',
+      tldr: 'Newly hatched tiger cowries have a translucent shell about 0.20–0.24 mm long, with a purple-red tinge at the first whorl. It shelters the developing body while the ciliated velum swims and feeds; the polished adult cowrie shape develops much later.',
+      claims: ['tiger-cowrie-larval-form', 'term-velum-how'],
+    },
+    Velum: {
+      what: 'A delicate swimming and feeding organ edged with cilia.',
+      tldr: 'The velum starts with two lobes and develops four elongated arms by about two weeks in laboratory tiger cowries. Its cilia move water for swimming and carry food toward the mouth; it is not a pair of fins flapping up and down.',
+      claims: ['tiger-cowrie-larval-form', 'term-velum-how'],
+    },
     Mantle: {
       what: 'Two mantle lobes with short papillae.',
       tldr: 'The tiger cowrie’s mantle is two lobes patterned with short papillae, and it secretes the shell. While the animal is active the lobes spread right over the shell and lay down new outer material, keeping it smooth and glossy.',
@@ -364,10 +394,14 @@ const bySpecies: Record<string, Record<string, Term>> = {
         'cowrie-mantle-gloss-layer',
       ],
     },
-    'Egg capsule': {
-      what: 'A protective case around the eggs.',
-      tldr: 'The tiger cowrie lays its eggs in a mass of capsules, and the mother sits over it for 7 to 17 days, until the larvae hatch. They hatch as free-swimming veliger larvae.',
-      claims: ['tiger-cowrie-brooding', 'tiger-cowrie-larva-unresolved'],
+    'Egg mass': {
+      what: 'Purplish-red capsules glued in up to five layers.',
+      tldr: 'The tiger cowrie glues its egg capsules in layers to rubble in a crevice, about 740 larvae to a capsule. The mother covers the mass with her foot for 7 to 17 days until the larvae hatch, most of them in one night.',
+      claims: [
+        'tiger-cowrie-egg-site',
+        'tiger-cowrie-brooding',
+        'cowrie-hatch-together',
+      ],
     },
   },
 }

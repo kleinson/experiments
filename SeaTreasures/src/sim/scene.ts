@@ -43,6 +43,10 @@ import { coilGeometry, lipGeometry, septumGeometry, toThree } from './meshes.ts'
 import { patternPixels, weather } from './patterns.ts'
 import type { Pixels, Rgb } from './patterns.ts'
 import { shapes } from './shapes.ts'
+import { fbm } from './kit.ts'
+import { nestFor } from './nests.ts'
+import { buildGastropodLarva, larvalSize } from './larvae.ts'
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import type { Species } from './species.ts'
 
 const TAU = Math.PI * 2
@@ -985,15 +989,358 @@ function nautilusBody(
   return outside
 }
 
-/** A clutch of egg capsules on the floor, each with an embryo; returns how to frame them. */
+/** Rough stone or rubble: a sphere pushed about by noise, flat-shaded. */
+function stone(
+  radii: [number, number, number],
+  seed: number,
+  own: Own,
+  material: Material,
+) {
+  const geometry = own.geometry(new SphereGeometry(1, 18, 12))
+  const position = geometry.getAttribute('position')
+  const p = new Vector3()
+  for (let i = 0; i < position.count; i++) {
+    p.fromBufferAttribute(position, i)
+    const bump = 1 + 0.22 * fbm(p.x * 1.6 + seed, p.y * 1.6, p.z * 1.6 - seed)
+    position.setXYZ(i, p.x * bump, p.y * bump, p.z * bump)
+  }
+  geometry.computeVertexNormals()
+  const mesh = new Mesh(geometry, material)
+  mesh.scale.set(...radii)
+  return mesh
+}
+
+/** A pear-shaped capsule standing on its base plate, height 1, width `width`. */
+function capsuleGeometry(width: number, flat = 1) {
+  const geometry = new SphereGeometry(0.5, 12, 10)
+  const position = geometry.getAttribute('position')
+  for (let i = 0; i < position.count; i++) {
+    const y = position.getY(i)
+    // Wider at the base, narrowing to a neck at the top.
+    const taper = (1.15 - 0.55 * (y + 0.5)) * width
+    position.setXYZ(
+      i,
+      position.getX(i) * taper * 2,
+      y + 0.5,
+      position.getZ(i) * taper * 2 * flat,
+    )
+  }
+  geometry.computeVertexNormals()
+  return geometry
+}
+
+type Clutch = { close: Built['close']; dispose?: () => void }
+
+/**
+ * The eggs, laid where the species lays them (nests.ts), at real size; each
+ * clickable mesh hatches on its own. Returns how to frame them.
+ */
 function layEggs(
+  species: Species,
   group: Group,
   eggs: Mesh[],
   length: number,
-  big: boolean,
   floor: number,
   own: Own,
-): Built['close'] {
+): Clutch {
+  const kind = nestFor(species.id).kind
+  const rubble = own.material(
+    new MeshStandardMaterial({
+      color: rgb([182, 170, 150]),
+      roughness: 1,
+      flatShading: true,
+    }),
+  )
+  const rockMaterial = own.material(
+    new MeshStandardMaterial({
+      color: rgb([120, 112, 100]),
+      roughness: 1,
+      flatShading: true,
+    }),
+  )
+  const embryo = own.material(
+    new MeshStandardMaterial({ color: rgb([196, 150, 110]) }),
+  )
+  // Rough stone and sand barely reflect the studio light that makes shells glossy.
+  rubble.userData.reflect = rockMaterial.userData.reflect = 0.04
+  const add = (mesh: Mesh, label: string | null) => {
+    mesh.userData.egg = eggs.length
+    if (label) markMesh(mesh, label)
+    eggs.push(mesh)
+    group.add(mesh)
+  }
+
+  if (kind === 'brood') {
+    // Tiger cowrie capsules are about 3.76 x 1.83 mm, in masses of 30-70 x 25-50 mm,
+    // glued up to five layers deep (Tay 2023). Other cowries are scaled to their shell.
+    const s = species.id === 'tiger-cowrie' ? 1 : length / 120
+    const tall = 3.76 * s
+    const wide = 1.83 * s
+    const [massX, massZ] = [50 * s, 38 * s]
+    const slab = stone([massX * 1.25, 7 * s, massZ * 1.35], 3, own, rubble)
+    slab.position.set(length * 0.12, floor + 1 * s, 0)
+    group.add(slab)
+    for (const [x, z, r] of [
+      [-massX * 0.9, -massZ * 0.7, 9],
+      [massX * 0.3, -massZ * 1.2, 7],
+      [-massX * 0.75, massZ * 0.8, 6],
+    ] as const) {
+      const chunk = stone([r * s, r * 0.7 * s, r * 0.8 * s], x, own, rubble)
+      chunk.position.set(x, floor + r * 0.3 * s, z)
+      group.add(chunk)
+    }
+    const top = floor + 7 * s
+    // One cluster of capsules, packed and stacked, shared by every clickable patch.
+    const parts: BufferGeometry[] = []
+    const one = capsuleGeometry(wide / tall)
+    for (let ring = 0, i = 0; ring < 3; ring++) {
+      const count = ring === 0 ? 1 : ring * 6
+      for (let k = 0; k < count; k++, i++) {
+        const a = (k / count) * Math.PI * 2 + ring * 0.4
+        const r = ring * wide * 1.02
+        const layer = ring === 0 ? 2 : ring === 1 ? 1 : 0
+        const part = one.clone()
+        part.scale(tall * 0.95 + (i % 3) * 0.04 * tall, tall, tall)
+        part.rotateX(Math.sin(i * 1.7) * 0.18)
+        part.rotateZ(Math.cos(i * 2.3) * 0.18)
+        part.translate(Math.cos(a) * r, layer * tall * 0.45, Math.sin(a) * r)
+        parts.push(part)
+      }
+    }
+    one.dispose()
+    const cluster = own.geometry(mergeGeometries(parts, false)!)
+    parts.forEach((part) => part.dispose())
+    const mass = own.material(
+      new MeshPhysicalMaterial({
+        color: rgb([118, 28, 60]),
+        roughness: 0.4,
+        sheen: 0.5,
+        sheenColor: rgb([230, 150, 170]),
+        transmission: 0.15,
+        thickness: 1,
+      }),
+    )
+    const step = wide * 4.6
+    for (let x = -massX / 2; x <= massX / 2; x += step)
+      for (let z = -massZ / 2; z <= massZ / 2; z += step * 0.87) {
+        const shift = (Math.round(z / (step * 0.87)) % 2) * step * 0.5
+        const u = (x + shift) / (massX / 2)
+        const v = z / (massZ / 2)
+        if (u * u + v * v > 1) continue
+        const patch = new Mesh(cluster, mass)
+        patch.position.set(x + shift, top - tall * 0.15, z)
+        patch.rotation.y = x * 0.37 + z * 0.61
+        // Lower towards the edge of the mass, the way the layers thin out.
+        patch.scale.y = 1 - 0.35 * (u * u + v * v)
+        add(patch, eggs.length === 0 ? 'Egg mass' : null)
+      }
+    // The brooding mother, beside and over the mass. In life her foot covers it fully;
+    // she is drawn half off it so the capsules can be seen.
+    const mother = buildScene(
+      species,
+      {
+        phase: 'adult',
+        local: 1,
+        size: 1,
+        lip: 1,
+        animal: 1,
+        egg: 0,
+        larva: 0,
+        mark: 'none',
+        hermit: 0,
+        drift: 0,
+        wear: 0,
+        beach: false,
+      },
+      { cut: false, xray: false },
+    )
+    // Only her foot is labelled here: it is what covers the eggs.
+    mother.group.traverse((object) => {
+      if (object.userData.label && object.userData.label !== 'Foot')
+        delete object.userData.label
+    })
+    mother.group.position.set(
+      massX * 0.25 + length * 0.42,
+      top + tall * 0.4,
+      -massZ * 0.55,
+    )
+    mother.group.rotation.y = Math.PI - 0.35
+    group.add(mother.group)
+    const span = massX + length * 0.7
+    return {
+      close: {
+        target: new Vector3(-length * 0.06, top, -massZ * 0.2),
+        width: span * 1.25,
+        height: span * 0.85,
+      },
+      dispose: mother.dispose,
+    }
+  }
+
+  if (kind === 'under-rock') {
+    // Cone snail capsules, 10-25 mm tall with thin translucent walls, glued by a
+    // basal plate to the underside of rock or dead coral (Kohn 1961).
+    const rx = length * 0.6
+    const rz = length * 0.4
+    const lift = 26
+    const ledge = stone([rx, 12, rz], 7, own, rockMaterial)
+    const back = -rz * 0.4
+    ledge.position.set(0, floor + lift + 10, back)
+    group.add(ledge)
+    for (const x of [-rx * 0.7, rx * 0.7]) {
+      const prop = stone([18, lift * 0.75, 16], x, own, rockMaterial)
+      prop.position.set(x, floor + lift * 0.35, -rz * 0.8)
+      group.add(prop)
+    }
+    const capsule = own.geometry(capsuleGeometry(0.62, 0.38))
+    const wall = own.material(
+      new MeshPhysicalMaterial({
+        color: rgb([228, 212, 168]),
+        roughness: 0.3,
+        transmission: 0.55,
+        thickness: 0.6,
+        side: DoubleSide,
+      }),
+    )
+    const dots = own.geometry(new SphereGeometry(0.5, 6, 4))
+    for (let i = 0; i < 14; i++) {
+      // Near the front lip, where they can be seen from above and in front.
+      const x = -rx * 0.55 + (i / 13) * rx * 1.1
+      const z = rz * (0.12 + 0.12 * Math.abs(Math.sin(i * 2.1)))
+      const inside = 1 - (x / rx) ** 2 - ((z - back) / rz) ** 2
+      const underside =
+        floor + lift + 10 - 12 * Math.sqrt(Math.max(0, inside)) + 1
+      const tall = 13 + ((i * 7) % 10)
+      const egg = new Mesh(capsule, wall)
+      egg.scale.setScalar(tall)
+      // Hanging from the rock, opening down; fanned along the overhang's front edge.
+      egg.rotation.set(Math.PI + Math.sin(i * 1.3) * 0.25, i * 0.9, 0)
+      egg.position.set(x, underside, z)
+      for (let k = 0; k < 6; k++) {
+        const dot = new Mesh(dots, embryo)
+        dot.scale.setScalar(0.06)
+        dot.position.set(
+          Math.sin(k * 2.4) * 0.12,
+          0.3 + k * 0.08,
+          Math.cos(k * 2.4) * 0.03,
+        )
+        egg.add(dot)
+      }
+      add(egg, i === 0 ? 'Egg capsule' : null)
+    }
+    return {
+      close: {
+        target: new Vector3(0, floor + lift * 0.6, 0),
+        width: rx * 2.6,
+        height: rx * 1.6,
+      },
+    }
+  }
+
+  if (kind === 'sand') {
+    // A queen conch lays one long sticky tube, folded into a clump and coated in sand
+    // grains (Brownell & Stevely 1981). Its width here is illustrative.
+    const radius = 2.2
+    const reach = length * 0.16
+    // A meandering walk that keeps folding back on itself inside the clump.
+    const points: Vector3[] = []
+    const at = new Vector3()
+    let heading = 0
+    for (let i = 0; i <= 320; i++) {
+      heading += 0.9 * fbm(i * 0.13, 3.7, 1.3) + 0.18
+      // Past the edge of the clump, turn back towards its middle.
+      if (Math.hypot(at.x, at.z / 0.7) > reach) {
+        const home = Math.atan2(-at.z, -at.x)
+        heading += 0.8 * Math.sin(home - heading)
+      }
+      at.x += Math.cos(heading) * radius * 1.6
+      at.z += Math.sin(heading) * radius * 1.6
+      points.push(
+        new Vector3(
+          at.x,
+          floor + radius * (1 + 1.3 * (0.5 + 0.5 * Math.sin(i * 0.09))),
+          at.z,
+        ),
+      )
+    }
+    // Centre the clump where the camera looks.
+    const middle = new Vector3()
+    points.forEach((point) => middle.add(point))
+    middle.divideScalar(points.length).setY(0)
+    points.forEach((point) => point.sub(middle))
+    const grains = own.material(
+      new MeshStandardMaterial({
+        color: rgb([214, 198, 164]),
+        roughness: 1,
+        flatShading: true,
+      }),
+    )
+    grains.userData.reflect = 0.04
+    const pieces = 14
+    const per = Math.floor(points.length / pieces)
+    for (let i = 0; i < pieces; i++) {
+      const slice = points.slice(i * per, (i + 1) * per + 1)
+      const geometry = own.geometry(
+        new TubeGeometry(new CatmullRomCurve3(slice), per * 3, radius, 8),
+      )
+      const position = geometry.getAttribute('position')
+      for (let k = 0; k < position.count; k++) {
+        const n =
+          0.25 *
+          fbm(position.getX(k) * 2, position.getY(k) * 2, position.getZ(k) * 2)
+        position.setY(k, position.getY(k) + n * radius)
+      }
+      geometry.computeVertexNormals()
+      add(new Mesh(geometry, grains), i === 0 ? 'Egg strand' : null)
+    }
+    return {
+      close: {
+        target: new Vector3(0, floor + radius * 2, 0),
+        width: reach * 3,
+        height: reach * 2,
+      },
+    }
+  }
+
+  if (kind === 'water') {
+    // Spawned into the sea: single eggs a tenth of a millimetre or so across, drifting.
+    const size = species.id === 'giant-clam' ? 0.11 : 0.15
+    const egg = own.material(
+      new MeshPhysicalMaterial({
+        color: rgb([236, 226, 196]),
+        roughness: 0.3,
+        transmission: 0.5,
+        thickness: 0.05,
+      }),
+    )
+    const ball = own.geometry(new SphereGeometry(size / 2, 16, 12))
+    const spread = size * 14
+    for (let i = 0; i < 36; i++) {
+      const mesh = new Mesh(ball, egg)
+      const a = i * 2.39996
+      const r = Math.sqrt((i + 0.5) / 36) * spread
+      mesh.position.set(
+        Math.cos(a) * r,
+        floor + spread * (0.6 + 0.5 * Math.sin(i * 1.9)),
+        Math.sin(a) * r * 0.8,
+      )
+      const dot = new Mesh(ball, embryo)
+      dot.scale.setScalar(0.45)
+      mesh.add(dot)
+      add(mesh, i === 0 ? 'Egg' : null)
+    }
+    return {
+      close: {
+        target: new Vector3(0, floor + spread * 0.6, 0),
+        width: spread * 2.6,
+        height: spread * 1.7,
+      },
+    }
+  }
+
+  // Nautilus (in aquariums) and any species no source places: large single eggs, or a
+  // loose clutch, tucked between rocks or on the seabed.
+  const big = species.group === 'cephalopod'
   const eggMaterial = own.material(
     new MeshPhysicalMaterial({
       color: rgb([238, 228, 200]),
@@ -1003,45 +1350,51 @@ function layEggs(
       sheen: 0.4,
     }),
   )
-  const embryo = own.material(
-    new MeshStandardMaterial({ color: rgb([196, 150, 110]) }),
-  )
   const eggSize = big ? length * 0.14 : Math.max(0.25, length * 0.012)
   const count = big ? 3 : 48
+  const ball = own.geometry(new SphereGeometry(1, 24, 16))
+  if (kind === 'crevice')
+    for (const side of [-1, 1]) {
+      const rock = stone(
+        [eggSize * 1.4, eggSize * 1.1, eggSize * 1.5],
+        side * 5,
+        own,
+        rockMaterial,
+      )
+      rock.position.set(
+        side * eggSize * 2.8,
+        floor + eggSize * 0.3,
+        -eggSize * 0.9,
+      )
+      group.add(rock)
+    }
   for (let i = 0; i < count; i++) {
     const angle = i * 2.39996
     const ring = Math.sqrt(i + 0.5) * eggSize * 1.05
-    const egg = blob(
-      [
-        eggSize * 0.5,
-        eggSize * (big ? 0.36 : 0.5),
-        eggSize * (big ? 0.36 : 0.5),
-      ],
-      own,
-      eggMaterial,
+    const egg = new Mesh(ball, eggMaterial)
+    egg.scale.set(
+      eggSize * 0.5,
+      eggSize * (big ? 0.36 : 0.5),
+      eggSize * (big ? 0.36 : 0.5),
     )
     egg.position.set(
       Math.cos(angle) * ring,
       floor + eggSize * 0.42,
       Math.sin(angle) * ring,
     )
-    egg.userData.egg = i
-    if (i === 0) markMesh(egg, 'Egg capsule')
-    const dot = blob(
-      [eggSize * 0.16, eggSize * 0.16, eggSize * 0.16],
-      own,
-      embryo,
-    )
+    if (big) egg.rotation.y = angle
+    const dot = new Mesh(ball, embryo)
+    dot.scale.setScalar(0.32)
     egg.add(dot)
-    dot.scale.divide(egg.scale).multiplyScalar(eggSize * 0.18)
-    eggs.push(egg)
-    group.add(egg)
+    add(egg, i === 0 ? (big ? 'Egg' : 'Egg capsule') : null)
   }
   const spread = Math.sqrt(count) * eggSize * 2.6
   return {
-    target: new Vector3(0, eggSize, 0),
-    width: spread * 1.4,
-    height: spread,
+    close: {
+      target: new Vector3(0, eggSize, 0),
+      width: spread * (kind === 'crevice' ? 2.2 : 1.4),
+      height: spread * (kind === 'crevice' ? 1.4 : 1),
+    },
   }
 }
 
@@ -1097,7 +1450,18 @@ export function buildScene(
   let larva: Velum | null = null
   const floor = 0
 
-  if (frame.size > 0 && shape.kind === 'class') {
+  if (frame.larva > 0 && species.group === 'gastropod') {
+    const size = larvalSize(species.id, frame.local)
+    const hatchling = buildGastropodLarva(size, own, frame.local)
+    specimen.add(hatchling.group)
+    larva = hatchling.velum
+    close = {
+      target: hatchling.centre,
+      width: size * 3.6,
+      height: size * 2.8,
+    }
+    bob = size * 0.025
+  } else if (frame.size > 0 && shape.kind === 'class') {
     // A bivalve, chiton, tusk shell or monoplacophoran, built whole and painted per vertex.
     const vertex = { vertexColors: true }
     const shellMat = shellMaterial(
@@ -1601,7 +1965,11 @@ export function buildScene(
     if (frame.drift > 0) specimen.position.y += frame.drift * adult.height * 0.5
   }
 
-  if (frame.egg > 0) close = layEggs(group, eggs, length, swims, floor, own)
+  let clutch: Clutch | null = null
+  if (frame.egg > 0) {
+    clutch = layEggs(species, group, eggs, length, floor, own)
+    close = clutch.close
+  }
 
   if (frame.beach) {
     specimen.rotation.y = 0.5
@@ -1627,6 +1995,9 @@ export function buildScene(
     bob,
     floor,
     velum: larva,
-    dispose: own.dispose,
+    dispose: () => {
+      own.dispose()
+      clutch?.dispose?.()
+    },
   }
 }

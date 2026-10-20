@@ -8,6 +8,7 @@ import { shellsAt } from '../src/sim/ranges.ts'
 import { depthFor } from '../src/sim/depth.ts'
 import { allSpecies, getSpecies } from '../src/sim/species.ts'
 import { ranges } from '../src/sim/ranges.ts'
+import { nestFor, onRock } from '../src/sim/nests.ts'
 
 test('every species gets a seabed read from its sourced habitat', () => {
   const main = (id: string, region: string) =>
@@ -22,8 +23,28 @@ test('every species gets a seabed read from its sourced habitat', () => {
     for (const phase of ['egg', 'growth', 'adult', 'remains'] as const) {
       const setting = seabedFor(species, 'red-sea', phase)
       const total = Object.values(setting.mix).reduce((a, b) => a + b, 0)
-      assert.ok(Math.abs(total - 1) < 0.01, `${species.id} ${phase}`)
+      assert.ok(
+        setting.scene === 'open-water'
+          ? total === 0
+          : Math.abs(total - 1) < 0.01,
+        `${species.id} ${phase}`,
+      )
     }
+})
+
+test('egg settings follow sourced laying sites rather than a generic sand bed', () => {
+  const ids = new Set(manifest.claims.map((claim) => claim.id))
+  for (const species of allSpecies) {
+    const { kind, fact } = nestFor(species.id)
+    if (fact) assert.ok(ids.has(fact.claim), species.id)
+    const setting = seabedFor(species, 'philippines', 'egg')
+    assert.equal(setting.scene, kind === 'water' ? 'open-water' : 'seabed')
+    if (onRock(kind) && setting.depthM <= 60)
+      assert.ok(setting.mix.rubble && setting.mix.rock, species.id)
+  }
+  const conch = seabedFor(getSpecies('queen-conch'), 'cuba', 'egg')
+  assert.equal(conch.main, 'sand')
+  assert.equal(nestFor('tiger-cowrie').kind, 'brood')
 })
 
 test('the place changes the seabed: volcanic islands, seagrass and kelp coasts', () => {
