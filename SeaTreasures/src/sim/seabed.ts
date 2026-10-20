@@ -1,5 +1,9 @@
 import type { PhaseId } from './life.ts'
 import type { Rgb } from './patterns.ts'
+import { depthFor } from './depth.ts'
+import type { Depth } from './depth.ts'
+import { placeLook } from './places.ts'
+import type { PlaceLook } from './places.ts'
 import type { Species } from './species.ts'
 
 /**
@@ -44,32 +48,22 @@ const habitatWords: [RegExp, Bed, number][] = [
   [/rock|tide pool|intertidal/i, 'rock', 1],
 ]
 
-/** A place's coast character: volcanic islands, seagrass meadows, or brown-algae forests. */
+/** A place's coast character, read from its place profile (places.ts). */
 export type Coast = 'volcanic' | 'seagrass' | 'kelp' | 'reef'
-export const coastOf: Record<string, Coast> = {
-  'hawaiian-islands': 'volcanic',
-  galapagos: 'kelp',
-  'rapa-nui': 'volcanic',
-  'canary-islands': 'kelp',
-  'cape-verde': 'volcanic',
-  'gulf-of-california': 'kelp',
-  'persian-gulf': 'kelp',
-  mediterranean: 'seagrass',
-  'florida-keys': 'seagrass',
-  bahamas: 'seagrass',
-}
 export const coastLabels: Record<Coast, string> = {
   volcanic: 'volcanic rock',
   seagrass: 'seagrass',
   kelp: 'kelp and brown algae',
   reef: 'coral reef',
 }
-const coastBeds: Record<Coast, Partial<Record<Bed, number>>> = {
-  volcanic: { rock: 0.6 },
-  seagrass: { seagrass: 0.6 },
-  kelp: { kelp: 0.7, rock: 0.25 },
-  reef: { coral: 0.3 },
-}
+const coastFor = (place: PlaceLook): Coast =>
+  place.reef === 'volcanic'
+    ? 'volcanic'
+    : (place.beds.kelp ?? 0) >= 0.5
+      ? 'kelp'
+      : (place.beds.seagrass ?? 0) >= 0.5
+        ? 'seagrass'
+        : 'reef'
 
 export type Setting = {
   scene: Scene
@@ -80,6 +74,11 @@ export type Setting = {
   /** The sourced habitat text the bed was read from. */
   habitat: string
   coast: Coast
+  /** What this place looks like: reef, sand, rock, plants, water and fish. */
+  place: PlaceLook
+  /** How deep the animal lives here (sourced), and the depth drawn now, metres. */
+  depth: Depth
+  depthM: number
   /** True when the reader picked a bed this species' habitat does not mention. */
   elsewhere: boolean
   /** Ground colour, sRGB 0–255. */
@@ -123,24 +122,25 @@ export function habitatBeds(species: Species, regionId: string) {
   return mix
 }
 
-const groundFor = (main: Bed | null, coast: Coast, scene: Scene): Rgb => {
-  if (scene === 'beach')
-    return coast === 'volcanic' ? [92, 86, 82] : [228, 212, 172]
+const blend = (a: Rgb, b: Rgb, t: number): Rgb => [
+  Math.round(a[0] + (b[0] - a[0]) * t),
+  Math.round(a[1] + (b[1] - a[1]) * t),
+  Math.round(a[2] + (b[2] - a[2]) * t),
+]
+/** The ground takes the place's own sand, greyed by rock or a deep slope's silt. */
+const groundFor = (main: Bed | null, place: PlaceLook, scene: Scene): Rgb => {
+  if (scene === 'beach') return place.sand
   switch (main) {
-    case 'coral':
-      return [226, 214, 188]
-    case 'rubble':
-      return [214, 202, 176]
-    case 'seagrass':
-      return [204, 194, 156]
-    case 'kelp':
-      return [150, 140, 116]
     case 'rock':
-      return coast === 'volcanic' ? [96, 90, 86] : [150, 140, 126]
+      return blend(place.sand, place.rock[0]!, 0.35)
+    case 'kelp':
+      return blend(place.sand, [120, 110, 90], 0.3)
+    case 'seagrass':
+      return blend(place.sand, [170, 160, 120], 0.2)
     case 'deep':
-      return [96, 108, 118]
+      return blend(place.sand, [96, 108, 118], 0.6)
     default:
-      return [222, 206, 170]
+      return place.sand
   }
 }
 
@@ -153,8 +153,11 @@ export function seabedFor(
   regionId: string,
   phase: PhaseId,
   override: Bed | null = null,
+  depthM: number | null = null,
 ): Setting {
-  const coast = coastOf[regionId] ?? 'reef'
+  const place = placeLook(regionId)
+  const coast = coastFor(place)
+  const depth = depthFor(species, regionId)
   const habitat = habitatAt(species, regionId)
   const scene: Scene =
     phase === 'beach' || phase === 'found'
@@ -169,11 +172,16 @@ export function seabedFor(
   else {
     mix = { ...own }
     const deep = (own.deep ?? 0) > 0
-    for (const [bed, weight] of Object.entries(coastBeds[coast]) as [
-      Bed,
-      number,
-    ][])
+    for (const [bed, weight] of Object.entries(place.beds) as [Bed, number][])
       mix[bed] = (mix[bed] ?? 0) + weight * (deep ? 0.3 : 1)
+    // Reef-building corals and seagrass need sunlight (water-light-depth): none in deep water.
+    const metres = depthM ?? depth.drawn
+    if (metres > 60) {
+      delete mix.coral
+      delete mix.seagrass
+      delete mix.kelp
+      mix.deep = Math.max(mix.deep ?? 0, 1)
+    }
   }
   if (scene === 'beach') {
     // Washed ashore: what lies on the sand echoes the bed offshore.
@@ -193,9 +201,18 @@ export function seabedFor(
     main,
     habitat,
     coast,
+    place,
+    depth,
+    depthM:
+      scene === 'beach'
+        ? 0
+        : Math.min(
+            depth.reach[1],
+            Math.max(depth.reach[0], depthM ?? depth.drawn),
+          ),
     elsewhere,
-    ground: groundFor(main, coast, scene),
-    key: `${scene}|${coast}|${JSON.stringify(shares)}`,
+    ground: groundFor(main, place, scene),
+    key: `${scene}|${regionId}|${JSON.stringify(shares)}`,
   }
 }
 

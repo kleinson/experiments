@@ -149,6 +149,28 @@ generic reef fish and suspended particles drift past. The scenery is an
 illustration, not a survey of what lives at that place, and says so. The
 shell menu shows every species as its empty shell and its living animal.
 
+**Every place looks like itself.** Each of the 46 recorded places has a
+sourced profile (`src/sim/places.ts`, claims in `data/research/places.json`):
+table and branching corals in the Coral Triangle and wider Indo-Pacific, soft
+and hard corals on the Red Sea's fringing reefs, white sand lagoons on atolls,
+granite boulders in the Seychelles, black basalt with yellow tang at Hawaii
+and other volcanic islands, elkhorn coral, sea fans and turtle grass in the
+Caribbean, pink sand at Bermuda, rocky shores with brown algae in the Gulf of
+California, and Neptune grass in the Mediterranean.
+
+**Depth.** Each animal is drawn at a depth from its sources (`src/sim/depth.ts`):
+tiger cowries at 10–40 m, money cowries in tide pools, the textile cone in the
+shallows, queen conch under about 30 m, and the nautilus several hundred
+metres down (as shallow as 5 m only around Vanuatu and New Caledonia). A depth
+slider moves within that range: deeper water is darker and bluer, caustics
+fade, and below about 60 m there is no coral or seagrass. Dark mode is a night
+dive: black water, a diver's torch, no fish, and a note where the animal's
+night habits are sourced.
+
+**Attached to its shell.** A crawling snail is posed with its opening down on
+its foot; the body runs out of the opening onto the foot, and the camera
+cannot swing under the sea floor.
+
 **Drawing or realistic.** The 3D scene is real geometry you can turn, shown
 two ways (`src/sim/ink.ts`) and blended by the “Drawing ↔ Realistic” slider.
 The drawing is an educational plate: soft tonal washes on a smooth light ramp,

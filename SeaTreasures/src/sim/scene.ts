@@ -213,23 +213,55 @@ function poseFor(species: Species): Quaternion {
       .setFromAxisAngle(new Vector3(0, 0, 1), spin)
       .multiply(upright)
   }
-  // A snail lies on its foot. The coil axis runs from the apex at the back to the
-  // front canal (+x), and the shell is rolled so its opening faces the floor.
-  const along = new Vector3(0, -1, 0)
+  // A snail crawls with its opening pressed onto its foot: the coil axis runs from the apex at
+  // the back to the front canal (+x), and the shell is rolled until the opening is its lowest
+  // part, facing down. The spire is lifted a little, as a crawling snail carries it.
+  const cached = snailPoses.get(species.id)
+  if (cached) return cached.clone()
   const toFront = new Quaternion().setFromUnitVectors(
-    along,
+    new Vector3(0, -1, 0),
     new Vector3(1, 0, 0),
   )
-  // The opening faces the direction the shell grows in: along the coil, not out from its axis.
-  const opening = v(last + 0.02, 0, 1)
+  const body: Vector3[] = []
+  for (let theta = Math.max(0.05, last - TAU); theta <= last; theta += 0.08)
+    for (let s = 0; s < TAU; s += 0.3)
+      body.push(
+        new Vector3(...toThree(coilPoint(coil, theta, s, { flare: 1 }), 1)),
+      )
+  const ring = Array.from({ length: 36 }, (_, i) =>
+    v(last - 0.25, (i / 36) * TAU, 0.4),
+  )
+  const facing = v(last + 0.03, 0, 1)
     .sub(mouth)
-    .setY(0)
-    .applyQuaternion(toFront)
-  const roll = Math.atan2(opening.z, -opening.y)
-  return new Quaternion()
-    .setFromAxisAngle(new Vector3(1, 0, 0), roll)
-    .multiply(toFront)
+    .normalize()
+  const lift = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), -0.18)
+  let best = { score: Infinity, pose: new Quaternion() }
+  const turned = new Vector3()
+  for (let roll = 0; roll < TAU; roll += 0.02) {
+    const pose = lift
+      .clone()
+      .multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), roll))
+      .multiply(toFront)
+    let low = Infinity
+    let high = -Infinity
+    for (const p of body) {
+      const y = turned.copy(p).applyQuaternion(pose).y
+      low = Math.min(low, y)
+      high = Math.max(high, y)
+    }
+    const opening =
+      ring.reduce((sum, p) => sum + turned.copy(p).applyQuaternion(pose).y, 0) /
+      ring.length
+    // Lowest opening, facing down: the score falls as both improve.
+    const score =
+      (opening - low) / (high - low) +
+      0.35 * turned.copy(facing).applyQuaternion(pose).y
+    if (score < best.score) best = { score, pose }
+  }
+  snailPoses.set(species.id, best.pose)
+  return best.pose.clone()
 }
+const snailPoses = new Map<string, Quaternion>()
 
 /** Builds the shell meshes for a given size, in the shell's own coordinates. */
 function shellMeshes(
@@ -463,6 +495,7 @@ function snailBody(
   own: Own,
   speciesId: string,
   under: ReturnType<typeof underside>,
+  opening: Vector3 | null,
 ) {
   const outside = new Group()
   const L = box.max.x - box.min.x
@@ -502,7 +535,12 @@ function snailBody(
   const indices: number[] = []
   const tops: number[] = []
   for (let k = 0; k < stations; k++)
-    tops.push(Math.max(footTop * 0.9, under.low[k]! + footTop * 0.15))
+    tops.push(
+      Math.min(
+        footTop * 2.2,
+        Math.max(footTop * 0.9, under.low[k]! + footTop * 0.15),
+      ),
+    )
   const topAt = (t: number) => {
     const x = t * (stations - 1)
     const i = Math.min(stations - 2, Math.floor(x))
@@ -564,6 +602,43 @@ function snailBody(
       ),
     ),
   )
+
+  // The body runs out of the opening: a soft, thick column from inside the shell down onto the foot,
+  // so the animal is visibly in its shell rather than beside it.
+  if (opening) {
+    const inside = opening.clone()
+    const onFoot = new Vector3(
+      Math.min(opening.x, footX + footLength * 0.15),
+      footTop * 0.95,
+      mid,
+    )
+    add(
+      new Mesh(
+        geo(
+          limb(
+            [
+              inside,
+              inside
+                .clone()
+                .lerp(onFoot, 0.5)
+                .add(new Vector3(0, footTop * 0.2, 0)),
+              onFoot,
+            ],
+            Math.min(footWidth * 0.32, L * 0.11),
+            1,
+            16,
+          ),
+        ),
+        skin.flesh,
+      ),
+    )
+    add(
+      new Mesh(
+        geo(cap(inside, Math.min(footWidth * 0.3, L * 0.1))),
+        skin.flesh,
+      ),
+    )
+  }
 
   // The head rises from the front of the foot on a short neck.
   const headAt = new Vector3(footX + footLength * 0.42, footTop * 1.15, mid)
@@ -701,7 +776,12 @@ function snailBody(
     markMesh(operculum, 'Operculum')
   }
 
-  // The inhalant siphon: a soft tube rising from the front of the opening.
+  // The inhalant siphon: a soft tube rising from the front of the opening. Sourced for cowries
+  // (cowrie-animal-anatomy) and the textile cone's banded siphon; the conch is drawn without one.
+  if (conch) {
+    outside.position.copy(pivot)
+    return outside
+  }
   const siphonBase = cowrie
     ? new Vector3(front - L * 0.01, footTop * 1.3, mid)
     : new Vector3(front - L * 0.05, box.min.y + H * 0.3, mid)
@@ -1089,11 +1169,34 @@ export function buildScene(
     const footTop = Math.max(box.max.x - box.min.x, 1) * 0.06
     let lift = 0
     if (swims) lift = adult.height * 0.35
-    else if (living) lift = footTop * 0.55
+    else if (living) lift = footTop * 0.85
     else if (crabbed) lift = height * 0.18
 
     // Seat the shell: centred over the origin, resting on its foot, the sand, or in the water.
     const shift = new Vector3(-centre.x, floor + lift - box.min.y, -centre.z)
+    if (built.coil && living && !swims) {
+      // Seat a crawling snail by its opening: the opening rests on the foot, and anything lower
+      // (a flared lip, the body whorl's flank) settles into the sand as it does in life.
+      let openingLow = Infinity
+      for (let i = 0; i < 24; i++) {
+        const p = shell.localToWorld(
+          new Vector3(
+            ...toThree(
+              coilPoint(built.coil, built.end - 0.25, (i / 24) * TAU, {
+                inset: 0.4,
+              }),
+              built.scale,
+            ),
+          ),
+        )
+        openingLow = Math.min(openingLow, p.y)
+      }
+      const sink = Math.min(
+        openingLow - box.min.y,
+        (box.max.y - box.min.y) * 0.28,
+      )
+      shift.y = floor + footTop * 1.05 - box.min.y - sink
+    }
     shell.position.add(shift)
     body.position.add(shift)
     specimen.updateMatrixWorld(true)
@@ -1117,6 +1220,26 @@ export function buildScene(
       const ahead = aheadLocal.applyQuaternion(pose).normalize()
       outside = nautilusBody(mouth, ahead, length * frame.size, skin, own)
     } else if (living && !swims) {
+      // Where the opening is, in the specimen's frame: the body comes out of it.
+      let opening: Vector3 | null = null
+      if (built.coil) {
+        const ring = Array.from({ length: 24 }, (_, i) =>
+          shell.localToWorld(
+            new Vector3(
+              ...toThree(
+                coilPoint(built.coil!, built.end - 0.25, (i / 24) * TAU, {
+                  inset: 0.4,
+                }),
+                built.scale,
+              ),
+            ),
+          ),
+        )
+        opening = ring
+          .reduce((sum, p) => sum.add(p), new Vector3())
+          .divideScalar(ring.length)
+        opening.y = Math.max(opening.y, footTop)
+      }
       outside = snailBody(
         seated,
         footTop,
@@ -1124,6 +1247,7 @@ export function buildScene(
         own,
         species.id,
         underside(built.group, 12),
+        opening,
       )
     }
     specimen.add(outside)

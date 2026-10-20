@@ -22,6 +22,7 @@ import {
   Raycaster,
   Scene,
   ShadowMaterial,
+  SpotLight,
   SRGBColorSpace,
   Vector2,
   Vector3,
@@ -36,6 +37,7 @@ import type { LifeFrame } from './life.ts'
 import type { Setting } from './seabed.ts'
 import { buildSeafloor } from './seafloor.ts'
 import { buildWater, submerge, water, waterFor } from './water.ts'
+import type { WaterLight } from './water.ts'
 import type { Scenery } from './seafloor.ts'
 import { buildScene } from './scene.ts'
 import type { Built } from './scene.ts'
@@ -275,20 +277,40 @@ export default function Stage({
       key.color.setRGB(1, submerged ? 0.97 : 1, submerged ? 0.9 : 1)
       sky.color.setRGB(submerged ? 0.75 : 1, submerged ? 0.92 : 1, 1)
       sky.groundColor.setRGB(0.55, 0.5, 0.45)
+      torch.intensity = 0
       if (submerged) {
-        key.intensity = set.key * 0.62
-        sky.intensity = set.hemisphere * 0.55
-        ambient.intensity = set.ambient * 0.6
-        rim.intensity = set.rim * 0.2
+        // Daylight fades with depth, and is gone at night: then a diver's torch lights the animal.
+        const day = waterLight.night ? 0.05 : waterLight.daylight
+        const keep = 0.35 + 0.65 * day
+        key.intensity = set.key * 0.62 * (0.25 + 0.75 * day)
+        sky.intensity = set.hemisphere * 0.55 * keep
+        ambient.intensity = set.ambient * 0.6 * keep
+        rim.intensity = set.rim * 0.2 * day
+        sky.color.setRGB(0.55 + 0.2 * day, 0.75 + 0.17 * day, 1)
+        if (waterLight.night || day < 0.25) {
+          torch.intensity = waterLight.night ? 9 : 5
+          torch.position.copy(camera.position)
+          torch.target.position.copy(controls.target)
+          torch.target.updateMatrixWorld()
+        }
       }
       paper.material.color.copy(look === 'drawn' ? shadowTint : black)
       paper.material.opacity = look === 'drawn' ? 0.42 : 0.3
-      // Light rays, fish and drifting particles belong to the realistic water only.
-      if (waterParts) waterParts.group.visible = look === 'real'
+      // Light rays, fish and drifting particles belong to the realistic water only; fish shelter at night.
+      if (waterParts) {
+        waterParts.group.visible = look === 'real'
+        waterParts.group.traverse((object) => {
+          if (object.userData.fish) object.visible = !waterLight.night
+        })
+      }
     }
     paper.rotation.x = -Math.PI / 2
     paper.receiveShadow = true
     scene.add(paper)
+    // A diver's torch for night and the deep: a soft warm cone from the viewer.
+    const torch = new SpotLight(0xfff1dc, 0, 0, 0.32, 0.65, 0)
+    scene.add(torch, torch.target)
+    let waterLight: WaterLight = { tone: [0, 0, 0], daylight: 1, night: false }
     const ink = new InkPass()
     const inkColour = new Color()
     const probe = (name: string) => {
@@ -308,6 +330,11 @@ export default function Stage({
     controls.enablePan = false
     controls.minPolarAngle = 0.05
     controls.maxPolarAngle = Math.PI - 0.05
+    /** Over a seabed the camera stays above it: the view can't swing under the ground. */
+    const keepAbove = () => {
+      const grounded = Boolean(scenery?.ground)
+      controls.maxPolarAngle = grounded ? Math.PI / 2 - 0.06 : Math.PI - 0.05
+    }
     controls.minZoom = 0.3
     controls.maxZoom = 6
     const home = () => {
@@ -385,7 +412,7 @@ export default function Stage({
         }
       const view = built.close ?? built.view
       // With a seabed around it, step back so the specimen sits in its setting.
-      const room = scenery?.ground && !built.close ? 1.7 : 1
+      const room = scenery?.ground && !built.close ? 2 : 1
       const perPx =
         Math.max(view.height / free.height, view.width / free.width) * room
       return { perPx, magnified: Boolean(built.close), target: view.target }
@@ -395,6 +422,26 @@ export default function Stage({
       const offset = camera.position.clone().sub(controls.target)
       controls.target.copy(target)
       camera.position.copy(target).add(offset)
+    }
+
+    /** The frustum, re-derived from the zoom so the target stays centred in the free area. */
+    const frustum = { perPx: 1, zoom: Number.NaN, width: 0, height: 0 }
+    const frame = () => {
+      const width = container.clientWidth
+      const height = container.clientHeight
+      const { perPx } = frustum
+      // The view's centre is offset in world units, which an orthographic zoom does not scale:
+      // divide by the zoom so the offset stays a fixed number of screen pixels.
+      const shiftX = (((safe.left - safe.right) / 2) * perPx) / camera.zoom
+      const shiftY = (((safe.top - safe.bottom) / 2) * perPx) / camera.zoom
+      camera.left = (-width / 2) * perPx - shiftX
+      camera.right = (width / 2) * perPx - shiftX
+      camera.top = (height / 2) * perPx + shiftY
+      camera.bottom = (-height / 2) * perPx + shiftY
+      camera.updateProjectionMatrix()
+      frustum.zoom = camera.zoom
+      frustum.width = width
+      frustum.height = height
     }
 
     const fit = () => {
@@ -413,16 +460,10 @@ export default function Stage({
       renderer.setSize(width, height)
       const { perPx, magnified, target } = frameSize()
       if (!controls.target.equals(target)) aimAt(target)
-      // Centre the specimen in the space the floating panels leave free.
-      const shiftX = ((safe.left - safe.right) / 2) * perPx
-      const shiftY = ((safe.top - safe.bottom) / 2) * perPx
-      camera.left = (-width / 2) * perPx - shiftX
-      camera.right = (width / 2) * perPx - shiftX
-      camera.top = (height / 2) * perPx + shiftY
-      camera.bottom = (-height / 2) * perPx + shiftY
+      frustum.perPx = perPx
       controls.enableZoom = !latest.current.actual
       if (latest.current.actual) camera.zoom = 1
-      camera.updateProjectionMatrix()
+      frame()
       ink.setSize(width, height, renderer.getPixelRatio())
       measure({ pxPerMm: camera.zoom / perPx, magnified })
     }
@@ -452,6 +493,7 @@ export default function Stage({
       home()
       // Only the specimen casts a shadow: the scenery's own would cost more than it shows.
       scenery.group.traverse((object) => (object.castShadow = false))
+      keepAbove()
       scene.add(scenery.group)
       paper.visible = !scenery.ground
       fit()
@@ -734,18 +776,19 @@ export default function Stage({
       }
       water.centre.value.copy(controls.target)
       if (built) {
-        const tone = waterFor(
+        waterLight = waterFor(
           latest.current.setting,
           built.extent,
           document.documentElement.dataset.theme === 'dark',
         )
-        const css = `rgb(${tone.join(' ')})`
+        const css = `rgb(${waterLight.tone.join(' ')})`
         if (css !== waterCss) {
           waterCss = css
           container.parentElement?.style.setProperty('--water', css)
         }
       }
       controls.update()
+      if (camera.zoom !== frustum.zoom) frame()
       cssColour(shadowProbe, shadowTint)
       ink.render(renderer, scene, camera, {
         style: look,
@@ -1008,7 +1051,12 @@ export default function Stage({
         const offset = camera.position.clone().sub(controls.target)
         const side = offset.clone().cross(camera.up).normalize()
         offset.applyAxisAngle(side, event.key === 'ArrowUp' ? step : -step)
-        camera.position.copy(controls.target).add(offset)
+        // Clamp like the drag does, so the keys can't take the view under the ground either.
+        const polar = Math.acos(
+          Math.min(1, Math.max(-1, offset.y / offset.length())),
+        )
+        if (polar >= controls.minPolarAngle && polar <= controls.maxPolarAngle)
+          camera.position.copy(controls.target).add(offset)
       } else return
       event.preventDefault()
       controls.update()

@@ -3,6 +3,7 @@ import {
   BufferGeometry,
   Color,
   ConeGeometry,
+  SRGBColorSpace,
   DoubleSide,
   Float32BufferAttribute,
   Group,
@@ -23,6 +24,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import { seeded } from './patterns.ts'
 import type { Rgb } from './patterns.ts'
 import type { Setting } from './seabed.ts'
+import { daylightAt } from './depth.ts'
 
 /**
  * Light under water: what makes the seabed read as the sea floor rather than
@@ -156,38 +158,66 @@ export function underwater(material: Material, near = false) {
 }
 
 /** Sets the water colour and how far one can see, from the setting. */
-export function waterFor(setting: Setting, extent: number, dark: boolean): Rgb {
-  const deep = (setting.mix.deep ?? 0) > 0.3
-  const colour: Rgb =
+export type WaterLight = {
+  /** Background water colour, sRGB 0–255. */
+  tone: Rgb
+  /** How much daylight reaches the animal, 0–1. */
+  daylight: number
+  night: boolean
+}
+
+const mix = (a: Rgb, b: Rgb, t: number): Rgb => [
+  a[0] + (b[0] - a[0]) * t,
+  a[1] + (b[1] - a[1]) * t,
+  a[2] + (b[2] - a[2]) * t,
+]
+const DEEP_BLUE: Rgb = [6, 26, 62]
+const NIGHT: Rgb = [4, 10, 24]
+
+/**
+ * Sets the water from the place, the depth and the time of day. Red light is
+ * absorbed first and daylight fades with depth (water-light-depth), so deeper
+ * water is bluer and darker; at night only the diver's torch lights the scene.
+ */
+export function waterFor(
+  setting: Setting,
+  extent: number,
+  night: boolean,
+): WaterLight {
+  const { place } = setting
+  const depth = setting.depthM
+  const daylight =
+    setting.scene === 'beach' ? 1 : daylightAt(depth, place.clarity)
+  const base: Rgb =
     setting.scene === 'beach'
       ? [170, 205, 215]
-      : deep
-        ? [16, 48, 78]
-        : setting.scene === 'open-water'
-          ? [60, 140, 170]
-          : setting.main === 'kelp'
-            ? [62, 112, 104]
-            : setting.main === 'seagrass'
-              ? [70, 150, 150]
-              : [64, 150, 176]
-  const shade = dark ? 0.6 : 0.85
+      : setting.scene === 'open-water'
+        ? mix(place.water, [60, 150, 180], 0.4)
+        : place.water
+  // Deeper: towards deep blue and darker. Night: almost black, a hint of moonlit blue.
+  let tone = mix(base, DEEP_BLUE, 1 - daylight)
+  tone = tone.map((c) => c * (0.45 + 0.55 * daylight)) as Rgb
+  if (night) tone = mix(tone, NIGHT, 0.85)
   water.colour.value.setRGB(
-    ((colour[0] / 255) * shade) ** 2.2,
-    ((colour[1] / 255) * shade) ** 2.2,
-    ((colour[2] / 255) * shade) ** 2.2,
+    (tone[0] / 255) ** 2.2,
+    (tone[1] / 255) ** 2.2,
+    (tone[2] / 255) ** 2.2,
   )
   water.scale.value = extent * 0.55
+  // Caustics fade fast with depth: bright webs in the shallows, gone by about 30 m.
   water.caustics.value =
-    setting.scene === 'beach'
+    setting.scene === 'beach' || night
       ? 0
-      : deep
-        ? 0.15
-        : setting.main === 'kelp'
-          ? 0.45
-          : 0.75
-  water.near.value = extent * (deep ? 1.5 : 2.5)
-  water.far.value = extent * (deep ? 8 : 11.5)
-  return colour.map((c) => Math.round(c * shade)) as Rgb
+      : 0.9 * Math.exp(-depth / 16) * (setting.main === 'kelp' ? 0.6 : 1)
+  const reach = 0.6 + 0.6 * place.clarity
+  water.near.value = extent * (night ? 1.2 : 2.5 * reach)
+  water.far.value =
+    extent * (night ? 4.5 : Math.max(5, 11.5 * reach * (0.5 + 0.5 * daylight)))
+  return {
+    tone: tone.map((c) => Math.round(c)) as Rgb,
+    daylight,
+    night,
+  }
 }
 
 /**
@@ -273,7 +303,7 @@ export function buildWater(setting: Setting, extent: number, seed: number) {
     })
 
     // A small school of reef fish circling at a distance (not identified to species).
-    const fishCount = deep ? 0 : setting.scene === 'open-water' ? 18 : 12
+    const fishCount = deep || setting.depthM > 60 ? 0 : setting.place.fish.count
     if (fishCount) {
       const body = new SphereGeometry(1, 12, 8)
       body.scale(1, 0.38, 0.2)
@@ -283,13 +313,20 @@ export function buildWater(setting: Setting, extent: number, seed: number) {
       const geometry = own(mergeGeometries([body, tail])!)
       body.dispose()
       tail.dispose()
-      const fishColour = new Color(0.9, 0.62, 0.24)
+      const [r, g, b] = setting.place.fish.colour
+      const fishColour = new Color().setRGB(
+        r / 255,
+        g / 255,
+        b / 255,
+        SRGBColorSpace,
+      )
       const material = mat(
         underwater(
           new MeshStandardMaterial({ color: fishColour, roughness: 0.5 }),
         ),
       )
       const school = new InstancedMesh(geometry, material, fishCount)
+      school.userData.fish = true
       school.userData.noInk = true
       const fish = Array.from({ length: fishCount }, (_, i) => ({
         radius: E * (3.5 + random() * 1.5),
