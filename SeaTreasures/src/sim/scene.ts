@@ -1828,8 +1828,14 @@ export function buildScene(
     if (crabbed) {
       const crabMaterial = own.material(
         new MeshStandardMaterial({
-          color: rgb([196, 92, 58]),
-          roughness: 0.55,
+          color: rgb([198, 92, 48]),
+          roughness: 0.62,
+        }),
+      )
+      const jointMaterial = own.material(
+        new MeshStandardMaterial({
+          color: rgb([232, 132, 62]),
+          roughness: 0.58,
         }),
       )
       const L = seated.max.x - seated.min.x
@@ -1839,32 +1845,46 @@ export function buildScene(
         seated.min.y + H * 0.3,
         (seated.min.z + seated.max.z) / 2,
       )
-      for (let leg = 0; leg < 6; leg++) {
+      const carapace = blob([L * 0.12, H * 0.12, L * 0.11], own, crabMaterial)
+      carapace.position.copy(mouthAt).add(new Vector3(L * 0.015, H * 0.1, 0))
+      crab.add(carapace)
+      for (let leg = 0; leg < 8; leg++) {
         const sign = leg % 2 ? 1 : -1
-        const along = Math.floor(leg / 2)
+        const along = Math.floor(leg / 2) - 0.5
         const base = mouthAt
           .clone()
-          .add(new Vector3(-along * L * 0.04, 0, sign * L * 0.04))
+          .add(new Vector3(-along * L * 0.055, 0, sign * L * 0.05))
         const knee = base
           .clone()
-          .add(new Vector3(L * 0.06, H * 0.25, sign * L * 0.1))
+          .add(
+            new Vector3(L * 0.05, H * (0.18 + along * 0.02), sign * L * 0.11),
+          )
         const foot = new Vector3(
           knee.x + L * 0.04,
           floor,
           knee.z + sign * L * 0.04,
         )
-        crab.add(tube([base, knee, foot], L * 0.011, own, crabMaterial))
+        crab.add(tube([base, knee, foot], L * 0.012, own, jointMaterial))
       }
       for (const sign of [-1, 1]) {
-        const claw = blob([L * 0.07, L * 0.035, L * 0.045], own, crabMaterial)
+        const claw = blob([L * 0.075, L * 0.04, L * 0.05], own, jointMaterial)
         claw.position
           .copy(mouthAt)
           .add(new Vector3(L * 0.1, -H * 0.05, sign * L * 0.035))
         if (sign > 0) markMesh(claw, 'Hermit crab')
         crab.add(claw)
+        const pincer = blob(
+          [L * 0.035, L * 0.018, L * 0.012],
+          own,
+          crabMaterial,
+        )
+        pincer.position
+          .copy(claw.position)
+          .add(new Vector3(L * 0.045, 0, sign * L * 0.012))
+        crab.add(pincer)
         const eyeAt = mouthAt
           .clone()
-          .add(new Vector3(L * 0.09, H * 0.25, sign * L * 0.03))
+          .add(new Vector3(L * 0.09, H * 0.3, sign * L * 0.035))
         crab.add(
           tube(
             [

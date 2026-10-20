@@ -23,7 +23,7 @@ export const beds = [
   'deep',
 ] as const
 export type Bed = (typeof beds)[number]
-export type Scene = 'seabed' | 'beach' | 'open-water'
+export type Scene = 'seabed' | 'beach' | 'open-water' | 'collection'
 
 export const bedLabels: Record<Bed, string> = {
   coral: 'Coral reef',
@@ -130,7 +130,7 @@ const blend = (a: Rgb, b: Rgb, t: number): Rgb => [
 ]
 /** The ground takes the place's own sand, greyed by rock or a deep slope's silt. */
 const groundFor = (main: Bed | null, place: PlaceLook, scene: Scene): Rgb => {
-  if (scene === 'beach') return place.sand
+  if (scene === 'beach' || scene === 'collection') return place.sand
   switch (main) {
     case 'rock':
       return blend(place.sand, place.rock[0]!, 0.35)
@@ -162,15 +162,18 @@ export function seabedFor(
   const habitat = habitatAt(species, regionId)
   const nest = phase === 'egg' ? nestFor(species.id).kind : null
   const scene: Scene =
-    phase === 'beach' || phase === 'found'
+    phase === 'beach'
       ? 'beach'
-      : (phase === 'larva' && species.group !== 'cephalopod') ||
-          nest === 'water'
-        ? 'open-water'
-        : 'seabed'
+      : phase === 'found'
+        ? 'collection'
+        : (phase === 'larva' && species.group !== 'cephalopod') ||
+            nest === 'water'
+          ? 'open-water'
+          : 'seabed'
   const own = habitatBeds(species, regionId)
   let mix: Partial<Record<Bed, number>>
-  if (scene === 'open-water') mix = {}
+  if (scene === 'open-water' || scene === 'collection')
+    mix = scene === 'collection' ? { sand: 1 } : {}
   else if (override) mix = { [override]: 1 }
   else {
     mix = { ...own }
@@ -223,7 +226,7 @@ export function seabedFor(
     place,
     depth,
     depthM:
-      scene === 'beach'
+      scene === 'beach' || scene === 'collection'
         ? 0
         : Math.min(
             depth.reach[1],
@@ -239,5 +242,6 @@ export function seabedFor(
 export function settingLabel(setting: Setting) {
   if (setting.scene === 'open-water') return 'Open water'
   if (setting.scene === 'beach') return 'Beach'
+  if (setting.scene === 'collection') return 'Display case'
   return setting.main ? bedLabels[setting.main] : 'Seabed'
 }

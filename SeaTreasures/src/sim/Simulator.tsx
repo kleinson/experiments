@@ -48,6 +48,7 @@ import {
   ZoomOut,
 } from 'lucide-react'
 import { pearlFor, type PearlKind } from './pearls.ts'
+import { historyCards } from './history.ts'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import {
@@ -719,6 +720,32 @@ function PhaseStory({
               </ol>
             )}
           </div>
+          <section className="history" aria-labelledby="history-title">
+            <p className="panel-label" id="history-title">
+              Shells in human history
+            </p>
+            <p className="model-note">
+              These are documented cultural practices, not a claim that a shell
+              was used everywhere or that historical medicine was effective.
+            </p>
+            {historyCards.map((item) => (
+              <article className="history-card" key={item.title}>
+                <h3>{item.title}</h3>
+                <p>
+                  <strong>What:</strong> {item.what}
+                </p>
+                <p>
+                  <strong>Why:</strong> {item.why}
+                </p>
+                <p>
+                  <strong>How:</strong> {item.how}
+                </p>
+                <a href={item.href} target="_blank" rel="noreferrer">
+                  {item.source}
+                </a>
+              </article>
+            ))}
+          </section>
         </>
       )
   }

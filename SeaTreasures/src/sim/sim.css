@@ -107,6 +107,9 @@ html[data-theme='dark'] .sim {
 .sim[data-phase='found'] .sim-view {
   --sim-paper: color-mix(in srgb, var(--cp-warning) 13%, var(--cp-bg-elevated));
 }
+.sim[data-phase='found'] .sim-view {
+  --sim-paper: color-mix(in srgb, var(--cp-warning) 16%, var(--cp-bg-elevated));
+}
 .sim-view::after {
   /* Paper tooth: fixed fibres, multiplied over the page colour. */
   content: '';
@@ -416,6 +419,37 @@ html[data-theme='dark'] .sim-view::after {
 .shelf time {
   display: block;
   color: var(--cp-text-soft);
+  font-size: 11px;
+}
+.history {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--cp-border);
+}
+.history-card {
+  padding: 12px;
+  border-radius: 0.625rem;
+  background: color-mix(in srgb, var(--cp-warning) 7%, var(--cp-surface));
+  box-shadow: 0 0 0 1px var(--cp-border);
+}
+.history-card h3 {
+  margin: 0 0 6px;
+  font:
+    600 14px/1.2 Consolas,
+    'Courier New',
+    monospace;
+}
+.history-card p {
+  margin: 5px 0;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.history-card a {
+  display: inline-block;
+  margin-top: 5px;
+  color: var(--cp-link);
   font-size: 11px;
 }
 .timeline {

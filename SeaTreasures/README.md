@@ -348,7 +348,7 @@ tone is used.
 | Death        | Choose an ending                | Only sourced causes; otherwise “not documented”       |
 | Empty shell  | Tap the shell                   | A hermit crab moves in, or a nautilus shell floats    |
 | Beach        | Tap the shell                   | A wave rolls it; each wave wears it paler             |
-| Found        | Tap the shell                   | You pick it up and it joins your shelf on this device |
+| Found        | Tap the shell                   | You pick it up, place it in a dry bookshelf display case, and browse documented shell uses |
 
 ## Scientific boundaries
 
@@ -368,6 +368,10 @@ tone is used.
   shell microstructure was not verified.
 - **Your shelf** is kept only on this device. Damaged or blocked storage is
   disclosed rather than silently overwritten.
+- **Found is dry.** The collection scene removes underwater haze and particles,
+  rests the specimen on a wooden display shelf, and shows historical context for
+  adornment, trade, sound/ceremony and medicine/belief. Historical medicine is
+  labelled as practice and belief, not evidence of clinical effectiveness.
 
 ## Sources and data
 

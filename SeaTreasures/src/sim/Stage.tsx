@@ -57,6 +57,7 @@ import type { Label } from './labels.ts'
 import type { LifeFrame } from './life.ts'
 import type { Setting } from './seabed.ts'
 import { buildSeafloor } from './seafloor.ts'
+import { buildDisplayCase } from './display.ts'
 import { createSky } from './sky.ts'
 import { buildWater, submerge, water, waterFor, windowed } from './water.ts'
 import type { WaterLight } from './water.ts'
@@ -341,7 +342,10 @@ export default function Stage({
       rim.intensity = set.rim
       // Under water the sun is filtered from above and tinted by the water; the drawing stays neutral.
       const wet = look === 'real' && Boolean(scenery?.ground)
-      const submerged = wet && latest.current.setting.scene !== 'beach'
+      const submerged =
+        wet &&
+        latest.current.setting.scene !== 'beach' &&
+        latest.current.setting.scene !== 'collection'
       key.color.setRGB(1, submerged ? 0.97 : 1, submerged ? 0.9 : 1)
       sky.color.setRGB(submerged ? 0.75 : 1, submerged ? 0.92 : 1, 1)
       sky.groundColor.setRGB(0.55, 0.5, 0.45)
@@ -432,7 +436,10 @@ export default function Stage({
     let waterCss = ''
     let sceneryKey = ''
     /** The scene's layout size, mm: the animal, but never less than a reef patch (30 cm). */
-    const layout = (target: Built) => Math.max(target.extent, 300)
+    const layout = (target: Built) =>
+      latest.current.setting.scene === 'collection'
+        ? Math.max(target.extent, 1000)
+        : Math.max(target.extent, 300)
     /** Where the animal is now, which fish keep clear of. */
     const fishAvoid = new Vector3()
     /** Render resolution, scaled down on slow devices (see adapt). */
@@ -519,7 +526,7 @@ export default function Stage({
       // the minimum habitat patch, not only the animal, or all scenery lands
       // outside the orthographic camera. Zoom still goes back to the specimen.
       const contextPerPx =
-        scenery?.ground && !built.close
+        scenery && !built.close
           ? Math.max(
               (layout(built) * 2.2) / free.width,
               (layout(built) * 1.4) / free.height,
@@ -602,7 +609,10 @@ export default function Stage({
         waterParts.dispose()
       }
       ink.forget()
-      scenery = buildSeafloor(setting, layout(built), seedOf(key), built.extent)
+      scenery =
+        setting.scene === 'collection'
+          ? buildDisplayCase(built.extent)
+          : buildSeafloor(setting, layout(built), seedOf(key), built.extent)
       undoScenery = inkify(scenery.group)
       // The drawn look's sand needs the see-through window too.
       scenery.group.traverse((object) => {
@@ -621,21 +631,27 @@ export default function Stage({
         )
         .multiplyScalar(0.8)
       submerge(scenery.group)
-      waterParts = buildWater(
-        setting,
-        built.extent,
-        seedOf(key) + 1,
-        scenery,
-        fishAvoid,
-      )
-      scene.add(waterParts.group)
+      waterParts =
+        setting.scene === 'collection'
+          ? null
+          : buildWater(
+              setting,
+              built.extent,
+              seedOf(key) + 1,
+              scenery,
+              fishAvoid,
+            )
+      if (waterParts) scene.add(waterParts.group)
       home()
       // Only the specimen casts a shadow: the scenery's own would cost more than it shows.
       scenery.group.traverse((object) => (object.castShadow = false))
       keepAbove()
       scene.add(scenery.group)
       // Drifting in the open water column there is nothing below to catch a shadow.
-      paper.visible = !scenery.ground && setting.scene !== 'open-water'
+      paper.visible =
+        !scenery.ground &&
+        setting.scene !== 'open-water' &&
+        setting.scene !== 'collection'
       fit()
       request()
     }
@@ -729,7 +745,7 @@ export default function Stage({
       labelled = labelsIn(built.group)
       partList.report(labelled)
       dress()
-      if (frame.beach) {
+      if (frame.beach || latest.current.setting.scene === 'collection') {
         built.specimen.quaternion.multiply(motion.resting)
         rest(built)
       } else motion.resting.identity()
@@ -1307,7 +1323,7 @@ export default function Stage({
       if (built) {
         waterLight = waterFor(
           latest.current.setting,
-          built.extent,
+          layout(built),
           document.documentElement.dataset.theme === 'dark',
         )
         const css = `rgb(${waterLight.tone.join(' ')})`

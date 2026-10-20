@@ -275,9 +275,11 @@ export function waterFor(
   const { place } = setting
   const depth = setting.depthM
   const daylight =
-    setting.scene === 'beach' ? 1 : daylightAt(depth, place.clarity)
+    setting.scene === 'beach' || setting.scene === 'collection'
+      ? 1
+      : daylightAt(depth, place.clarity)
   const base: Rgb =
-    setting.scene === 'beach'
+    setting.scene === 'beach' || setting.scene === 'collection'
       ? [170, 205, 215]
       : setting.scene === 'open-water'
         ? mix(place.water, [60, 150, 180], 0.4)
@@ -296,7 +298,7 @@ export function waterFor(
   // The cast was measured from whole photographs taken at about 8 m: weaker in the
   // shallows, stronger deeper down, gone on the beach and under a diver's torch.
   const strength =
-    setting.scene === 'beach' || night
+    setting.scene === 'beach' || setting.scene === 'collection' || night
       ? 0
       : Math.min(1.6, Math.max(0.5, depth / 8))
   water.cast.value.setRGB(
@@ -307,7 +309,7 @@ export function waterFor(
   water.scale.value = extent * 0.55
   // Caustics fade fast with depth: bright webs in the shallows, gone by about 30 m.
   water.caustics.value =
-    setting.scene === 'beach' || night
+    setting.scene === 'beach' || setting.scene === 'collection' || night
       ? 0
       : 0.9 * Math.exp(-depth / 16) * (setting.main === 'kelp' ? 0.6 : 1)
   const reach = 0.6 + 0.6 * place.clarity
