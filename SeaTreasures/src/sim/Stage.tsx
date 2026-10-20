@@ -34,6 +34,7 @@ import {
 } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
+import { along, gaitFor, hop, travelled } from './crawl.ts'
 import { InkPass, inkify, LIGHTS } from './ink.ts'
 import type { Look } from './ink.ts'
 import { labelsIn } from './labels.ts'
@@ -123,6 +124,7 @@ function cssColour(probe: HTMLElement, into: Color) {
 
 /** Where the light comes from: high and to the right, so the flat shadow falls to the left. */
 const SUN = new Vector3(1, 0.8, 0.3).normalize()
+const UP = new Vector3(0, 1, 0)
 
 const ease = (t: number) => (t < 0 ? 0 : t > 1 ? 1 : t * t * (3 - 2 * t))
 
@@ -197,6 +199,7 @@ export default function Stage({
     look,
     turntable,
     setting,
+    selected,
   })
   const [status] = useState(failureStore)
   const failure = useSyncExternalStore(status.subscribe, status.snapshot)
@@ -225,7 +228,7 @@ export default function Stage({
   }, [apart])
 
   useEffect(() => {
-    latest.current = { ...latest.current, labels, look, turntable }
+    latest.current = { ...latest.current, labels, look, turntable, selected }
     api.current?.nudge()
   }, [labels, look, turntable, parts, cut, xray, selected])
 
@@ -418,6 +421,20 @@ export default function Stage({
       larvaKey: '',
       apart: 0,
     }
+    /**
+     * The living animal's slow way over the sea floor: seconds spent moving,
+     * and the offset (mm) last applied, which the camera and light follow.
+     */
+    const crawl = {
+      species: '',
+      seconds: 0,
+      last: 0,
+      active: false,
+      applied: new Vector3(),
+      keyTarget: new Vector3(),
+      keyAt: new Vector3(),
+      paper: new Vector3(),
+    }
 
     /** Millimetres per screen pixel at zoom 1, and where the view looks. */
     const frameSize = () => {
@@ -484,7 +501,9 @@ export default function Stage({
         ),
       )
       renderer.setSize(width, height)
-      const { perPx, magnified, target } = frameSize()
+      const size = frameSize()
+      const { perPx, magnified } = size
+      const target = size.target.clone().add(crawl.applied)
       if (!controls.target.equals(target)) aimAt(target)
       frustum.perPx = perPx
       controls.enableZoom = !latest.current.actual
@@ -582,6 +601,9 @@ export default function Stage({
       shade.near = span * 0.5
       shade.far = span * 9
       shade.updateProjectionMatrix()
+      crawl.keyTarget.copy(key.target.position)
+      crawl.keyAt.copy(key.position)
+      crawl.paper.copy(paper.position)
       key.shadow.bias = -0.0005
       key.shadow.normalBias = span * 0.002
       labelled = labelsIn(built.group)
@@ -604,6 +626,69 @@ export default function Stage({
         motion.larvaTarget.set(0, 0, 0)
       }
       fit()
+    }
+
+    const turn = new Quaternion()
+    const pivot = new Vector3()
+    const moved = new Vector3()
+    /**
+     * Moves the living animal along its route, turned the way it is going, and
+     * carries the camera, light and shadow with it. It rests while it hides in
+     * its shell, while it is taken apart or a part is being read, and never
+     * moves with reduced motion. True only while the camera has to catch up.
+     */
+    const roam = (t: number, calm: boolean) => {
+      if (!built) return false
+      const { frame, species, selected } = latest.current
+      const specimen = built.specimen
+      if (crawl.species !== species.id) {
+        crawl.species = species.id
+        crawl.seconds = 0
+      }
+      const living =
+        (frame.phase === 'adult' || frame.phase === 'growth') &&
+        frame.animal > 0 &&
+        frame.larva === 0 &&
+        !frame.beach
+      const gait = gaitFor(species)
+      const hiding =
+        Number.isFinite(t - motion.withdraw) && t - motion.withdraw < 2.6
+      const go =
+        living && !calm && !hiding && motion.apart < 0.01 && selected === null
+      if (go) crawl.seconds += Math.min(0.1, Math.max(0, t - crawl.last))
+      crawl.last = t
+      crawl.active = living && !calm
+      const state = crawl.active ? (go ? 'moving' : 'resting') : ''
+      if (renderer.domElement.dataset.crawl !== state) {
+        if (state) renderer.domElement.dataset.crawl = state
+        else delete renderer.domElement.dataset.crawl
+      }
+      moved.set(0, 0, 0)
+      if (crawl.active) {
+        const body = built.extent * Math.max(frame.size, 0.05)
+        const place = along(travelled(gait, crawl.seconds), gait === 'jet')
+        turn.setFromAxisAngle(UP, place.heading)
+        // Turn about the middle of what is shown, then carry it along the route.
+        pivot.copy((built.close ?? built.view).target).setY(0)
+        specimen.quaternion.copy(turn)
+        specimen.position
+          .sub(pivot)
+          .applyQuaternion(turn)
+          .add(pivot)
+          .add(moved.set(place.x * body, 0, place.z * body))
+        specimen.position.y += hop(gait, crawl.seconds) * body
+      } else if (living) specimen.quaternion.identity()
+      const delta = moved.clone().sub(crawl.applied)
+      if (delta.lengthSq() > 0) {
+        crawl.applied.copy(moved)
+        controls.target.add(delta)
+        camera.position.add(delta)
+        key.target.position.copy(crawl.keyTarget).add(moved)
+        key.target.updateMatrixWorld()
+        key.position.copy(crawl.keyAt).add(moved)
+        paper.position.copy(crawl.paper).add(moved)
+      }
+      return false
     }
 
     /** Applies every transient motion; true while something is still moving. */
@@ -646,6 +731,7 @@ export default function Stage({
       specimen.userData.base ??= specimen.position.clone()
       const base = specimen.userData.base as Vector3
       specimen.position.copy(base)
+      moving = roam(t, calm) || moving
       if (built.bob > 0 && !calm) {
         specimen.position.y += Math.sin(t * 1.8) * built.bob
         moving = true
@@ -907,7 +993,10 @@ export default function Stage({
       controls.autoRotate = turntable && !reducedMotion
       controls.autoRotateSpeed = 1.2
       if (controls.autoRotate) moving = true
-      const ambient = Boolean(scenery?.animated || waterParts) && !reducedMotion
+      // The water's sway and the animal's slow crawl only need about 25 frames a second.
+      const ambient =
+        Boolean(scenery?.animated || waterParts || crawl.active) &&
+        !reducedMotion
       if (ambient) {
         scenery?.sway(now())
         waterParts?.animate(now())

@@ -583,3 +583,28 @@ test('the shell lab builds shells from the published model and responds to its n
   await lab.getByRole('button', { name: /^Scallop/ }).click()
   await expect(lab).toContainText('not taken from the paper')
 })
+
+test.describe('with motion', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  test('the living animal slowly makes its way over the sea floor', async ({
+    page,
+  }) => {
+    await page.goto('./?species=queen-conch')
+    const canvas = page.locator('[data-sim-canvas]')
+    await expect(canvas).toHaveAttribute('data-crawl', 'moving', {
+      timeout: 25_000,
+    })
+    // It rests while it hides in its shell, and sets off again.
+    await page.getByRole('button', { name: 'Poke it' }).click()
+    await expect(canvas).toHaveAttribute('data-crawl', 'resting')
+    await expect(canvas).toHaveAttribute('data-crawl', 'moving')
+    // It waits while a part is being read.
+    const parts = page.getByRole('list', { name: 'Labelled parts' })
+    await parts.getByRole('button', { name: 'Operculum' }).click()
+    await expect(canvas).toHaveAttribute('data-crawl', 'resting')
+    // An empty shell stays put.
+    await phase(page, 'Empty shell')
+    await expect(canvas).not.toHaveAttribute('data-crawl')
+  })
+})

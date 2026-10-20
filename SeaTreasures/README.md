@@ -190,6 +190,16 @@ Safari's pinch gestures), touch pinch, the + and − keys and the zoom buttons
 all zoom towards the point under the cursor. Zoomed all the way out, scrolling
 carries on down the page; Home or “Reset view” goes back to the whole animal.
 
+**On the move.** While it lives, the animal slowly makes its way over the
+sea floor in a loose figure of eight, turned the way it is going, with the
+camera, light and shadow following so the seabed slides past
+(`src/sim/crawl.ts`). Each moves as its sources say: cowries and cones glide
+on their muscular foot, the queen conch leaps by digging its operculum into
+the sand and throwing the shell forward, and the nautilus swims backwards,
+shell first, by jet propulsion. The pace is sped up to be watchable. It rests
+while it hides in its shell, while it is taken apart or a part is being read,
+and stays still with reduced motion.
+
 **Attached to its shell.** A crawling snail is posed with its opening down on
 its foot; the body runs out of the opening onto the foot, and the camera
 cannot swing under the sea floor.
@@ -342,6 +352,7 @@ offline use.
 | `src/sim/species.ts`     | Typed, validated species data                                 |
 | `src/sim/ranges.ts`      | GBIF records per sea and island, levels and outliers          |
 | `src/sim/WhereFound.tsx` | World map and place list; picking a place sets the origin     |
+| `src/sim/crawl.ts`       | How each animal moves, and its slow route over the sea floor  |
 | `src/sim/forms.ts`       | Sourced local forms, such as the Hawaiian tiger cowrie        |
 | `src/sim/thumbs.ts`      | Studio pictures of each shell, its underside and its animal   |
 | `src/sim/bodies.ts`      | Soft bodies: skins, head-foot, tapered limbs, papillae        |
