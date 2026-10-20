@@ -295,11 +295,12 @@ html[data-theme='dark'] .sim-view::after {
   color: var(--cp-bg-elevated);
 }
 .part-card .fact p {
-  font-size: 14px;
+  font-size: 17px;
+  line-height: 1.65;
 }
 .life-panel h2 {
   margin: 0;
-  font-size: 26px;
+  font-size: 34px;
   font-weight: 400;
   letter-spacing: -0.03em;
 }
@@ -1111,7 +1112,7 @@ html[data-theme='dark'] .sim-view::after {
   z-index: 7;
   top: 76px;
   left: 16px;
-  width: min(430px, calc(100% - 32px));
+  width: min(500px, calc(100% - 32px));
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -1140,10 +1141,11 @@ html[data-theme='dark'] .sim-view::after {
   gap: 2px;
 }
 .float-title .sim-title h1 {
-  font-size: clamp(22px, 2.1vw, 30px);
+  font-size: clamp(30px, 2.7vw, 40px);
+  line-height: 1;
 }
 .float-title .sim-taxon {
-  font-size: 13px;
+  font-size: 16px;
   color: var(--cp-text-muted);
 }
 .setting-note {
@@ -1151,8 +1153,8 @@ html[data-theme='dark'] .sim-view::after {
   gap: 4px;
 }
 .setting-note .fact p {
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: 17px;
+  line-height: 1.65;
 }
 .setting-note strong {
   font-weight: 600;
@@ -1180,7 +1182,7 @@ html[data-theme='dark'] .sim-view::after {
   top: 80px;
   right: 16px;
   bottom: 176px;
-  width: 360px;
+  width: 400px;
 }
 
 /* The timeline and figure tools float along the bottom. */
@@ -1468,7 +1470,7 @@ html[data-theme='dark'] .sim-view::after {
   color: var(--primary-foreground);
 }
 .sim .ocean .float-title {
-  padding: 18px 20px;
+  padding: 24px 26px;
 }
 .sim .ocean .float-title h1,
 .sim .ocean .life-panel h2 {
@@ -1495,8 +1497,15 @@ html[data-theme='dark'] .sim-view::after {
 .sim .ocean .fact p {
   color: var(--card-foreground);
   font-family: var(--font-serif);
-  font-size: 15px;
-  line-height: 1.65;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.sim .ocean .setting-note .fact p {
+  font-size: 17px;
+}
+.sim .ocean .part-card .fact p {
+  font-size: 18px;
+  line-height: 1.7;
 }
 .sim .ocean .sim-taxon,
 .sim .ocean .model-note,
@@ -1513,7 +1522,7 @@ html[data-theme='dark'] .sim-view::after {
 }
 .sim .ocean .durations dt,
 .sim .ocean .durations dd {
-  font-size: 12px;
+  font-size: 13px;
 }
 .sim .ocean .float-bottom {
   padding: 14px 18px;

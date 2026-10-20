@@ -1523,16 +1523,16 @@ export function Simulator() {
               card={
                 labels && term && part ? (
                   <Card
-                    className="part-card w-[min(340px,calc(100vw-2rem))] gap-2 rounded-2xl border-0 bg-card/97 py-3 shadow-[0_0_0_1px_var(--cp-border),0_16px_40px_color-mix(in_srgb,var(--cp-text)_18%,transparent)] backdrop-blur-md"
+                    className="part-card w-[min(440px,calc(100vw-2rem))] gap-3 rounded-2xl border-0 bg-card/97 py-5 shadow-[0_0_0_1px_var(--cp-border),0_16px_40px_color-mix(in_srgb,var(--cp-text)_18%,transparent)] backdrop-blur-md"
                     role="region"
                     aria-label={part}
                   >
-                    <CardHeader className="grid-cols-[1fr_auto] items-start gap-0.5 px-4">
+                    <CardHeader className="grid-cols-[1fr_auto] items-start gap-1 px-6">
                       <div className="grid gap-0.5">
-                        <h3 className="font-mono text-xs font-semibold tracking-[0.12em] uppercase">
+                        <h3 className="font-mono text-sm font-semibold tracking-[0.12em] uppercase">
                           {part}
                         </h3>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           {term.what}
                         </p>
                       </div>
@@ -1545,7 +1545,7 @@ export function Simulator() {
                         <X />
                       </Button>
                     </CardHeader>
-                    <CardContent className="grid gap-2.5 px-4">
+                    <CardContent className="grid gap-4 px-6">
                       <div className="grid gap-1">
                         <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
                           TL;DR · what, why and how
