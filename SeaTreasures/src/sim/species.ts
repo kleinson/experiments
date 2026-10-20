@@ -28,7 +28,13 @@ export type Species = {
   authority: string
   aphiaId: number
   taxonClaim: string
-  group: 'gastropod' | 'cephalopod'
+  group:
+    | 'gastropod'
+    | 'cephalopod'
+    | 'bivalve'
+    | 'chiton'
+    | 'scaphopod'
+    | 'monoplacophoran'
   /** Adult length used to draw the shell at true size, and its source. */
   lengthMm: {
     typical: Range | null

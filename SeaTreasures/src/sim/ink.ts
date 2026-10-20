@@ -28,6 +28,7 @@ import {
   ZeroFactor,
 } from 'three'
 import type { Camera } from 'three'
+import { swayLike } from './sway.ts'
 
 /**
  * Two ways to show the same specimen. The drawing is an educational plate:
@@ -82,6 +83,7 @@ function drawn(source: Material, ramp: DataTexture): Material {
     depthWrite: from.depthWrite,
     clippingPlanes: from.clippingPlanes,
     clipShadows: true,
+    vertexColors: from.vertexColors,
   })
   if (from instanceof MeshPhysicalMaterial && from.transmission > 0) {
     // Jelly-like egg capsules are drawn see-through.
@@ -90,7 +92,7 @@ function drawn(source: Material, ramp: DataTexture): Material {
     material.depthWrite = false
   }
   material.name = from.name
-  return material
+  return swayLike(material, from)
 }
 
 type Looks = Record<Look, Material | Material[]>
@@ -217,11 +219,14 @@ vec2 edgeAt(vec2 uv) {
 void main() {
   // Four offset samples smooth the ink into a fine, even line.
   vec2 e = vec2(0.0);
-  e += edgeAt(vUv + vec2(-0.25, -0.25) * texel);
-  e += edgeAt(vUv + vec2(0.25, -0.25) * texel);
-  e += edgeAt(vUv + vec2(-0.25, 0.25) * texel);
-  e += edgeAt(vUv + vec2(0.25, 0.25) * texel);
-  e *= 0.25;
+  // The realistic look has no lines: skip the edge search, by far the costliest part.
+  if (lines > 0.0) {
+    e += edgeAt(vUv + vec2(-0.25, -0.25) * texel);
+    e += edgeAt(vUv + vec2(0.25, -0.25) * texel);
+    e += edgeAt(vUv + vec2(-0.25, 0.25) * texel);
+    e += edgeAt(vUv + vec2(0.25, 0.25) * texel);
+    e *= 0.25;
+  }
   float line = max(e.x, e.y * 0.45) * lines;
   // Water haze: the further away, the more the scene fades into the water behind it.
   float fade = haze.y > haze.x
@@ -262,9 +267,11 @@ export class InkPass {
     samples: 4,
     type: HalfFloatType,
   })
+  // Its depth gives the water haze when there are no lines, so the realistic look needs one pass.
   private real = new WebGLRenderTarget(1, 1, {
     samples: 4,
     type: HalfFloatType,
+    depthTexture: new DepthTexture(1, 1),
   })
   private normals = new WebGLRenderTarget(1, 1, {
     minFilter: LinearFilter,
@@ -341,6 +348,7 @@ export class InkPass {
         clippingPlanes: material.clippingPlanes,
       })
     }
+    twin = swayLike(twin, material)
     this.twins.set(material, twin)
     return twin
   }
@@ -361,6 +369,7 @@ export class InkPass {
         blendSrcAlpha: ZeroFactor,
         blendDstAlpha: ZeroFactor,
       })
+      twin = swayLike(twin, material)
       this.groundTwins.set(material, twin)
     }
     return twin
@@ -409,7 +418,7 @@ export class InkPass {
       options.light?.('real')
       this.pass(renderer, scene, camera, this.real)
     }
-    if (lines > 0 || haze) {
+    if (lines > 0 || (haze && style < 1)) {
       const swapped: [Mesh, Material | Material[]][] = []
       const muted: Object3D[] = []
       scene.traverse((object) => {
@@ -443,6 +452,10 @@ export class InkPass {
     uniforms.lines!.value = lines
     const depth = (distance: number) =>
       (distance - camera.near) / (camera.far - camera.near)
+    uniforms.tDepth!.value =
+      lines > 0 || style < 1
+        ? this.normals.depthTexture
+        : this.real.depthTexture
     if (haze) uniforms.haze!.value.set(depth(haze.from), depth(haze.to))
     else uniforms.haze!.value.set(0, 0)
     renderer.setRenderTarget(null)
@@ -454,6 +467,7 @@ export class InkPass {
     this.forget()
     this.hidden.dispose()
     this.drawn.dispose()
+    this.real.depthTexture?.dispose()
     this.real.dispose()
     this.normals.depthTexture?.dispose()
     this.normals.dispose()

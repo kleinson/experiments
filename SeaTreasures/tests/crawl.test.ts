@@ -4,6 +4,8 @@ import manifest from '../data/claims.json' with { type: 'json' }
 import {
   activity,
   along,
+  grazing,
+  hatchesTogether,
   lift,
   routeLength,
   sunk,
@@ -81,15 +83,27 @@ test('the route is a closed loop over the clear sand around the start', () => {
 })
 
 test('crawling is slow and steady; a lunge stays on the sand and is followed by a rest', () => {
-  for (const gait of ['crawl', 'swim'] as const) {
-    const step = travelled(gait, 0.5)
-    for (let s = 0; s < 30; s += 0.5)
-      assert.ok(
-        Math.abs(travelled(gait, s + 0.5) - travelled(gait, s) - step) < 1e-9,
-        gait,
-      )
-    assert.equal(lift(gait, 0.3), 0)
+  // Swimming is steady.
+  const step = travelled('swim', 0.5)
+  for (let t = 0; t < 30; t += 0.5)
+    assert.ok(
+      Math.abs(travelled('swim', t + 0.5) - travelled('swim', t) - step) < 1e-9,
+    )
+  assert.equal(lift('swim', 0.3), 0)
+  // A crawler moves, eases to a stop to graze, then sets off again: never backwards, never a jump.
+  let previous = 0
+  let maxStep = 0
+  for (let t = 0.05; t < 60; t += 0.05) {
+    const d = travelled('crawl', t)
+    assert.ok(d >= previous - 1e-12)
+    maxStep = Math.max(maxStep, d - previous)
+    previous = d
   }
+  assert.ok(maxStep <= 0.03 * 0.05 + 1e-9)
+  assert.ok(
+    grazing('crawl', 13) && !grazing('crawl', 5) && !grazing('swim', 13),
+  )
+  assert.equal(travelled('crawl', 12.5), travelled('crawl', 15.5))
   for (const gait of ['crawl', 'vault', 'swim'] as const) {
     assert.ok(travels(gait))
     // Well under a body length every ten seconds.
@@ -115,4 +129,35 @@ test('only what changes with the time of day is told by day or by night', () => 
   assert.ok(!daily('queen-conch', 'growth'))
   assert.ok(!daily('queen-conch', 'adult'))
   assert.ok(!daily('money-cowrie', 'adult'))
+})
+
+test('sibling larvae drift only with species whose larvae hatch together', () => {
+  for (const id of [
+    'tiger-cowrie',
+    'money-cowrie',
+    'textile-cone',
+    'queen-conch',
+    'giant-clam',
+  ]) {
+    const fact = hatchesTogether(id)
+    assert.ok(fact, `${id} should drift among siblings`)
+    assert.ok(ids.has(fact.claim), `${id} cites missing ${fact.claim}`)
+    assert.ok(
+      activity(getSpecies(id), 'larva', false).facts.some(
+        (f) => f.claim === fact.claim,
+      ),
+      `${id} larva should explain its siblings`,
+    )
+  }
+  for (const id of [
+    'chambered-nautilus',
+    'fuzzy-chiton',
+    'tusk-shell',
+    'monoplacophoran',
+  ])
+    assert.equal(
+      hatchesTogether(id),
+      null,
+      `${id} has no sourced brood of drifting larvae`,
+    )
 })

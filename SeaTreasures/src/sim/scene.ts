@@ -33,6 +33,8 @@ import {
 } from './coil.ts'
 import { cap, footGeometry, limb, papillae, skinMaterials } from './bodies.ts'
 import { marker, markMesh } from './labels.ts'
+import { buildClassAnimal } from './classes.ts'
+import { buildPearl, pearlFor } from './pearls.ts'
 import { buildVelum } from './velum.ts'
 import type { Velum } from './velum.ts'
 import type { LifeFrame } from './life.ts'
@@ -47,7 +49,12 @@ const TAU = Math.PI * 2
 const UP = new Vector3(0, 1, 0)
 const rgb = ([r, g, b]: Rgb) => new Color(r / 255, g / 255, b / 255)
 
-export type SceneOptions = { cut: boolean; xray: boolean }
+export type SceneOptions = {
+  cut: boolean
+  xray: boolean
+  /** A step of the pearl growing inside a living clam (pearls.ts), or null for none. */
+  pearl?: number | null
+}
 
 /** The cut-through plane, fixed in the world: it removes the half of the shell nearest the viewer. */
 export const cutPlane = new Plane(new Vector3(0, 0, -1), 0)
@@ -195,6 +202,7 @@ const blob = (
  */
 function poseFor(species: Species): Quaternion {
   const shape = shapes[species.id]!
+  if (shape.kind === 'class') return new Quaternion()
   if (shape.kind === 'cowrie')
     return new Quaternion().setFromAxisAngle(UP, Math.PI)
   const coil = shape.coil
@@ -278,6 +286,8 @@ function shellMeshes(
   own: Own,
 ) {
   const shape = shapes[species.id]!
+  if (shape.kind === 'class')
+    throw new Error(`${species.id} is built whole in classes.ts`)
   const length = species.lengthMm.drawn
   const group = new Group()
   if (shape.kind === 'coil') {
@@ -435,10 +445,29 @@ function adultBox(species: Species) {
   if (cached) return cached
   const own = track()
   const plain = own.material(new MeshStandardMaterial())
-  const built = shellMeshes(species, 1, 1, plain, plain, plain, own)
-  built.group.quaternion.copy(poseFor(species))
-  built.group.updateMatrixWorld(true)
-  const box = new Box3().setFromObject(built.group)
+  const shape = shapes[species.id]!
+  const measured = new Group()
+  if (shape.kind === 'class') {
+    const whole = buildClassAnimal(
+      shape.class,
+      species.lengthMm.drawn,
+      1,
+      1,
+      own,
+      {
+        shell: plain,
+        inner: plain,
+        tissue: plain,
+      },
+    )
+    measured.add(whole.shell)
+  } else {
+    const built = shellMeshes(species, 1, 1, plain, plain, plain, own)
+    built.group.quaternion.copy(poseFor(species))
+    measured.add(built.group)
+  }
+  measured.updateMatrixWorld(true)
+  const box = new Box3().setFromObject(measured)
   const size = box.getSize(new Vector3())
   own.dispose()
   const result = {
@@ -956,6 +985,66 @@ function nautilusBody(
   return outside
 }
 
+/** A clutch of egg capsules on the floor, each with an embryo; returns how to frame them. */
+function layEggs(
+  group: Group,
+  eggs: Mesh[],
+  length: number,
+  big: boolean,
+  floor: number,
+  own: Own,
+): Built['close'] {
+  const eggMaterial = own.material(
+    new MeshPhysicalMaterial({
+      color: rgb([238, 228, 200]),
+      roughness: 0.35,
+      transmission: 0.4,
+      thickness: 1,
+      sheen: 0.4,
+    }),
+  )
+  const embryo = own.material(
+    new MeshStandardMaterial({ color: rgb([196, 150, 110]) }),
+  )
+  const eggSize = big ? length * 0.14 : Math.max(0.25, length * 0.012)
+  const count = big ? 3 : 48
+  for (let i = 0; i < count; i++) {
+    const angle = i * 2.39996
+    const ring = Math.sqrt(i + 0.5) * eggSize * 1.05
+    const egg = blob(
+      [
+        eggSize * 0.5,
+        eggSize * (big ? 0.36 : 0.5),
+        eggSize * (big ? 0.36 : 0.5),
+      ],
+      own,
+      eggMaterial,
+    )
+    egg.position.set(
+      Math.cos(angle) * ring,
+      floor + eggSize * 0.42,
+      Math.sin(angle) * ring,
+    )
+    egg.userData.egg = i
+    if (i === 0) markMesh(egg, 'Egg capsule')
+    const dot = blob(
+      [eggSize * 0.16, eggSize * 0.16, eggSize * 0.16],
+      own,
+      embryo,
+    )
+    egg.add(dot)
+    dot.scale.divide(egg.scale).multiplyScalar(eggSize * 0.18)
+    eggs.push(egg)
+    group.add(egg)
+  }
+  const spread = Math.sqrt(count) * eggSize * 2.6
+  return {
+    target: new Vector3(0, eggSize, 0),
+    width: spread * 1.4,
+    height: spread,
+  }
+}
+
 export function buildScene(
   species: Species,
   frame: LifeFrame,
@@ -972,10 +1061,19 @@ export function buildScene(
   const pose = poseFor(species)
   const swims = species.group === 'cephalopod'
   const clipping = options.cut ? [cutPlane] : []
+  const pearlKind =
+    options.pearl != null &&
+    frame.animal > 0 &&
+    frame.larva === 0 &&
+    !frame.beach
+      ? pearlFor(species.id)
+      : null
+  // Looking for the pearl: the shell turns see-through, as it does for the X-ray view.
+  const seeThrough = options.xray || Boolean(pearlKind)
   const shellMaterial = <T extends MeshStandardMaterial>(material: T) => {
     material.side = DoubleSide
     material.clippingPlanes = clipping
-    if (options.xray) {
+    if (seeThrough) {
       material.transparent = true
       material.opacity = 0.18
       material.depthWrite = false
@@ -999,7 +1097,110 @@ export function buildScene(
   let larva: Velum | null = null
   const floor = 0
 
-  if (frame.size > 0) {
+  if (frame.size > 0 && shape.kind === 'class') {
+    // A bivalve, chiton, tusk shell or monoplacophoran, built whole and painted per vertex.
+    const vertex = { vertexColors: true }
+    const shellMat = shellMaterial(
+      new MeshPhysicalMaterial({
+        ...vertex,
+        roughness: 0.45 + wear * 0.5,
+        clearcoat: 0.25 * (1 - wear),
+      }),
+    )
+    const innerMat = shellMaterial(
+      new MeshStandardMaterial({ ...vertex, roughness: 0.25 }),
+    )
+    const tissueMat = own.material(
+      new MeshPhysicalMaterial({
+        ...vertex,
+        roughness: 0.4,
+        clearcoat: 0.4,
+        sheen: 0.4,
+        side: DoubleSide,
+        transparent: frame.animal < 1,
+        opacity: Math.max(0, frame.animal),
+        clippingPlanes: clipping,
+      }),
+    )
+    const whole = buildClassAnimal(
+      shape.class,
+      length,
+      frame.size,
+      frame.phase === 'adult' ? 1 : 0.5,
+      own,
+      { shell: shellMat, inner: innerMat, tissue: tissueMat },
+    )
+    const living = frame.animal > 0
+    whole.body.visible = living
+    whole.outside.visible = living
+    if (pearlKind) {
+      // The mantle and body go translucent too, so the pearl inside them shows.
+      tissueMat.transparent = true
+      tissueMat.opacity = Math.min(tissueMat.opacity, 0.32)
+      tissueMat.depthWrite = false
+    }
+    // An empty tusk shell falls over and lies on its side; washed up, a clam lies on one valve.
+    const lie =
+      shape.class === 'tusk' && !living
+        ? new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), -0.8)
+        : shape.class === 'clam' && frame.beach
+          ? new Quaternion().setFromAxisAngle(
+              new Vector3(1, 0, 0),
+              -Math.PI / 2,
+            )
+          : null
+    if (lie)
+      for (const part of [whole.shell, whole.body, whole.outside])
+        part.quaternion.copy(lie)
+    specimen.add(whole.body, whole.shell, whole.outside)
+    specimen.updateMatrixWorld(true)
+    const box = new Box3().setFromObject(whole.shell)
+    const centre = box.getCenter(new Vector3())
+    const height = box.max.y - box.min.y
+    // A tusk shell lives mostly buried, head down; empty shells lie on the sand.
+    const sink = living && frame.larva === 0 ? whole.buried * height : 0
+    for (const part of [whole.shell, whole.body, whole.outside])
+      part.position.set(-centre.x, floor - box.min.y - sink, -centre.z)
+    rig = {
+      outside: whole.outside,
+      shell: whole.shell,
+      crab: new Group(),
+      reach: adult.height * 1.3 + adult.length * 0.15,
+    }
+    if (pearlKind) {
+      // Loose pearls grow in the mantle under the gape; a blister pearl against one valve's inside.
+      const pearl = buildPearl(pearlKind, options.pearl!, own, {
+        cut: options.cut,
+        clipping,
+      })
+      const blister = pearl.step.blister
+      pearl.group.position.set(
+        0,
+        floor - sink + height * (blister ? 0.42 : 0.8),
+        blister ? -(box.max.z - box.min.z) * 0.12 : 0,
+      )
+      specimen.add(pearl.group)
+      if (!blister) {
+        const view = pearl.size * 7
+        close = {
+          target: pearl.group.position.clone(),
+          width: view,
+          height: view * 0.75,
+        }
+      }
+    }
+    if (frame.larva > 0) {
+      specimen.updateMatrixWorld(true)
+      const small = new Box3().setFromObject(specimen)
+      const size = small.getSize(new Vector3())
+      close = {
+        target: small.getCenter(new Vector3()),
+        width: Math.max(size.x, size.z) * 3,
+        height: Math.max(size.y, size.x * 0.5) * 3.4,
+      }
+      bob = close.height * 0.03
+    }
+  } else if (frame.size > 0) {
     const pixels =
       wear > 0 ? weather(patternFor(species), wear) : patternFor(species)
     const outer = shellMaterial(
@@ -1400,58 +1601,7 @@ export function buildScene(
     if (frame.drift > 0) specimen.position.y += frame.drift * adult.height * 0.5
   }
 
-  if (frame.egg > 0) {
-    const eggMaterial = own.material(
-      new MeshPhysicalMaterial({
-        color: rgb([238, 228, 200]),
-        roughness: 0.35,
-        transmission: 0.4,
-        thickness: 1,
-        sheen: 0.4,
-      }),
-    )
-    const embryo = own.material(
-      new MeshStandardMaterial({ color: rgb([196, 150, 110]) }),
-    )
-    const big = swims
-    const eggSize = big ? length * 0.14 : Math.max(0.25, length * 0.012)
-    const count = big ? 3 : 48
-    for (let i = 0; i < count; i++) {
-      const angle = i * 2.39996
-      const ring = Math.sqrt(i + 0.5) * eggSize * 1.05
-      const egg = blob(
-        [
-          eggSize * 0.5,
-          eggSize * (big ? 0.36 : 0.5),
-          eggSize * (big ? 0.36 : 0.5),
-        ],
-        own,
-        eggMaterial,
-      )
-      egg.position.set(
-        Math.cos(angle) * ring,
-        floor + eggSize * 0.42,
-        Math.sin(angle) * ring,
-      )
-      egg.userData.egg = i
-      if (i === 0) markMesh(egg, 'Egg capsule')
-      const dot = blob(
-        [eggSize * 0.16, eggSize * 0.16, eggSize * 0.16],
-        own,
-        embryo,
-      )
-      egg.add(dot)
-      dot.scale.divide(egg.scale).multiplyScalar(eggSize * 0.18)
-      eggs.push(egg)
-      group.add(egg)
-    }
-    const spread = Math.sqrt(count) * eggSize * 2.6
-    close = {
-      target: new Vector3(0, eggSize, 0),
-      width: spread * 1.4,
-      height: spread,
-    }
-  }
+  if (frame.egg > 0) close = layEggs(group, eggs, length, swims, floor, own)
 
   if (frame.beach) {
     specimen.rotation.y = 0.5

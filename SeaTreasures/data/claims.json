@@ -398,51 +398,6 @@
       "accessNote": "Verified through the WoRMS REST record AphiaRecordByAphiaID/51: status accepted, rank Phylum, kingdom Animalia. MolluscaBase is the mollusc section of WoRMS."
     },
     {
-      "id": "gbif-tiger-cowrie",
-      "title": "GBIF occurrence records: Cypraea tigris (taxon key 4360773)",
-      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
-      "url": "https://www.gbif.org/occurrence/search?taxon_key=4360773&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
-      "accessedAt": "2026-10-19",
-      "kind": "biodiversity-database",
-      "accessNote": "Counted through the GBIF occurrence API on 2026-10-19: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
-    },
-    {
-      "id": "gbif-money-cowrie",
-      "title": "GBIF occurrence records: Monetaria moneta (taxon key 5724968)",
-      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
-      "url": "https://www.gbif.org/occurrence/search?taxon_key=5724968&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
-      "accessedAt": "2026-10-19",
-      "kind": "biodiversity-database",
-      "accessNote": "Counted through the GBIF occurrence API on 2026-10-19: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
-    },
-    {
-      "id": "gbif-textile-cone",
-      "title": "GBIF occurrence records: Conus textile (taxon key 5728235)",
-      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
-      "url": "https://www.gbif.org/occurrence/search?taxon_key=5728235&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
-      "accessedAt": "2026-10-19",
-      "kind": "biodiversity-database",
-      "accessNote": "Counted through the GBIF occurrence API on 2026-10-19: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
-    },
-    {
-      "id": "gbif-queen-conch",
-      "title": "GBIF occurrence records: Aliger gigas (taxon key 10903982)",
-      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
-      "url": "https://www.gbif.org/occurrence/search?taxon_key=10903982&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
-      "accessedAt": "2026-10-19",
-      "kind": "biodiversity-database",
-      "accessNote": "Counted through the GBIF occurrence API on 2026-10-19: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
-    },
-    {
-      "id": "gbif-chambered-nautilus",
-      "title": "GBIF occurrence records: Nautilus pompilius (taxon key 2289202)",
-      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
-      "url": "https://www.gbif.org/occurrence/search?taxon_key=2289202&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
-      "accessedAt": "2026-10-19",
-      "kind": "biodiversity-database",
-      "accessNote": "Counted through the GBIF occurrence API on 2026-10-19: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
-    },
-    {
       "id": "contreras-aragon-2023",
       "title": "A Mathematical Model for Mollusc Shells Based on Parametric Surfaces and the Construction of Theoretical Morphospaces",
       "publisher": "Diversity (Contreras-Figueroa & Aragón, 2023)",
@@ -882,6 +837,456 @@
       "accessedAt": "2026-10-20",
       "kind": "peer-reviewed",
       "accessNote": "Open-access PDF read directly: the section on trochophore and veliger larvae and their opposed ciliary bands."
+    },
+    {
+      "id": "marinebio-mollusks",
+      "title": "Mollusks",
+      "publisher": "MarineBio Conservation Society",
+      "url": "https://www.marinebio.org/creatures/marine-invertebrates/mollusks/",
+      "accessedAt": "2026-10-20",
+      "kind": "specialist",
+      "accessNote": "The site refuses curl, so the page was read with a web fetch tool (page modified 2026-10-15). Used for its list of mollusc classes: Bivalvia, Polyplacophora, Scaphopoda and Monoplacophora."
+    },
+    {
+      "id": "worms-bivalvia",
+      "title": "Bivalvia Linnaeus, 1758 (AphiaID 105)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=105",
+      "accessedAt": "2026-10-20",
+      "kind": "taxonomic",
+      "accessNote": "Verified via the WoRMS REST endpoint AphiaRecordsByName: class Bivalvia, status accepted."
+    },
+    {
+      "id": "worms-polyplacophora",
+      "title": "Polyplacophora Gray, 1821 (AphiaID 55)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=55",
+      "accessedAt": "2026-10-20",
+      "kind": "taxonomic",
+      "accessNote": "Verified via the WoRMS REST endpoint AphiaRecordsByName: class Polyplacophora, status accepted."
+    },
+    {
+      "id": "worms-scaphopoda",
+      "title": "Scaphopoda Bronn, 1862 (AphiaID 104)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=104",
+      "accessedAt": "2026-10-20",
+      "kind": "taxonomic",
+      "accessNote": "Verified via the WoRMS REST endpoint AphiaRecordsByName: class Scaphopoda, status accepted."
+    },
+    {
+      "id": "worms-monoplacophora",
+      "title": "Monoplacophora Odhner, 1940 (AphiaID 415)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=415",
+      "accessedAt": "2026-10-20",
+      "kind": "taxonomic",
+      "accessNote": "Verified via the WoRMS REST endpoint AphiaRecordsByName: class Monoplacophora, status accepted."
+    },
+    {
+      "id": "worms-tridacna-gigas",
+      "title": "Tridacna gigas (Linnaeus, 1758) (AphiaID 207670)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=207670",
+      "accessedAt": "2026-10-20",
+      "kind": "taxonomic",
+      "accessNote": "Verified via WoRMS REST: AphiaRecordsByName (accepted, family Cardiidae, class Bivalvia) and AphiaAttributesByAphiaID/207670 (body size: maximum length 137 cm and a length of 80 cm, both from the FAO species identification guide of Carpenter & Niem 1998; IUCN Red List category Critically Endangered, criteria A2acd, assessed 2024). AphiaDistributions lists only Madagascar and Tanzania, which NOAA's status review treats as unconfirmed or fossil records, so it was not used for range."
+    },
+    {
+      "id": "worms-acanthopleura-granulata",
+      "title": "Acanthopleura granulata (Gmelin, 1791) (AphiaID 386270)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=386270",
+      "accessedAt": "2026-10-20",
+      "kind": "taxonomic",
+      "accessNote": "Verified via WoRMS REST: AphiaRecordsByName (accepted, family Chitonidae, class Polyplacophora) and AphiaDistributionsByAphiaID/386270 (Gulf of Mexico; Colombian part of the Caribbean Sea)."
+    },
+    {
+      "id": "worms-antalis-vulgaris",
+      "title": "Antalis vulgaris (da Costa, 1778) (AphiaID 196380)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=196380",
+      "accessedAt": "2026-10-20",
+      "kind": "taxonomic",
+      "accessNote": "Verified via WoRMS REST: AphiaRecordsByName (accepted, family Dentaliidae, class Scaphopoda), AphiaDistributionsByAphiaID/196380 (Ireland; Atlantic and Mediterranean Spain; Tunisia; Turkish Aegean and Mediterranean; Sea of Marmara; Dardanelles) and AphiaAttributesByAphiaID/196380 (maximum length 60 mm, from Jones & Baxter 1987 and Hayward & Ryland 1990; AMBI ecological group 'very sensitive to disturbance', from Borja et al. 2000)."
+    },
+    {
+      "id": "worms-neopilina-galatheae",
+      "title": "Neopilina galatheae Lemche, 1957 (AphiaID 343689)",
+      "publisher": "WoRMS / MolluscaBase",
+      "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=343689",
+      "accessedAt": "2026-10-20",
+      "kind": "taxonomic",
+      "accessNote": "Verified via WoRMS REST: AphiaRecordsByName (accepted, family Neopilinidae, class Monoplacophora) and AphiaDistributionsByAphiaID/343689 (East Pacific; Costa Rican part of the North Pacific Ocean)."
+    },
+    {
+      "id": "noaa-true-giant-clam",
+      "title": "True Giant Clam",
+      "publisher": "NOAA Fisheries",
+      "url": "https://www.fisheries.noaa.gov/species/true-giant-clam",
+      "accessedAt": "2026-10-20",
+      "kind": "government",
+      "accessNote": "Species profile read directly (last updated 2024-07-24): protected status (ESA proposed endangered; CITES Appendix II), length, range, depth, appearance and threats."
+    },
+    {
+      "id": "noaa-giant-clam-status-review",
+      "title": "Status Review Report of Seven Giant Clam Species Petitioned Under the U.S. Endangered Species Act",
+      "publisher": "NOAA National Marine Fisheries Service (2024)",
+      "url": "https://www.fisheries.noaa.gov/s3/2024-07/StatusReview-GiantClams-508.pdf",
+      "accessedAt": "2026-10-20",
+      "kind": "government",
+      "accessNote": "296-page PDF read directly (text extracted with pypdf). Used sections 2.3 (reproduction and growth), 3.1.3 (shell harvesting), 3.3.2 (predation), 3.4.2 (CITES), 3.5.1 (ocean warming) and 4.4 (Tridacna gigas: size, appearance, range, habitat, depth, growth, maturity, age, feeding, abundance by country). The report summarises the primary literature it cites."
+    },
+    {
+      "id": "adw-tridacna-gigas",
+      "title": "Tridacna gigas",
+      "publisher": "Animal Diversity Web, University of Michigan Museum of Zoology (Tervo & Csomos, 2001)",
+      "url": "https://animaldiversity.org/accounts/Tridacna_gigas/",
+      "accessedAt": "2026-10-20",
+      "kind": "university",
+      "accessNote": "Species account read directly. Last updated 2001: its conservation lines (IUCN Vulnerable, 'CITES no special status') are out of date and were not used; NOAA and WoRMS give the current status."
+    },
+    {
+      "id": "gbrf-giant-clam",
+      "title": "Giant Clam",
+      "publisher": "Great Barrier Reef Foundation",
+      "url": "https://www.barrierreef.org/the-reef/animals/giant-clam",
+      "accessedAt": "2026-10-20",
+      "kind": "specialist",
+      "accessNote": "Conservation-charity species page read directly: habitat, feeding, spawning, the diver-trapping legend, and the note that wild collection has never been allowed in Australian waters. Its IUCN line (Vulnerable) predates the 2024 assessment."
+    },
+    {
+      "id": "wikipedia-giant-clam",
+      "title": "Giant clam",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Giant_clam",
+      "accessedAt": "2026-10-20",
+      "kind": "encyclopedia",
+      "accessNote": "Tertiary source (Wikipedia), read directly via the MediaWiki API plain-text extract; used for context and cross-checking, not as sole evidence for numbers where a primary source exists."
+    },
+    {
+      "id": "wikipedia-bivalvia",
+      "title": "Bivalvia",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Bivalvia",
+      "accessedAt": "2026-10-20",
+      "kind": "encyclopedia",
+      "accessNote": "Tertiary source (Wikipedia), read directly via the MediaWiki API plain-text extract; used for context and cross-checking, not as sole evidence for numbers where a primary source exists."
+    },
+    {
+      "id": "ucmp-bivalvia",
+      "title": "The Bivalvia",
+      "publisher": "University of California Museum of Paleontology",
+      "url": "https://ucmp.berkeley.edu/taxa/inverts/mollusca/bivalvia.php",
+      "accessedAt": "2026-10-20",
+      "kind": "university",
+      "accessNote": "Introductory page read directly: two-halved shell, about 10,000 described species, mostly suspension feeders."
+    },
+    {
+      "id": "wikipedia-chiton",
+      "title": "Chiton",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Chiton",
+      "accessedAt": "2026-10-20",
+      "kind": "encyclopedia",
+      "accessNote": "Tertiary source (Wikipedia), read directly via the MediaWiki API plain-text extract; used for context and cross-checking, not as sole evidence for numbers where a primary source exists."
+    },
+    {
+      "id": "wikipedia-acanthopleura-granulata",
+      "title": "Acanthopleura granulata",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Acanthopleura_granulata",
+      "accessedAt": "2026-10-20",
+      "kind": "encyclopedia",
+      "accessNote": "Tertiary source (Wikipedia), read directly via the MediaWiki API plain-text extract; used for context and cross-checking, not as sole evidence for numbers where a primary source exists. Its '40 years' lifespan line cites whatsthatfish.com, which itself cites Wikipedia (circular), so it was not used."
+    },
+    {
+      "id": "ucmp-polyplacophora",
+      "title": "The Polyplacophora",
+      "publisher": "University of California Museum of Paleontology",
+      "url": "https://ucmp.berkeley.edu/taxa/inverts/mollusca/polyplacophora.php",
+      "accessedAt": "2026-10-20",
+      "kind": "university",
+      "accessNote": "Page read directly (text by Paul Bunje, 2003): habitat, reproduction and larva, body plan, aesthetes and radula."
+    },
+    {
+      "id": "sealifebase-acanthopleura-granulata",
+      "title": "Acanthopleura granulata",
+      "publisher": "SeaLifeBase",
+      "url": "https://www.sealifebase.se/summary/Acanthopleura-granulata.html",
+      "accessedAt": "2026-10-20",
+      "kind": "biodiversity-database",
+      "accessNote": "Species summary read directly: depth 0-1 m, maximum length 10 cm, intertidal and spray-zone habitat, class-level life cycle note, IUCN and CITES 'not evaluated'."
+    },
+    {
+      "id": "varney-2021-chiton-genome",
+      "title": "The Iron-Responsive Genome of the Chiton Acanthopleura granulata",
+      "publisher": "Genome Biology and Evolution (Varney, Speiser, McDougall, Degnan & Kocot, 2021)",
+      "url": "https://doi.org/10.1093/gbe/evaa263",
+      "accessedAt": "2026-10-20",
+      "kind": "peer-reviewed",
+      "accessNote": "Open-access full text read via Europe PMC (PMC7850002): introduction on chiton shell plates, aesthetes and eyes, magnetite-capped radula teeth; notes that A. granulata is a broadcast spawner; specimen collected in the Florida Keys."
+    },
+    {
+      "id": "speiser-2011-chiton-lenses",
+      "title": "A chiton uses aragonite lenses to form images",
+      "publisher": "Current Biology (Speiser, Eernisse & Johnsen, 2011)",
+      "url": "https://doi.org/10.1016/j.cub.2011.03.033",
+      "accessedAt": "2026-10-20",
+      "kind": "peer-reviewed",
+      "accessNote": "Abstract read directly via Europe PMC (PMID 21497091); the full text was not accessible (publisher returned 403), so only statements in the abstract are used."
+    },
+    {
+      "id": "schill-2002-chiton-hsp70",
+      "title": "Daily stress protein (hsp70) cycle in chitons (Acanthopleura granulata Gmelin, 1791) which inhabit the rocky intertidal shoreline in a tropical ecosystem",
+      "publisher": "Comparative Biochemistry and Physiology Part C (Schill, Gayle & Köhler, 2002)",
+      "url": "https://doi.org/10.1016/S1532-0456(02)00012-1",
+      "accessedAt": "2026-10-20",
+      "kind": "peer-reviewed",
+      "accessNote": "Abstract read directly via Europe PMC (PMID 11912050); full text not accessed."
+    },
+    {
+      "id": "gbif-acanthopleura-granulata",
+      "title": "Acanthopleura granulata (Gmelin, 1791)",
+      "publisher": "GBIF",
+      "url": "https://www.gbif.org/species/5193733",
+      "accessedAt": "2026-10-20",
+      "kind": "biodiversity-database",
+      "accessNote": "Occurrence API queried directly for preserved specimens faceted by country: of 1,657 records, 340 United States, 178 Bahamas, 100 Cuba, 48 Jamaica, 48 Puerto Rico and others across the Caribbean. A few records from Papua New Guinea, Australia and Madagascar fall far outside the published range and are probably errors, so counts are used only to confirm places inside the published range."
+    },
+    {
+      "id": "wikipedia-scaphopoda",
+      "title": "Tusk shell (Scaphopoda)",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Scaphopoda",
+      "accessedAt": "2026-10-20",
+      "kind": "encyclopedia",
+      "accessNote": "Tertiary source (Wikipedia), read directly via the MediaWiki API plain-text extract; used for context and cross-checking, not as sole evidence for numbers where a primary source exists."
+    },
+    {
+      "id": "wikipedia-antalis-vulgaris",
+      "title": "Antalis vulgaris",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Antalis_vulgaris",
+      "accessedAt": "2026-10-20",
+      "kind": "encyclopedia",
+      "accessNote": "Tertiary source (Wikipedia), read directly via the MediaWiki API plain-text extract; used for context and cross-checking, not as sole evidence for numbers where a primary source exists. It calls the narrow end 'anterior', which conflicts with UCMP and DORIS (the wide end is the head end), so its orientation wording was not used."
+    },
+    {
+      "id": "ucmp-scaphopoda",
+      "title": "The Scaphopoda",
+      "publisher": "University of California Museum of Paleontology",
+      "url": "https://ucmp.berkeley.edu/taxa/inverts/mollusca/scaphopoda.php",
+      "accessedAt": "2026-10-20",
+      "kind": "university",
+      "accessNote": "Page read directly (Brian Speer, 2000): shell open at both ends, life position, breathing without gills, captacula, larvae."
+    },
+    {
+      "id": "sealifebase-antalis-vulgaris",
+      "title": "Antalis vulgaris",
+      "publisher": "SeaLifeBase",
+      "url": "https://www.sealifebase.se/summary/Antalis-vulgaris.html",
+      "accessedAt": "2026-10-20",
+      "kind": "biodiversity-database",
+      "accessNote": "Species summary read directly: depth 5-1000 m (citing Steiner & Kabat 2004), Eastern Atlantic and Mediterranean, class-level life cycle note, IUCN 'not evaluated'."
+    },
+    {
+      "id": "doris-antalis-vulgaris",
+      "title": "Antalis vulgaris (Da Costa, 1778): Dentale commun",
+      "publisher": "DORIS, Fédération française d'études et de sports sous-marins (FFESSM)",
+      "url": "https://doris.ffessm.fr/Especes/Antalis-vulgaris-Dentale-commun-375",
+      "accessedAt": "2026-10-20",
+      "kind": "specialist-guide",
+      "accessNote": "French-language species sheet read directly and translated: distribution, habitat, shell description, life position, feeding, reproduction, empty-shell accumulations and use in jewellery."
+    },
+    {
+      "id": "wikipedia-monoplacophora",
+      "title": "Monoplacophora",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Monoplacophora",
+      "accessedAt": "2026-10-20",
+      "kind": "encyclopedia",
+      "accessNote": "Tertiary source (Wikipedia), read directly via the MediaWiki API plain-text extract; used for context and cross-checking, not as sole evidence for numbers where a primary source exists."
+    },
+    {
+      "id": "wikipedia-neopilina",
+      "title": "Neopilina",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Neopilina",
+      "accessedAt": "2026-10-20",
+      "kind": "encyclopedia",
+      "accessNote": "Tertiary source (Wikipedia), read directly via the MediaWiki API plain-text extract; used for context and cross-checking, not as sole evidence for numbers where a primary source exists."
+    },
+    {
+      "id": "ucmp-monoplacophora",
+      "title": "The Monoplacophora",
+      "publisher": "University of California Museum of Paleontology",
+      "url": "https://ucmp.berkeley.edu/taxa/inverts/mollusca/monoplacophora.php",
+      "accessedAt": "2026-10-20",
+      "kind": "university",
+      "accessNote": "Page read directly (text by Paul Bunje): discovery in 1952, deep-sea habitat, body plan, and the statement that no developmental studies have been done on monoplacophorans."
+    },
+    {
+      "id": "lemche-wingstrand-1959",
+      "title": "The anatomy of Neopilina galatheae Lemche, 1957 (Mollusca Tryblidiacea)",
+      "publisher": "Galathea Report vol. 3 (Lemche & Wingstrand, 1959), digitised by the Natural History Museum of Denmark",
+      "url": "https://www.digit.snm.ku.dk/Documentsonline/GalatheaReports/galathea-vol.03-pp_009-072.pdf",
+      "accessedAt": "2026-10-20",
+      "kind": "museum",
+      "accessNote": "Primary anatomical monograph on the type material, read directly (64-page PDF, text extracted with pypdf): station data, shell size, shape and colour, gills, nephridia, gut contents and habitat."
+    },
+    {
+      "id": "lemche-1957-nature",
+      "title": "A New Living Deep-Sea Mollusc of the Cambro-Devonian Class Monoplacophora",
+      "publisher": "Nature 179: 413-416 (Lemche, 1957)",
+      "url": "https://doi.org/10.1038/179413a0",
+      "accessedAt": "2026-10-20",
+      "kind": "peer-reviewed",
+      "accessNote": "Paywalled: only the article landing page (title, author, issue date 23 February 1957) was read. Cited only for the fact of the original description."
+    },
+    {
+      "id": "giribet-2006-serialia",
+      "title": "Evidence for a clade composed of molluscs with serially repeated structures: monoplacophorans are related to chitons",
+      "publisher": "PNAS (Giribet, Okusu, Lindgren, Huff, Schrödl & Nishiguchi, 2006)",
+      "url": "https://doi.org/10.1073/pnas.0602578103",
+      "accessedAt": "2026-10-20",
+      "kind": "peer-reviewed",
+      "accessNote": "Abstract read directly via Europe PMC (PMID 16675549)."
+    },
+    {
+      "id": "stoger-2016-monoplacophoran-mitogenomes",
+      "title": "Monoplacophoran mitochondrial genomes: convergent gene arrangements and little phylogenetic signal",
+      "publisher": "BMC Evolutionary Biology (Stöger, Kocot, Poustka, Wilson, Ivanov, Halanych & Schrödl, 2016)",
+      "url": "https://doi.org/10.1186/s12862-016-0829-3",
+      "accessedAt": "2026-10-20",
+      "kind": "peer-reviewed",
+      "accessNote": "Open-access full text read via Europe PMC (PMC5162086); background section on the 1952 discovery."
+    },
+    {
+      "id": "chen-2024-neopilina",
+      "title": "In situ observation and range extension of the first discovered monoplacophoran Neopilina galatheae",
+      "publisher": "Journal of Molluscan Studies (Chen, 2024)",
+      "url": "https://doi.org/10.1093/mollus/eyae014",
+      "accessedAt": "2026-10-20",
+      "kind": "peer-reviewed",
+      "accessNote": "Published open access (CC BY); the journal site returned 403, so the abstract was read via the bioRxiv API for the preprint (doi:10.1101/2023.11.08.566290, versions 1 and 2 have the same abstract)."
+    },
+    {
+      "id": "menzies-robinson-1961-neopilina",
+      "title": "Recovery of the Living Fossil Mollusk, Neopilina, from the Slope of the Cedros Trench, Mexico",
+      "publisher": "Science 134: 338 (Menzies & Robinson, 1961)",
+      "url": "https://doi.org/10.1126/science.134.3475.338",
+      "accessedAt": "2026-10-20",
+      "kind": "peer-reviewed",
+      "accessNote": "Only the bibliographic record (title, authors, year) was read via Europe PMC; no abstract is available. Cited only for the fact of a record from the Cedros Trench slope, Mexico."
+    },
+    {
+      "id": "gbif-tiger-cowrie",
+      "title": "GBIF occurrence records: Cypraea tigris (taxon key 4360773)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=4360773&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-20",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-20: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "gbif-money-cowrie",
+      "title": "GBIF occurrence records: Monetaria moneta (taxon key 5724968)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=5724968&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-20",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-20: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "gbif-textile-cone",
+      "title": "GBIF occurrence records: Conus textile (taxon key 5728235)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=5728235&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-20",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-20: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "gbif-queen-conch",
+      "title": "GBIF occurrence records: Aliger gigas (taxon key 10903982)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=10903982&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-20",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-20: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "gbif-chambered-nautilus",
+      "title": "GBIF occurrence records: Nautilus pompilius (taxon key 2289202)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=2289202&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-20",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-20: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "gbif-giant-clam",
+      "title": "GBIF occurrence records: Tridacna gigas (taxon key 4372619)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=4372619&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-20",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-20: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "gbif-fuzzy-chiton",
+      "title": "GBIF occurrence records: Acanthopleura granulata (taxon key 5193733)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=5193733&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-20",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-20: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "gbif-tusk-shell",
+      "title": "GBIF occurrence records: Antalis vulgaris (taxon key 2284973)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=2284973&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-20",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-20: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "gbif-monoplacophoran",
+      "title": "GBIF occurrence records: Neopilina galatheae (taxon key 2306873)",
+      "publisher": "GBIF.org (Global Biodiversity Information Facility)",
+      "url": "https://www.gbif.org/occurrence/search?taxon_key=2306873&has_coordinate=true&has_geospatial_issue=false&occurrence_status=present",
+      "accessedAt": "2026-10-20",
+      "kind": "biodiversity-database",
+      "accessNote": "Counted through the GBIF occurrence API on 2026-10-20: records with coordinates, no geospatial issue, occurrence status present, and basis of record one of HUMAN_OBSERVATION, PRESERVED_SPECIMEN, MATERIAL_SAMPLE, MATERIAL_CITATION, OCCURRENCE, OBSERVATION, LIVING_SPECIMEN. Synonyms are included by GBIF. Each record keeps the licence of its dataset."
+    },
+    {
+      "id": "wikipedia-pearl",
+      "title": "Pearl",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Pearl",
+      "accessedAt": "2026-10-21",
+      "kind": "encyclopedia",
+      "accessNote": "Read via the MediaWiki extracts API. Used for how natural pearls form (pearl sac, intruders, concentric layers) and which molluscs make them."
+    },
+    {
+      "id": "wikipedia-pearl-of-lao-tzu",
+      "title": "Pearl of Lao Tzu",
+      "publisher": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Pearl_of_Lao_Tzu",
+      "accessedAt": "2026-10-21",
+      "kind": "encyclopedia",
+      "accessNote": "Used for the pearl's size, weight and origin."
+    },
+    {
+      "id": "gia-tridacnidae-flame-2019",
+      "title": "Evidence of Rotation in Flame-Structure Pearls from Bivalves of the Tridacnidae Family",
+      "publisher": "GIA, Gems & Gemology (Summer 2019)",
+      "url": "https://www.gia.edu/gems-gemology/summer-2019-evidence-rotation-flame-structure-pearls-from-bivalves-tridacnidae",
+      "accessedAt": "2026-10-21",
+      "kind": "peer-reviewed",
+      "accessNote": "Abstract and introduction read. Used for the non-nacreous structure of giant clam pearls, their flame structure, signs of rotation during growth, and their sizes."
     }
   ],
   "claims": [
@@ -1548,46 +1953,6 @@
       "evidenceNote": "A deliberate gap: predators reported only in unverified summaries were left out rather than presented as fact."
     },
     {
-      "id": "tiger-cowrie-gbif-records",
-      "text": "GBIF holds 4,193 located records of Cypraea tigris: museum specimens and observations, leaving out fossils and automated tag detections. 30 of the 46 seas and islands shown here have at least one record.",
-      "sourceIds": ["gbif-tiger-cowrie"],
-      "scope": "species",
-      "confidence": "high",
-      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
-    },
-    {
-      "id": "money-cowrie-gbif-records",
-      "text": "GBIF holds 4,135 located records of Monetaria moneta: museum specimens and observations, leaving out fossils and automated tag detections. 33 of the 46 seas and islands shown here have at least one record.",
-      "sourceIds": ["gbif-money-cowrie"],
-      "scope": "species",
-      "confidence": "high",
-      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
-    },
-    {
-      "id": "textile-cone-gbif-records",
-      "text": "GBIF holds 2,648 located records of Conus textile: museum specimens and observations, leaving out fossils and automated tag detections. 31 of the 46 seas and islands shown here have at least one record.",
-      "sourceIds": ["gbif-textile-cone"],
-      "scope": "species",
-      "confidence": "high",
-      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
-    },
-    {
-      "id": "queen-conch-gbif-records",
-      "text": "GBIF holds 4,774 located records of Aliger gigas: museum specimens and observations, leaving out fossils and automated tag detections. 11 of the 46 seas and islands shown here have at least one record.",
-      "sourceIds": ["gbif-queen-conch"],
-      "scope": "species",
-      "confidence": "high",
-      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
-    },
-    {
-      "id": "chambered-nautilus-gbif-records",
-      "text": "GBIF holds 722 located records of Nautilus pompilius: museum specimens and observations, leaving out fossils and automated tag detections. 25 of the 46 seas and islands shown here have at least one record.",
-      "sourceIds": ["gbif-chambered-nautilus"],
-      "scope": "species",
-      "confidence": "high",
-      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
-    },
-    {
       "id": "shell-morphospace-model",
       "text": "A parametric model with six numbers (whorl expansion, distance from the axis, spire translation, aperture ratio, aperture tilt and aperture rotation) reproduces the shell forms of snails, limpets, nautiluses, ammonites and bivalves; the paper gives fitted values for real specimens.",
       "sourceIds": ["contreras-aragon-2023"],
@@ -2037,6 +2402,762 @@
       "scope": "demo-limitation",
       "confidence": "moderate",
       "evidenceNote": "Photos vary with camera, lens, depth, light and editing, so these are a typical look, not a measurement of the water. Photos lit by a flash or taken out of the water were left out (data/research/place-photo-exclusions.json and the script's filters)."
+    },
+    {
+      "id": "class-bivalvia",
+      "text": "Bivalves (class Bivalvia) are molluscs whose soft body is enclosed in two hinged shell halves called valves. The class includes clams, mussels, oysters, scallops and cockles; most are filter feeders.",
+      "sourceIds": [
+        "marinebio-mollusks",
+        "wikipedia-bivalvia",
+        "ucmp-bivalvia",
+        "worms-bivalvia"
+      ],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Class-level statement. The app has no 'class' scope, so 'family' is used to mean 'its wider group' rather than this species alone. MarineBio and Wikipedia agree; UCMP adds that most bivalves are suspension feeders. WoRMS confirms the class name."
+    },
+    {
+      "id": "class-polyplacophora",
+      "text": "Chitons (class Polyplacophora) are marine molluscs whose shell is divided into eight overlapping plates, bordered by a girdle. They use a muscular foot to cling to rocks and other hard surfaces.",
+      "sourceIds": [
+        "marinebio-mollusks",
+        "ucmp-polyplacophora",
+        "wikipedia-chiton",
+        "worms-polyplacophora"
+      ],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Class-level statement. The app has no 'class' scope, so 'family' is used to mean 'its wider group' rather than this species alone. All three descriptive sources agree on the eight plates, girdle and clinging foot."
+    },
+    {
+      "id": "class-scaphopoda",
+      "text": "Tusk shells (class Scaphopoda) are marine molluscs with a tubular, tusk-shaped shell that is open at both ends. They burrow into sediment with their foot and catch food with thread-like tentacles called captacula.",
+      "sourceIds": [
+        "marinebio-mollusks",
+        "ucmp-scaphopoda",
+        "wikipedia-scaphopoda",
+        "worms-scaphopoda"
+      ],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Class-level statement. The app has no 'class' scope, so 'family' is used to mean 'its wider group' rather than this species alone. 'Open at both ends' is from UCMP and Wikipedia; the rest is in all three."
+    },
+    {
+      "id": "class-monoplacophora",
+      "text": "Monoplacophorans (class Monoplacophora) are small deep-sea molluscs with a single cap-like shell. The class was known only from fossils and thought to be extinct until living animals were found in 1952.",
+      "sourceIds": [
+        "marinebio-mollusks",
+        "ucmp-monoplacophora",
+        "wikipedia-monoplacophora",
+        "worms-monoplacophora"
+      ],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Class-level statement. The app has no 'class' scope, so 'family' is used to mean 'its wider group' rather than this species alone. MarineBio says living specimens were found in the 1950s; UCMP and Wikipedia give 1952."
+    },
+    {
+      "id": "bivalve-parts",
+      "text": "A bivalve's two valves are joined along a hinge by a flexible ligament, usually with interlocking teeth. Adductor muscles pull the valves shut and the ligament springs them open when the muscles relax. Many bivalves pump water in and out through siphons, and their gills (ctenidia) are used both to breathe and to filter food. Bivalves have no head and no radula.",
+      "sourceIds": ["wikipedia-bivalvia"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Class-level statement. The app has no 'class' scope, so 'family' is used to mean 'its wider group' rather than this species alone. Read from the article lead and its 'Muscles and ligaments' and feeding sections. Giant clams fit this plan; NOAA's status review also describes T. gigas siphons, gills (demibranchs) and adductor muscle."
+    },
+    {
+      "id": "chiton-parts",
+      "text": "A chiton's shell is eight articulated plates (valves) set in a tough muscular girdle that may carry spines, scales or hairs. Most of the body underneath is a large muscular foot, with a row of small gills along each side. The mouth holds a radula whose teeth are capped with magnetite, an iron mineral, and are used to scrape algae from rock.",
+      "sourceIds": [
+        "wikipedia-chiton",
+        "ucmp-polyplacophora",
+        "varney-2021-chiton-genome"
+      ],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Class-level statement. The app has no 'class' scope, so 'family' is used to mean 'its wider group' rather than this species alone. Varney et al. (peer-reviewed) give the aragonite plates and magnetite-capped teeth; UCMP and Wikipedia give the girdle, foot and gills."
+    },
+    {
+      "id": "scaphopod-parts",
+      "text": "A tusk shell's shell is a tapering tube open at both ends, with the mantle forming a tube inside it. A muscular foot digs from the wide end, thread-like captacula gather food, and a large radula grinds it. There are no eyes and no gills.",
+      "sourceIds": ["wikipedia-scaphopoda", "ucmp-scaphopoda"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Class-level statement. The app has no 'class' scope, so 'family' is used to mean 'its wider group' rather than this species alone. Both sources state the absence of eyes and gills; Wikipedia notes the scaphopod radula is the largest relative to body size of any mollusc."
+    },
+    {
+      "id": "monoplacophoran-parts",
+      "text": "A monoplacophoran has a single cap-like shell over a round muscular foot, a poorly defined head without eyes, and a mouth with a radula. Three to six pairs of gills sit in a groove along each side of the foot, and kidneys and muscles are repeated in series.",
+      "sourceIds": ["wikipedia-monoplacophora", "ucmp-monoplacophora"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Class-level statement. The app has no 'class' scope, so 'family' is used to mean 'its wider group' rather than this species alone. Wikipedia gives three to six gill pairs; UCMP gives five or six (fewer in very tiny species). Neopilina galatheae has five pairs (see neopilina-serial-organs)."
+    },
+    {
+      "id": "giant-clam-taxonomy",
+      "text": "The true giant clam is Tridacna gigas (Linnaeus, 1758), an accepted species in the World Register of Marine Species (AphiaID 207670), in the cockle family Cardiidae, class Bivalvia.",
+      "sourceIds": ["worms-tridacna-gigas", "noaa-true-giant-clam"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "WoRMS REST record read directly; NOAA's classification also lists family Cardiidae, genus Tridacna, species gigas."
+    },
+    {
+      "id": "giant-clam-size",
+      "text": "Tridacna gigas is the largest giant clam and the largest living bivalve. Its shell can reach 137 cm long and the animal over 225 kg, but it is most commonly found at about 80 cm long. NOAA's species page gives a length of up to 51 inches.",
+      "sourceIds": [
+        "noaa-giant-clam-status-review",
+        "noaa-true-giant-clam",
+        "worms-tridacna-gigas"
+      ],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "137 cm = 1,370 mm (maximum) and about 80 cm = 800 mm (most common size), as stated in NOAA's status review; WoRMS lists the same two lengths from the FAO guide. 51 inches is about 1,295 mm."
+    },
+    {
+      "id": "giant-clam-range-habitat",
+      "text": "Tridacna gigas lives in shallow tropical Indo-Pacific waters from Myanmar to Kiribati and from Japan's Ryukyu Islands to Queensland. It lives on coral reefs, including atoll lagoons and fringing reefs, among hard corals, on reef rock or on sand and coral rubble. The Great Barrier Reef still has large stocks; it is now rare in the Philippines, Solomon Islands, Marshall Islands and Palau, and locally extinct in Fiji.",
+      "sourceIds": [
+        "noaa-giant-clam-status-review",
+        "noaa-true-giant-clam",
+        "adw-tridacna-gigas"
+      ],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Range, habitat and country status ('frequent', 'rare', 'reintroduced') are from NOAA's status review section 4.4; ADW adds that it is usually embedded in sand or coral rubble on reef flats and lagoons. Old reports from Madagascar and Mauritius are unconfirmed, and East African records are Pleistocene fossils."
+    },
+    {
+      "id": "giant-clam-depth",
+      "text": "Tridacna gigas is typically found between about 2 and 20 m deep (NOAA's species page says 6 to 65 feet).",
+      "sourceIds": ["noaa-giant-clam-status-review", "noaa-true-giant-clam"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "6-65 feet is about 2-20 m. ADW and Wikipedia also say usually within 20 m of the surface."
+    },
+    {
+      "id": "giant-clam-appearance",
+      "text": "A thick, heavy, off-white shell with four to six deep radial folds ending in large triangular points along the opening, often overgrown with corals and worm tubes; the inside is porcelain-white. The mantle is yellowish-brown to olive-green with many small, brilliant blue-green rings. Adults cannot close the shell completely.",
+      "sourceIds": [
+        "noaa-giant-clam-status-review",
+        "noaa-true-giant-clam",
+        "adw-tridacna-gigas"
+      ],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Shell and mantle description from NOAA's status review (citing Rosewater 1965 and others) and NOAA's species page. ADW says 4 to 5 projections and that fully grown clams cannot completely close the shell."
+    },
+    {
+      "id": "giant-clam-zooxanthellae",
+      "text": "Giant clams farm single-celled algae (zooxanthellae) in narrow tubes in the upper layers of the mantle. By day the clam opens and spreads its mantle so the algae get sunlight to photosynthesise, and the algae pass sugars and amino acids to the clam, supplying most of the carbon it needs. In some T. gigas they supply about 90% of the carbon used, and the clam dies if kept in the dark.",
+      "sourceIds": [
+        "noaa-giant-clam-status-review",
+        "adw-tridacna-gigas",
+        "wikipedia-giant-clam"
+      ],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The status review (section 3.5.1) describes where the algae live and what they provide; ADW gives the 90% figure and death in darkness; Wikipedia and the Great Barrier Reef Foundation describe the daytime opening."
+    },
+    {
+      "id": "giant-clam-filter-feeding",
+      "text": "Tridacna gigas also filters plankton from seawater with its gills. This matters most while small: clams about 4 cm long can get up to 65% of the carbon they need this way, 16-17 cm clams about a third, and large adults can probably meet their needs from their algae alone.",
+      "sourceIds": ["noaa-giant-clam-status-review", "adw-tridacna-gigas"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Figures from the status review section 4.4.1.4 (citing Klumpp et al. 1992); ADW confirms filter feeding on phytoplankton and zooplankton with the gills."
+    },
+    {
+      "id": "giant-clam-sessile",
+      "text": "Giant clam larvae swim, then settle; juveniles crawl on a foot and later attach with byssal threads. Large species lose the byssus as adults and are held in place by their size and weight: adult T. gigas are free-living and permanently sessile.",
+      "sourceIds": ["noaa-giant-clam-status-review", "adw-tridacna-gigas"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Juvenile byssal attachment and its loss in large species are from the status review section 2.3 (all giant clams); 'lack of byssal attachment (free-living)' for T. gigas is from its section 4.4.1.1; ADW says adults are permanently sessile."
+    },
+    {
+      "id": "giant-clam-spawning",
+      "text": "Tridacna gigas is a hermaphrodite that spawns sperm and eggs into the water; one spawning releases about 500 million eggs on average. Fertilised eggs, about 0.09-0.13 mm across, become swimming trochophore larvae within 12-24 hours. Spawning may follow the moon; in Australia it is limited to a short summer season, while in Palau it can happen year-round.",
+      "sourceIds": ["noaa-giant-clam-status-review", "wikipedia-giant-clam"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Egg size (90-130 µm) and the 12-24 hour hatching time are from the status review section 2.3 (giant clams generally); fecundity and seasonality are T. gigas-specific (section 4.4.1.3). Wikipedia gives about 12 hours and eggs of 100 µm. 12-24 hours = 0.5-1 day."
+    },
+    {
+      "id": "giant-clam-larva",
+      "text": "Within 36-48 hours giant clam larvae become shelled, swimming veligers that feed on microalgae. Over several days they grow a foot (pediveliger), generally 6-14 days after fertilisation (some up to 29 days), then turn into juveniles at about 0.2 mm. Fewer than 1% of fertilised T. gigas eggs are estimated to survive larval development.",
+      "sourceIds": ["noaa-giant-clam-status-review"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Stages are described for giant clams generally (section 2.3); the report repeatedly gives a pelagic larval duration of about 6-14 days. The survival estimate is T. gigas-specific (section 4.4.1.3)."
+    },
+    {
+      "id": "giant-clam-growth",
+      "text": "Tridacna gigas grows faster than any other giant clam, typically 8-12 cm a year, slowing with age. Cultured clams in the Philippines grew up to 9.1 mm a month. Shell growth continues throughout life.",
+      "sourceIds": ["noaa-giant-clam-status-review"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "From the status review sections 2.3 and 4.4.1.3. Wikipedia similarly reports laboratory growth of 12 cm a year."
+    },
+    {
+      "id": "giant-clam-maturity",
+      "text": "Tridacna gigas reaches male maturity at around 6 years of age and female maturity by 9-10 years, later than most other giant clams.",
+      "sourceIds": ["noaa-giant-clam-status-review"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Status review section 4.4.1.3, citing Gomez & Mingoa-Licuanan (2006). Giant clams usually mature as males first."
+    },
+    {
+      "id": "giant-clam-lifespan",
+      "text": "The maximum lifespan of giant clams is not known. The oldest reliably aged one was a Tridacna gigas of 63 years, and growth rings put a 93 cm T. gigas at about 60 years old.",
+      "sourceIds": ["noaa-giant-clam-status-review"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Status review section 2.3 (citing Lucas 1994 and Watanabe et al. 2004). Popular sources (Wikipedia, Great Barrier Reef Foundation) say up to or over 100 years, but give no aged specimen, so that figure is not used."
+    },
+    {
+      "id": "giant-clam-predators",
+      "text": "Giant clams have 75 known predators, mostly bottom-dwellers. Triggerfish, wrasse and pufferfish bite the mantle or foot; crabs, snails and mantis shrimp chip, drill or crush small shells. In Palau one hermit crab crushed 26 juvenile T. gigas 20-30 mm long. Risk falls as clams grow, and adults are relatively immune.",
+      "sourceIds": ["noaa-giant-clam-status-review"],
+      "scope": "family",
+      "confidence": "high",
+      "evidenceNote": "Status review section 3.3.2 (giant clams generally, citing Neo et al. 2015 and Heslinga et al. 1984); the hermit-crab example is T. gigas-specific."
+    },
+    {
+      "id": "giant-clam-harvest",
+      "text": "Decades of intense, unregulated harvest for meat and shells have driven Tridacna gigas to very low numbers in much of its range; harvest is the main threat. Large adults are taken most because they are worth most.",
+      "sourceIds": [
+        "noaa-true-giant-clam",
+        "noaa-giant-clam-status-review",
+        "wikipedia-giant-clam"
+      ],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "NOAA's species page names overharvest as the primary threat; Wikipedia adds that mainly large adults are killed."
+    },
+    {
+      "id": "giant-clam-bleaching",
+      "text": "Hot water can make giant clams bleach, expelling the algae that feed them. In 1997-98, about 8,000 of 9,000 surveyed T. gigas on the central Great Barrier Reef bleached to some degree. In Thailand in 2010, two-thirds of bleached T. squamosa died.",
+      "sourceIds": ["noaa-giant-clam-status-review"],
+      "scope": "family",
+      "confidence": "high",
+      "evidenceNote": "Status review section 3.5.1. Deaths are documented for T. squamosa; for T. gigas the report documents bleaching, not a death rate."
+    },
+    {
+      "id": "giant-clam-remains",
+      "text": "Shells of long-dead giant clams can lie buried in the reef. In the South China Sea, boats used their propellers to dig up reef to reach these old shells for carving, destroying about 160 km² of reef together with island-building.",
+      "sourceIds": ["noaa-giant-clam-status-review"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Status review section 3.1.3 ('Tanmen destructive shell harvesting'). The 160 km² figure covers clam dredging and island-building together."
+    },
+    {
+      "id": "giant-clam-protection",
+      "text": "All giant clams are listed in CITES Appendix II (T. gigas since 1983), so international trade needs permits. In 2024 NOAA proposed listing T. gigas as endangered under the US Endangered Species Act, and the IUCN Red List assessed it as Critically Endangered. Australia has never allowed it to be collected from the wild.",
+      "sourceIds": [
+        "noaa-true-giant-clam",
+        "noaa-giant-clam-status-review",
+        "worms-tridacna-gigas",
+        "gbrf-giant-clam"
+      ],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "CITES and ESA from NOAA (species page and status review section 3.4.2). The IUCN category (Critically Endangered, A2acd, 2024) was read from the WoRMS attribute record, not the IUCN site. ADW and the Great Barrier Reef Foundation still show the older 'Vulnerable' listing."
+    },
+    {
+      "id": "giant-clam-myth",
+      "text": "Stories of giant clams trapping and drowning divers are myths: there are no authentic cases. Giant clams close slowly, and adult T. gigas cannot even shut their shells completely. Real injuries happen when people lift these very heavy clams.",
+      "sourceIds": [
+        "adw-tridacna-gigas",
+        "gbrf-giant-clam",
+        "wikipedia-giant-clam"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "University, conservation-charity and encyclopedia sources agree; Wikipedia adds that the slow adductor muscle and the need to push water out prevent trapping a person."
+    },
+    {
+      "id": "fuzzy-chiton-taxonomy",
+      "text": "The West Indian fuzzy chiton is Acanthopleura granulata (Gmelin, 1791), an accepted species in the World Register of Marine Species (AphiaID 386270), family Chitonidae, class Polyplacophora.",
+      "sourceIds": [
+        "worms-acanthopleura-granulata",
+        "wikipedia-acanthopleura-granulata"
+      ],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Authority and status read from the WoRMS REST record; the common name is from Wikipedia and Varney et al. (2021)."
+    },
+    {
+      "id": "fuzzy-chiton-size",
+      "text": "SeaLifeBase gives a maximum length of 10 cm for Acanthopleura granulata; Wikipedia says it grows to about 7 cm.",
+      "sourceIds": [
+        "sealifebase-acanthopleura-granulata",
+        "wikipedia-acanthopleura-granulata"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "10 cm = 100 mm (maximum body length); 7 cm = 70 mm. Neither is a measured size distribution, so no typical range is given."
+    },
+    {
+      "id": "fuzzy-chiton-range-habitat",
+      "text": "Found in the tropical western Atlantic from southern Florida to Mexico, south to Panama and through the West Indies. It lives on rocks very high in the intertidal and spray zone of open rocky shores, where its colour and texture blend with the rock.",
+      "sourceIds": [
+        "wikipedia-acanthopleura-granulata",
+        "sealifebase-acanthopleura-granulata",
+        "worms-acanthopleura-granulata",
+        "gbif-acanthopleura-granulata",
+        "varney-2021-chiton-genome"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Range from Wikipedia (citing Malacolog) and SeaLifeBase ('Western Central Atlantic'), consistent with WoRMS distribution records and GBIF museum specimens (Bahamas 178, Cuba 100, Puerto Rico 48, Jamaica 48). Varney et al. collected their specimen in the Florida Keys."
+    },
+    {
+      "id": "fuzzy-chiton-depth",
+      "text": "An intertidal animal: recorded from 0 to 1 m depth, on rocky shores up into the spray zone.",
+      "sourceIds": [
+        "sealifebase-acanthopleura-granulata",
+        "schill-2002-chiton-hsp70"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Depth range from SeaLifeBase; Schill et al. describe it as inhabiting the rocky intertidal shoreline."
+    },
+    {
+      "id": "fuzzy-chiton-appearance",
+      "text": "Eight thick, heavy shell plates, made only of aragonite, are surrounded by a girdle that is densely spiky and usually has a few black bands. In adults the plates are almost always heavily eroded; uneroded plates are granular. Tiny eyes and sensory pores (aesthetes) dot the plates.",
+      "sourceIds": [
+        "varney-2021-chiton-genome",
+        "wikipedia-acanthopleura-granulata",
+        "ucmp-polyplacophora"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Aragonite plates, eyes and aesthete pores from Varney et al. (peer-reviewed, with photographs of A. granulata); girdle and erosion from Wikipedia (citing Abbott and Warmke & Abbott)."
+    },
+    {
+      "id": "fuzzy-chiton-eyes",
+      "text": "Hundreds of tiny eyes (ocelli) are set into the shell plates. Each has a pigment layer, a retina and a lens made of aragonite, the first aragonite lenses ever found. They work as small camera eyes with a resolution of about 9-12 degrees, in air and in water: chitons reacted to a dark circle appearing overhead but not to the light simply dimming.",
+      "sourceIds": ["speiser-2011-chiton-lenses", "varney-2021-chiton-genome"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "From the abstract of Speiser et al. (2011), which studied A. granulata; Varney et al. show the eyes and aesthete pores in A. granulata plates."
+    },
+    {
+      "id": "fuzzy-chiton-feeding",
+      "text": "It grazes algae by scraping rock with its radula, whose teeth are capped with magnetite so they do not quickly dull; chitons make new rows of teeth within days. Wikipedia says its foraging is limited to night-time low tides, and a study of this species notes that tropical chitons limit daytime heat stress by staying in rocky microhabitats.",
+      "sourceIds": [
+        "varney-2021-chiton-genome",
+        "ucmp-polyplacophora",
+        "wikipedia-acanthopleura-granulata",
+        "schill-2002-chiton-hsp70"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Radula and teeth from Varney et al. and UCMP (chitons generally). The night-time low-tide foraging comes only from Wikipedia, whose cited study (Focardi & Chelazzi 1990) could not be read, hence moderate."
+    },
+    {
+      "id": "fuzzy-chiton-clinging",
+      "text": "Chitons creep on a muscular foot and can cling to rock very powerfully, like a limpet; SeaLifeBase says this species adheres to rocks with great force. Because the shell is eight jointed plates, a chiton can bend over uneven rock and roll into a protective ball if it is knocked loose.",
+      "sourceIds": [
+        "wikipedia-chiton",
+        "ucmp-polyplacophora",
+        "sealifebase-acanthopleura-granulata"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Rolling into a ball and the limpet comparison are stated for chitons generally (Wikipedia); the species-specific adhesion note is from SeaLifeBase."
+    },
+    {
+      "id": "fuzzy-chiton-reproduction",
+      "text": "Acanthopleura granulata is a broadcast spawner. As in most chitons, males and females are separate: males release sperm into the water and females release eggs, which are fertilised in the water.",
+      "sourceIds": [
+        "varney-2021-chiton-genome",
+        "ucmp-polyplacophora",
+        "wikipedia-chiton"
+      ],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Broadcast spawning in A. granulata is stated by Varney et al. (citing Glynn 1970); separate sexes and external fertilisation are described for chitons generally by UCMP and Wikipedia."
+    },
+    {
+      "id": "fuzzy-chiton-larva",
+      "text": "Chiton eggs usually hatch into a free-swimming trochophore larva that lives on its yolk and soon develops directly into a young chiton; unlike most molluscs there is no veliger stage. No larval duration was found for A. granulata.",
+      "sourceIds": [
+        "ucmp-polyplacophora",
+        "sealifebase-acanthopleura-granulata",
+        "wikipedia-chiton"
+      ],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Class-level statement; SeaLifeBase gives the same life cycle (lecithotrophic planktonic trochophore, no veliger) on the species page. UCMP describes the trochophore as 'soon' developing into a juvenile but gives no number of days."
+    },
+    {
+      "id": "fuzzy-chiton-predators",
+      "text": "Animals that eat chitons include seagulls, sea stars, crabs, lobsters, fish and people. In countries that were part of the British West Indies, A. granulata and other intertidal chitons are called 'curb'; the foot is eaten and also used as fishing bait.",
+      "sourceIds": ["wikipedia-chiton", "wikipedia-acanthopleura-granulata"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "The predator list is for chitons generally; no species-specific predator study was read. The 'curb' use is from the species article."
+    },
+    {
+      "id": "fuzzy-chiton-remains",
+      "text": "When a chiton dies, the girdle no longer holds the eight plates together, so they come apart. Single plates, sometimes called butterfly shells, may wash up in beach drift.",
+      "sourceIds": ["wikipedia-chiton"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Stated for chitons generally."
+    },
+    {
+      "id": "fuzzy-chiton-status",
+      "text": "Acanthopleura granulata has not been evaluated for the IUCN Red List and is not assessed under CITES.",
+      "sourceIds": ["sealifebase-acanthopleura-granulata"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "SeaLifeBase lists IUCN (version 2025-2), CITES and CMS status as 'Not Evaluated'. Local harvesting rules were not researched."
+    },
+    {
+      "id": "tusk-shell-taxonomy",
+      "text": "The common tusk shell is Antalis vulgaris (da Costa, 1778), an accepted species in the World Register of Marine Species (AphiaID 196380), family Dentaliidae, class Scaphopoda.",
+      "sourceIds": ["worms-antalis-vulgaris", "doris-antalis-vulgaris"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Authority and status read from the WoRMS REST record; DORIS gives the same WoRMS number and family."
+    },
+    {
+      "id": "tusk-shell-size",
+      "text": "The shell is 3 to 6 cm long and up to about 6 mm wide at the wide end. WoRMS records a maximum length of 60 mm.",
+      "sourceIds": [
+        "doris-antalis-vulgaris",
+        "worms-antalis-vulgaris",
+        "wikipedia-antalis-vulgaris"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "3-6 cm = 30-60 mm, from DORIS and Wikipedia; the 60 mm maximum is a WoRMS attribute citing two British identification guides."
+    },
+    {
+      "id": "tusk-shell-range-habitat",
+      "text": "Lives from south-western Britain to the western Mediterranean, on sandy and detrital (shell-gravel) bottoms of the continental shelf. WoRMS records also include Ireland, Atlantic and Mediterranean Spain, Tunisia, the Aegean and the Sea of Marmara.",
+      "sourceIds": [
+        "doris-antalis-vulgaris",
+        "worms-antalis-vulgaris",
+        "sealifebase-antalis-vulgaris"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "DORIS gives the range and 'sandy and detrital bottoms of the continental shelf'; SeaLifeBase gives 'Eastern Atlantic; Mediterranean'. The WoRMS distribution list is read directly from its REST endpoint."
+    },
+    {
+      "id": "tusk-shell-depth",
+      "text": "Recorded from about 5 to 1,000 m deep; DORIS says from the first few metres down to very great depths.",
+      "sourceIds": [
+        "sealifebase-antalis-vulgaris",
+        "doris-antalis-vulgaris",
+        "wikipedia-antalis-vulgaris"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "SeaLifeBase gives 5-1000 m, citing Steiner & Kabat (2004); Wikipedia gives the same range."
+    },
+    {
+      "id": "tusk-shell-appearance",
+      "text": "A slightly curved, elephant-tusk-shaped tube open at both ends. It is opaque white, with many fine lengthwise ridges toward the narrow end, which is often stained brown (orange to black), and a few fine growth lines across the shell.",
+      "sourceIds": ["doris-antalis-vulgaris", "wikipedia-antalis-vulgaris"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Description translated from DORIS; Wikipedia agrees on the white colour and lengthwise striations."
+    },
+    {
+      "id": "tusk-shell-burrowing",
+      "text": "A tusk shell lives buried head-down in sand or mud: the wide end, with the head and digging foot, points down, and only the narrow end reaches up into the water for water exchange and waste. To dig, it pushes out its foot and spreads the tip to anchor, then pulls itself along.",
+      "sourceIds": [
+        "ucmp-scaphopoda",
+        "wikipedia-scaphopoda",
+        "doris-antalis-vulgaris"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "DORIS describes A. vulgaris living buried by its wider end; the anchoring foot and narrow end in the water are described for scaphopods generally by UCMP and Wikipedia."
+    },
+    {
+      "id": "tusk-shell-captacula",
+      "text": "Its head carries many thread-like, club-tipped tentacles (captacula) that probe the sediment and carry food, mainly foraminifera and other tiny bottom-living organisms, to the mouth, where a large radula grinds it.",
+      "sourceIds": [
+        "doris-antalis-vulgaris",
+        "ucmp-scaphopoda",
+        "wikipedia-scaphopoda"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "DORIS states the club-shaped captacula and foraminifera diet for A. vulgaris; UCMP and Wikipedia describe the radula for scaphopods generally."
+    },
+    {
+      "id": "tusk-shell-breathing",
+      "text": "Tusk shells have no gills. Water enters through the narrow top end and cilia move it along the mantle, whose surface absorbs oxygen. When oxygen runs low, the water is pushed back out of the same top opening by muscle action, about every 10 to 12 minutes.",
+      "sourceIds": ["ucmp-scaphopoda", "wikipedia-scaphopoda"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Class-level statement ('family' scope used for the wider group). The 10-12 minute interval is from Wikipedia only."
+    },
+    {
+      "id": "tusk-shell-larva",
+      "text": "Sexes are separate and the gametes are released into the water. The egg hatches into a free-swimming trochophore that becomes a shelled veliger larva, which settles on the bottom and grows into a miniature adult. No larval duration was found for A. vulgaris.",
+      "sourceIds": [
+        "doris-antalis-vulgaris",
+        "sealifebase-antalis-vulgaris",
+        "ucmp-scaphopoda",
+        "wikipedia-scaphopoda"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "DORIS and Wikipedia describe external fertilisation; SeaLifeBase's class-level note says fertilisation occurs in the mantle cavity, so the place of fertilisation is not settled here. The trochophore-then-veliger sequence is in SeaLifeBase, UCMP and Wikipedia."
+    },
+    {
+      "id": "tusk-shell-remains",
+      "text": "Tusk shells are rarely seen alive by divers. More often one finds piles of empty shells on the seabed, and shells also wash up along the strandline.",
+      "sourceIds": ["doris-antalis-vulgaris"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Translated from DORIS ('Divers biologie')."
+    },
+    {
+      "id": "tusk-shell-collecting",
+      "text": "Empty tusk shells are often collected and, in some countries, still made into jewellery. Antalis vulgaris has not been evaluated for the IUCN Red List, and a European seabed index (AMBI) rates it as very sensitive to disturbance.",
+      "sourceIds": [
+        "doris-antalis-vulgaris",
+        "sealifebase-antalis-vulgaris",
+        "worms-antalis-vulgaris"
+      ],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Jewellery use from DORIS; IUCN status from SeaLifeBase; AMBI group from the WoRMS attribute record (Borja et al. 2000). No collecting rules specific to this species were found."
+    },
+    {
+      "id": "neopilina-taxonomy",
+      "text": "Neopilina galatheae Lemche, 1957 is an accepted species in the World Register of Marine Species (AphiaID 343689), family Neopilinidae, class Monoplacophora. Henning Lemche described it in Nature in February 1957.",
+      "sourceIds": ["worms-neopilina-galatheae", "lemche-1957-nature"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "WoRMS REST record read directly; only the Nature landing page (title, author, date) was accessible."
+    },
+    {
+      "id": "neopilina-discovery",
+      "text": "The first living monoplacophoran was found on 6 May 1952 by the Danish Galathea deep-sea expedition: a trawl at 3,570 m off Costa Rica brought up 10 animals and three empty shells. The class had been thought extinct since the Palaeozoic, about 375 million years, so Neopilina was called a living fossil.",
+      "sourceIds": [
+        "lemche-wingstrand-1959",
+        "stoger-2016-monoplacophoran-mitogenomes",
+        "chen-2024-neopilina",
+        "giribet-2006-serialia"
+      ],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Date, depth and catch from the station data in Lemche & Wingstrand (station 716, 9°23'N 89°32'W). '375 million years' and 'living fossils' are from Chen (2024); Stöger et al. (2016) and Giribet et al. (2006) confirm the 1952 Galathea discovery."
+    },
+    {
+      "id": "neopilina-size",
+      "text": "The 1952 shells measured 25 to 37 mm long: the largest 37 × 35 × 13 mm and the type specimen 33 × 30 × 10 mm. The shell is very thin, mostly under 0.2 mm.",
+      "sourceIds": ["lemche-wingstrand-1959"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Measured by Lemche & Wingstrand on the type material (length × width × height)."
+    },
+    {
+      "id": "neopilina-range-depth",
+      "text": "Recorded from the deep eastern Pacific: first trawled at 3,570 m off Costa Rica on dark, muddy clay; later from the slope of the Cedros Trench off Mexico; and in 2023 at 2,460 m on the Galápagos Spreading Center, where one sat on hard basalt lava, about 1,000 km south-east of earlier records.",
+      "sourceIds": [
+        "lemche-wingstrand-1959",
+        "menzies-robinson-1961-neopilina",
+        "chen-2024-neopilina",
+        "worms-neopilina-galatheae"
+      ],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Earlier records were trawled from sand and mud (Chen 2024). The Mexican record is cited from its title only. WoRMS distribution lists the East Pacific and Costa Rica. Wikipedia also mentions Chile, which was not verified here."
+    },
+    {
+      "id": "neopilina-appearance",
+      "text": "A single thin, almost circular, cap-shaped shell, with its apex near the front edge and slightly coiled. It is dull brown, darkening to almost black toward the apex and pale straw-brown near the edge, with fine growth lines crossed by 30 to 60 faint radial ribs. The surface is often corroded.",
+      "sourceIds": ["lemche-wingstrand-1959"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "From the 'Shell and pallial fold' section of the anatomical monograph."
+    },
+    {
+      "id": "neopilina-serial-organs",
+      "text": "Under the shell is a round central foot with five pairs of gills spaced along each side, kidneys (nephridia) repeated in series, and eight sets of paired foot-retractor muscles. This repetition of organs surprised zoologists when it was described.",
+      "sourceIds": ["lemche-wingstrand-1959", "giribet-2006-serialia"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Five gill pairs and the nephridial openings from Lemche & Wingstrand; the repeated gills, nephridia and eight sets of retractor muscles, and the zoological 'shock', from the Giribet et al. abstract."
+    },
+    {
+      "id": "neopilina-feeding",
+      "text": "The guts of the 1952 animals held many radiolarians, scattered diatoms and much undefined detritus, so their describers concluded that Neopilina is a deposit feeder, probably gathering food with the tentacle tufts behind the mouth and a ciliated fold (velum) in front of it.",
+      "sourceIds": ["lemche-wingstrand-1959", "wikipedia-neopilina"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "Gut contents and conclusion from Lemche & Wingstrand, who add that it is impossible to say exactly how these organs work. Chen (2024) saw no feeding trails near the 2023 animal."
+    },
+    {
+      "id": "neopilina-unknowns",
+      "text": "How Neopilina galatheae develops and how long it lives are unknown. No developmental studies have been done on any monoplacophoran, and this species was not collected again between 1959 and 2023. One 1952 specimen still carried a tiny coiled larval shell at its tip.",
+      "sourceIds": [
+        "ucmp-monoplacophora",
+        "chen-2024-neopilina",
+        "lemche-wingstrand-1959"
+      ],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "A sourced statement of ignorance: UCMP says no developmental studies have been done; Chen (2024) says the 2023 animal was the first collected since 1959; Lemche & Wingstrand describe the larval shell. No lifespan or larval duration was found in any source."
+    },
+    {
+      "id": "tiger-cowrie-gbif-records",
+      "text": "GBIF holds 4,193 located records of Cypraea tigris: museum specimens and observations, leaving out fossils and automated tag detections. 30 of the 47 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-tiger-cowrie"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "money-cowrie-gbif-records",
+      "text": "GBIF holds 4,135 located records of Monetaria moneta: museum specimens and observations, leaving out fossils and automated tag detections. 34 of the 47 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-money-cowrie"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "textile-cone-gbif-records",
+      "text": "GBIF holds 2,648 located records of Conus textile: museum specimens and observations, leaving out fossils and automated tag detections. 31 of the 47 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-textile-cone"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "queen-conch-gbif-records",
+      "text": "GBIF holds 4,774 located records of Aliger gigas: museum specimens and observations, leaving out fossils and automated tag detections. 12 of the 47 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-queen-conch"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "chambered-nautilus-gbif-records",
+      "text": "GBIF holds 722 located records of Nautilus pompilius: museum specimens and observations, leaving out fossils and automated tag detections. 25 of the 47 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-chambered-nautilus"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "giant-clam-gbif-records",
+      "text": "GBIF holds 1,504 located records of Tridacna gigas: museum specimens and observations, leaving out fossils and automated tag detections. 23 of the 47 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-giant-clam"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "fuzzy-chiton-gbif-records",
+      "text": "GBIF holds 3,604 located records of Acanthopleura granulata: museum specimens and observations, leaving out fossils and automated tag detections. 13 of the 47 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-fuzzy-chiton"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "tusk-shell-gbif-records",
+      "text": "GBIF holds 2,096 located records of Antalis vulgaris: museum specimens and observations, leaving out fossils and automated tag detections. 3 of the 47 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-tusk-shell"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "monoplacophoran-gbif-records",
+      "text": "GBIF holds 20 located records of Neopilina galatheae: museum specimens and observations, leaving out fossils and automated tag detections. 2 of the 47 seas and islands shown here have at least one record.",
+      "sourceIds": ["gbif-monoplacophoran"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "The counts are facts about the database, not about the ocean. More records usually means more divers, collectors and surveys, not more animals; old museum labels can be imprecise; and empty shells can be recorded far from where the animal lived. A region with no records may simply be unsurveyed. Region outlines are simple boxes drawn for this simulator."
+    },
+    {
+      "id": "pearl-natural-formation",
+      "text": "A natural pearl forms when a parasite, organic matter or an injury carries cells of the mantle's outer layer into the soft body. They form a pocket, the pearl sac, which coats the intruder with calcium carbonate and the protein conchiolin.",
+      "sourceIds": ["wikipedia-pearl"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "The encyclopedia describes the pearl sac and the usual triggers; it says the process is 'thought' to work this way."
+    },
+    {
+      "id": "pearl-not-sand",
+      "text": "Despite the common belief, a grain of sand is rarely what starts a pearl.",
+      "sourceIds": ["wikipedia-pearl"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Stated directly in the encyclopedia article."
+    },
+    {
+      "id": "pearl-concentric-layers",
+      "text": "Like the shell, a pearl is calcium carbonate laid down in concentric layers, and the pearl sac grows by cell division as the pearl grows. An X-ray of a natural pearl shows a series of concentric growth rings.",
+      "sourceIds": ["wikipedia-pearl"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "The rings drawn in the cut pearl are far wider and fewer than the real layers, so they can be seen."
+    },
+    {
+      "id": "pearl-any-mollusc",
+      "text": "All shelled molluscs can make some kind of pearl, but most are not gems. The lustrous nacreous pearls come mainly from pearl oysters and freshwater mussels.",
+      "sourceIds": ["wikipedia-pearl"],
+      "scope": "mollusks",
+      "confidence": "moderate",
+      "evidenceNote": "Stated in the encyclopedia article."
+    },
+    {
+      "id": "giant-clam-pearl-kind",
+      "text": "Giant clam pearls are non-nacreous: porcelain-like, without nacre's rainbow sheen. They are built of crossed aragonite lamellae, which show a 'flame structure' and sometimes a silky shimmer.",
+      "sourceIds": ["gia-tridacnidae-flame-2019"],
+      "scope": "family",
+      "confidence": "high",
+      "evidenceNote": "GIA studied 37 pearls from the giant clam family (Tridacnidae), mainly Tridacna gigas, T. maxima and T. squamosa."
+    },
+    {
+      "id": "giant-clam-pearl-rotation",
+      "text": "Most giant clam pearls studied are symmetrical around one axis and show spiral patterns at their ends, which suggests they turn as they grow.",
+      "sourceIds": ["gia-tridacnidae-flame-2019"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "35 of the 37 pearls had cylindrical symmetry; GIA reads this as suggesting rotation, not proving it."
+    },
+    {
+      "id": "giant-clam-pearl-sizes",
+      "text": "Tridacna gigas has yielded flame-structure pearls weighing several tens of carats, and very large concretions such as the Pearl of Allah, a blister pearl that grew against the shell and was cut from it.",
+      "sourceIds": ["gia-tridacnidae-flame-2019"],
+      "scope": "species",
+      "confidence": "high",
+      "evidenceNote": "One carat is 0.2 g, so several tens of carats is several grams. The drawn sizes of loose pearls are illustrative, not measurements."
+    },
+    {
+      "id": "giant-clam-pearl-lao-tzu",
+      "text": "The Pearl of Lao Tzu (also called the Pearl of Allah), from a giant clam off Palawan in the Philippines, measures 24 cm across and weighs 6.4 kg.",
+      "sourceIds": ["wikipedia-pearl-of-lao-tzu", "gia-tridacnidae-flame-2019"],
+      "scope": "species",
+      "confidence": "moderate",
+      "evidenceNote": "Its early history rests on one owner's accounts, which the encyclopedia treats as embellished; the size and weight are not disputed. GIA gives about 6.37 kg."
+    },
+    {
+      "id": "giant-clam-pearl-growth-unknown",
+      "text": "How long a giant clam pearl takes to grow was not found in the sources reviewed, so the slider shows sizes along the way, not ages.",
+      "sourceIds": [],
+      "scope": "demo-limitation",
+      "confidence": "high",
+      "evidenceNote": "A limit of this demo rather than a fact about the animal."
+    },
+    {
+      "id": "cowrie-hatch-together",
+      "text": "Tropical cowries produce many swimming veliger larvae from each egg capsule. In tiger cowries kept in the lab, a capsule held about 740 larvae on average, and a brood hatched over 1 to 3 days, with 90% of the larvae released overnight on the final day.",
+      "sourceIds": ["tay-2023-cowrie-larvae"],
+      "scope": "family",
+      "confidence": "moderate",
+      "evidenceNote": "Counts and hatching timing are from captive tiger cowries (table 1 and section 3.1.1); 'numerous planktotrophic veligers per capsule' is stated for tropical cowries in general. How closely siblings stay together once in the open sea is not measured."
     }
   ]
 }

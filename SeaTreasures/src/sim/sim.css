@@ -143,6 +143,15 @@ html[data-theme='dark'] .sim-view::after {
   display: block;
   touch-action: none;
 }
+/* Rendered at half size: the light is soft, so it is simply stretched to fill. */
+.sim-stage canvas.sim-sky {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.sim-stage canvas.sim-sky[hidden] {
+  display: none;
+}
 .sim-stage:focus-visible {
   outline: 2px solid var(--cp-accent);
   outline-offset: -4px;
@@ -1500,4 +1509,19 @@ html[data-theme='dark'] .shell-studio {
   border-radius: 8px;
   background: color-mix(in srgb, var(--cp-surface) 85%, transparent);
   box-shadow: 0 0 0 1px var(--cp-border);
+}
+
+/* The pearl card: the step's fact first, the background behind a disclosure. */
+.pearl-card .pearl-more > summary {
+  cursor: pointer;
+  font-size: 11px;
+  margin-top: 4px;
+}
+.pearl-card .pearl-more[open] {
+  max-height: 32vh;
+  overflow: auto;
+}
+.ocean .pearl-card .fact + .fact,
+.ocean .pearl-card .text-xs {
+  display: revert;
 }

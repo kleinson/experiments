@@ -325,7 +325,7 @@ test('the shell menu shows each species as its shell and its animal', async ({
   const toggle = page.getByRole('button', { name: 'Shells', exact: true })
   await toggle.click()
   const tray = page.locator('#shell-tray')
-  await expect(tray.getByRole('button')).toHaveCount(5)
+  await expect(tray.getByRole('button')).toHaveCount(9)
   await expect(
     tray.getByRole('button', { name: /Money cowrie/ }),
   ).toHaveAttribute('aria-pressed', 'true')
@@ -720,4 +720,50 @@ test.describe('a swimming larva', () => {
     await page.getByRole('button', { name: 'Tuck in the velum' }).click()
     await expect(announced(page)).toContainText('velum into its shell')
   })
+})
+
+test('a pearl grows step by step inside the giant clam', async ({ page }) => {
+  await page.goto('./?species=giant-clam')
+  const toggle = page.getByRole('button', { name: 'Pearl', exact: true })
+  await expect(toggle).toBeEnabled()
+  await toggle.click()
+  const card = page.getByRole('group', { name: 'Pearl' })
+  await expect(card).toContainText('First layers')
+  await expect(page.getByRole('group', { name: 'Depth' })).toBeHidden()
+  const growth = page.getByRole('slider', { name: 'Pearl growth' })
+  await growth.focus()
+  await page.keyboard.press('Home')
+  await expect(card).toContainText('Intruder')
+  await expect(card).toContainText('0.3 mm')
+  await page.keyboard.press('End')
+  await expect(card).toContainText('24 cm')
+  await expect(card).toContainText('Pearl of Lao Tzu')
+  await page.keyboard.press('ArrowLeft')
+  await card.getByRole('button', { name: /Cut it open/ }).click()
+  await expect(
+    page.getByRole('list', { name: 'Labelled parts' }),
+  ).toContainText('Growth layers')
+  await page
+    .getByRole('button', { name: 'Pearl', exact: true, pressed: true })
+    .click()
+  await expect(card).toBeHidden()
+})
+
+test('species without pearls have no pearl tool', async ({ page }) => {
+  await page.goto('./?species=queen-conch')
+  await expect(
+    page.getByRole('button', { name: 'Pearl', exact: true }),
+  ).toHaveCount(0)
+})
+
+test('the sun and surface show under water, not on the beach', async ({
+  page,
+}) => {
+  await page.goto('./?species=tiger-cowrie&place=philippines')
+  const sky = page.locator('canvas.sim-sky')
+  await expect(sky).toBeVisible()
+  await page.getByRole('button', { name: 'Beach', exact: true }).click()
+  await expect(sky).toBeHidden()
+  await page.getByRole('button', { name: 'Larva', exact: true }).click()
+  await expect(sky).toBeVisible()
 })

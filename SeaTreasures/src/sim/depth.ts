@@ -70,6 +70,38 @@ export function depthFor(species: Species, regionId: string): Depth {
         claim: 'depth-nautilus',
       }
     }
+    case 'giant-clam':
+      return {
+        range: [2, 20],
+        drawn: 6,
+        reach: [2, 20],
+        words: 'Shallow, sunlit reefs: its algae need the light',
+        claim: 'giant-clam-depth',
+      }
+    case 'fuzzy-chiton':
+      return {
+        range: [0, 1],
+        drawn: 0.5,
+        reach: [0.2, 1],
+        words: 'Intertidal: on rocks up into the spray zone',
+        claim: 'fuzzy-chiton-depth',
+      }
+    case 'tusk-shell':
+      return {
+        range: [5, 1000],
+        drawn: 30,
+        reach: [5, 200],
+        words: 'From a few metres to very great depths',
+        claim: 'tusk-shell-depth',
+      }
+    case 'monoplacophoran':
+      return {
+        range: [2460, 3570],
+        drawn: 3570,
+        reach: [2460, 3570],
+        words: 'The deep sea: abyssal mud and lava',
+        claim: 'neopilina-range-depth',
+      }
     default:
       return {
         range: null,

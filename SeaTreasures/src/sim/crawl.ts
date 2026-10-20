@@ -38,6 +38,37 @@ const jetting: Fact = {
   claim: 'move-nautilus-jet',
 }
 
+/**
+ * Species whose larvae hatch in great numbers at once, so a larva drifts among siblings
+ * from the same brood or spawning. Others are left alone rather than guessed at.
+ */
+const HATCH_TOGETHER: Record<string, Fact> = {
+  'tiger-cowrie': {
+    text: 'It hatched with hundreds of siblings from each egg capsule, most of the brood in one night, so other veligers drift nearby.',
+    claim: 'cowrie-hatch-together',
+  },
+  'money-cowrie': {
+    text: 'Tropical cowries release many veligers from each egg capsule, so siblings from the same brood drift nearby.',
+    claim: 'cowrie-hatch-together',
+  },
+  'textile-cone': {
+    text: 'A cone egg mass holds thousands of eggs, so it drifts among many siblings.',
+    claim: 'textile-cone-egg-genus',
+  },
+  'queen-conch': {
+    text: 'One egg mass holds hundreds of thousands of eggs that hatch together after about five days, so siblings drift nearby.',
+    claim: 'queen-conch-eggs',
+  },
+  'giant-clam': {
+    text: 'One spawning releases hundreds of millions of eggs into the water, so countless sibling larvae drift together.',
+    claim: 'giant-clam-spawning',
+  },
+}
+
+/** Whether a species' larva drifts among siblings that hatched with it, and the claim for it. */
+export const hatchesTogether = (speciesId: string): Fact | null =>
+  HATCH_TOGETHER[speciesId] ?? null
+
 /** What the living animal is doing, for a species at a stage, by day or by night. */
 export function activity(
   species: Pick<Species, 'id' | 'group'>,
@@ -59,11 +90,43 @@ export function activity(
   const cowrie = species.id === 'tiger-cowrie' || species.id === 'money-cowrie'
   if (phase === 'larva') {
     if (species.group === 'cephalopod') return still()
+    const siblings = hatchesTogether(species.id)
+    const among = siblings ? [siblings] : []
+    if (species.id === 'giant-clam')
+      return still([
+        {
+          text: 'A shelled, swimming veliger that feeds on microalgae; after about 6 to 14 days it grows a foot and settles.',
+          claim: 'giant-clam-larva',
+        },
+        ...among,
+      ])
+    if (species.id === 'fuzzy-chiton')
+      return still([
+        {
+          text: 'A chiton hatches as a trochophore that lives on its yolk and soon turns into a young chiton, with no veliger stage.',
+          claim: 'fuzzy-chiton-larva',
+        },
+      ])
+    if (species.id === 'tusk-shell')
+      return still([
+        {
+          text: 'A trochophore becomes a shelled, swimming veliger, which settles on the bottom and grows into a miniature tusk shell.',
+          claim: 'tusk-shell-larva',
+        },
+      ])
+    if (species.id === 'monoplacophoran')
+      return still([
+        {
+          text: 'How it develops is unknown: no one has studied a monoplacophoran larva.',
+          claim: 'neopilina-unknowns',
+        },
+      ])
     return still([
       {
         text: 'It swims by beating the cilia on its velum, and can pull the velum into its shell for protection.',
         claim: 'term-velum-why',
       },
+      ...among,
       ...(cowrie
         ? [
             {
@@ -78,6 +141,87 @@ export function activity(
   const young = phase === 'growth'
   const moving = young ? settled : crawling
   switch (species.id) {
+    case 'giant-clam':
+      return young
+        ? doing('still', [
+            {
+              text: 'A young clam crawls on its foot at first, then ties itself down with byssal threads.',
+              claim: 'giant-clam-sessile',
+            },
+            {
+              text: 'It filters plankton from the water with its gills, which matters most while it is small.',
+              claim: 'giant-clam-filter-feeding',
+            },
+          ])
+        : daily(
+            night
+              ? doing('still', [
+                  {
+                    text: 'At night its algae cannot photosynthesise; it keeps filtering plankton from the water.',
+                    claim: 'giant-clam-filter-feeding',
+                  },
+                ])
+              : doing('still', [
+                  {
+                    text: 'It never moves: by day it opens and spreads its mantle so the algae living in it get sunlight, and they feed it.',
+                    claim: 'giant-clam-zooxanthellae',
+                  },
+                  {
+                    text: 'Adults are held in place by their size and weight alone.',
+                    claim: 'giant-clam-sessile',
+                  },
+                ]),
+          )
+    case 'fuzzy-chiton':
+      return daily(
+        night
+          ? doing('crawl', [
+              {
+                text: 'At night it creeps over the rock, scraping algae off with its magnetite-capped teeth.',
+                claim: 'fuzzy-chiton-feeding',
+              },
+            ])
+          : doing(
+              'hidden',
+              [
+                {
+                  text: 'By day it clings to the rock with great force, sheltering from the heat.',
+                  claim: 'fuzzy-chiton-clinging',
+                },
+                {
+                  text: 'Hundreds of tiny eyes in its plates watch for shadows passing overhead.',
+                  claim: 'fuzzy-chiton-eyes',
+                },
+              ],
+              true,
+            ),
+      )
+    case 'tusk-shell':
+      return doing('still', [
+        {
+          text: 'It lives buried head-down in the sand; only the narrow end reaches into the water.',
+          claim: 'tusk-shell-burrowing',
+        },
+        {
+          text: 'Its thread-like captacula probe the sediment and carry tiny prey, mainly foraminifera, to the mouth.',
+          claim: 'tusk-shell-captacula',
+        },
+        {
+          text: 'It has no gills: water drawn in at the top is pushed back out about every 10 to 12 minutes.',
+          claim: 'tusk-shell-breathing',
+        },
+      ])
+    case 'monoplacophoran':
+      return doing('still', [
+        {
+          text: 'On the abyssal mud it gathers detritus, radiolarians and diatoms with the tentacle tufts beside its mouth.',
+          claim: 'neopilina-feeding',
+        },
+        {
+          text: 'How fast or how far it moves has not been observed.',
+          claim: 'neopilina-unknowns',
+        },
+      ])
     case 'chambered-nautilus':
       if (young) return doing('swim', [jetting])
       return daily(
@@ -185,8 +329,26 @@ const SPEED = { crawl: 0.03, vault: 0.04, swim: 0.035 }
 const VAULT = { beat: 4.5, push: 1.6 }
 
 /** How far along its route the animal has come after `seconds` of moving, in body lengths. */
+/** A crawler moves on for a while, then stops to graze, in seconds. */
+const GRAZE = { cycle: 16, moving: 11 }
+
+/** True while a crawling animal has stopped to feed. */
+export const grazing = (mode: Mode, seconds: number) =>
+  mode === 'crawl' && seconds % GRAZE.cycle > GRAZE.moving
+
 export function travelled(mode: Mode, seconds: number) {
-  if (mode === 'crawl' || mode === 'swim') return SPEED[mode] * seconds
+  if (mode === 'crawl') {
+    // Moves, eases to a stop, grazes, sets off again: never a jump in speed.
+    const cycles = Math.floor(seconds / GRAZE.cycle)
+    const into = seconds - cycles * GRAZE.cycle
+    const ease = 1.2
+    const moving =
+      into < GRAZE.moving
+        ? into - Math.max(0, into - (GRAZE.moving - ease)) ** 2 / (2 * ease)
+        : GRAZE.moving - ease / 2
+    return SPEED.crawl * (cycles * (GRAZE.moving - ease / 2) + moving)
+  }
+  if (mode === 'swim') return SPEED[mode] * seconds
   if (mode !== 'vault') return 0
   const perBeat = SPEED.vault * VAULT.beat
   const beats = Math.floor(seconds / VAULT.beat)

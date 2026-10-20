@@ -155,6 +155,83 @@ export const glossary: Record<string, Term> = {
     tldr: 'The larval shell, or protoconch, is the first shell, built by the embryo or larva. The adult shell later grows on from its rim, so it stays as the tip of the spire; in some snails it dissolves.',
     claims: ['part-protoconch', 'term-gastropod-shell-parts'],
   },
+  Valve: {
+    what: 'One of the two halves of a bivalve shell.',
+    tldr: 'A bivalve’s shell is two valves joined along a hinge. In the giant clam they are thick and heavy, with four to six deep folds ending in big triangular points, and adults cannot close them completely.',
+    claims: ['bivalve-parts', 'giant-clam-appearance'],
+  },
+  Hinge: {
+    what: 'Where the two valves are joined.',
+    tldr: 'The two valves are joined here by a flexible ligament, usually with interlocking teeth. The ligament works as a spring: it pushes the valves open whenever the muscles that close them relax.',
+    claims: ['bivalve-parts'],
+  },
+  'Adductor muscle': {
+    what: 'The muscle that pulls the valves shut.',
+    tldr: 'The adductor muscle runs between the two valves and pulls them shut. When it relaxes, the springy hinge ligament opens the shell again.',
+    claims: ['bivalve-parts'],
+  },
+  Gill: {
+    what: 'A gill, for breathing.',
+    tldr: 'Gills take oxygen from the water. In bivalves they also filter food: the giant clam strains plankton with its gills, which matters most while it is small.',
+    claims: ['bivalve-parts', 'giant-clam-filter-feeding'],
+  },
+  Girdle: {
+    what: 'The tough muscular band around the plates.',
+    tldr: 'The girdle is a tough, muscular band that holds a chiton’s eight plates. In the fuzzy chiton it is thick and densely spiky, usually with a few dark bands, and with the foot it clamps the animal to the rock.',
+    claims: [
+      'chiton-parts',
+      'fuzzy-chiton-appearance',
+      'fuzzy-chiton-clinging',
+    ],
+  },
+  Plate: {
+    what: 'One of the chiton’s eight shell plates.',
+    tldr: 'A chiton’s shell is eight jointed plates rather than one piece. The joints let it bend over uneven rock and roll into a ball if it is knocked loose; in adult fuzzy chitons the plates are usually heavily eroded.',
+    claims: [
+      'chiton-parts',
+      'fuzzy-chiton-clinging',
+      'fuzzy-chiton-appearance',
+    ],
+  },
+  'Shell eyes': {
+    what: 'Hundreds of tiny eyes set in the plates.',
+    tldr: 'The fuzzy chiton has hundreds of tiny eyes in its shell plates, each with a lens made of the mineral aragonite. They work as small camera eyes, in air and in water: the chiton reacts to a dark shape overhead but not to light simply dimming.',
+    claims: ['fuzzy-chiton-eyes'],
+  },
+  Radula: {
+    what: 'A ribbon of tiny teeth in the mouth.',
+    tldr: 'The radula is a ribbon of tiny teeth that scrapes food before it is swallowed. A chiton’s teeth are capped with magnetite, an iron mineral, so they stay sharp scraping algae off rock, and new rows grow within days.',
+    claims: ['part-radula', 'fuzzy-chiton-feeding'],
+  },
+  'Tusk shell': {
+    what: 'A tapering tube open at both ends.',
+    tldr: 'A tusk shell is a slightly curved tube, open at both ends, shaped like an elephant’s tusk. The animal lives in it head-down in the sand: the wide end digs, and only the narrow end reaches up into the water.',
+    claims: [
+      'scaphopod-parts',
+      'tusk-shell-appearance',
+      'tusk-shell-burrowing',
+    ],
+  },
+  'Narrow end': {
+    what: 'The small opening that reaches into the water.',
+    tldr: 'The narrow end is the only part that sticks out of the sand. Tusk shells have no gills: water comes in here and the mantle absorbs its oxygen, then the water is pushed back out the same way about every 10 to 12 minutes.',
+    claims: ['tusk-shell-breathing', 'tusk-shell-burrowing'],
+  },
+  Captacula: {
+    what: 'Thread-like, club-tipped feeding tentacles.',
+    tldr: 'Captacula are many thread-like tentacles with club-shaped tips around the head. They probe the sediment and carry tiny prey, mainly foraminifera, to the mouth, where a large radula grinds it.',
+    claims: ['tusk-shell-captacula', 'scaphopod-parts'],
+  },
+  'Cap shell': {
+    what: 'A single, thin, cap-shaped shell.',
+    tldr: 'Neopilina has one thin, almost circular shell like a cap, its tip near the front edge. It is dull brown, nearly black at the tip and straw-coloured at the rim, with fine growth lines and faint radial ribs, and often corroded.',
+    claims: ['neopilina-appearance', 'monoplacophoran-parts'],
+  },
+  'Mouth tentacles': {
+    what: 'Tufts of tentacles beside the mouth.',
+    tldr: 'Behind the mouth are tufts of tentacles. Food found in the guts of the first animals, mostly radiolarians, diatoms and detritus, suggests they gather it from the deep-sea mud, so Neopilina is thought to be a deposit feeder.',
+    claims: ['neopilina-feeding'],
+  },
   'Hermit crab': {
     what: 'A crab living in the empty shell.',
     tldr: 'A hermit crab’s abdomen is soft and not hardened by calcium, so it must live in a shell made by another animal or be defenceless. Almost 800 species carry such mobile homes, most often empty snail shells, and these shells are shared with hundreds of other small species too.',
@@ -170,10 +247,92 @@ export const glossary: Record<string, Term> = {
     tldr: 'A chipped, broken edge is damage to the shell. Predators such as crabs, octopuses, birds and predatory snails can leave damage and holes in mollusc shells, and rolling in the waves wears shells down too.',
     claims: ['predator-drill-holes', 'wave-abrasion-holes'],
   },
+  Intruder: {
+    what: 'What a pearl starts from.',
+    tldr: 'A pearl usually starts with a parasite, a scrap of organic matter or an injury that carries cells of the mantle’s outer layer into the soft body. Despite the common belief, it is rarely a grain of sand.',
+    claims: ['pearl-natural-formation', 'pearl-not-sand'],
+  },
+  'Pearl sac': {
+    what: 'The pocket of mantle cells that makes the pearl.',
+    tldr: 'The displaced mantle cells close into a pocket, the pearl sac. It coats the intruder with calcium carbonate and the protein conchiolin, as the mantle builds the shell, and grows by cell division as the pearl grows.',
+    claims: ['pearl-natural-formation', 'pearl-concentric-layers'],
+  },
+  'Growth layers': {
+    what: 'Concentric layers, oldest at the centre.',
+    tldr: 'A pearl is laid down in concentric layers around its starting point, so the centre is the oldest part and the skin the newest; an X-ray of a natural pearl shows these growth rings. They are drawn much wider and fewer here than in life.',
+    claims: ['pearl-concentric-layers'],
+  },
+  Pearl: {
+    what: 'A pearl, grown inside the soft body.',
+    tldr: 'A pearl is calcium carbonate laid down in concentric layers by a pocket of mantle cells, the pearl sac. All shelled molluscs can make some kind of pearl, but most are not gems; the lustrous nacreous ones come mainly from pearl oysters and freshwater mussels.',
+    claims: [
+      'pearl-concentric-layers',
+      'pearl-natural-formation',
+      'pearl-any-mollusc',
+    ],
+  },
+  'Blister pearl': {
+    what: 'A pearl that grew fixed to the shell.',
+    tldr: 'A blister pearl grows against the inside of the shell and is joined to it, so it has to be cut from the shell. The giant clam’s Pearl of Allah is one.',
+    claims: ['giant-clam-pearl-sizes'],
+  },
 }
 
 /** Where a species uses a part its own way, its sourced entry replaces the general one. */
 const bySpecies: Record<string, Record<string, Term>> = {
+  'giant-clam': {
+    Mantle: {
+      what: 'The mantle, spread out in the sun.',
+      tldr: 'The giant clam farms single-celled algae in its mantle. By day it opens and spreads the mantle, olive to golden brown with brilliant blue-green rings, so the algae get sunlight; they pass sugars to the clam and supply most of its food.',
+      claims: ['giant-clam-zooxanthellae', 'giant-clam-appearance'],
+    },
+    Siphon: {
+      what: 'The opening where water is drawn in.',
+      tldr: 'Water is drawn in through this opening in the mantle and over the gills, which take oxygen from it and filter out plankton. Many bivalves pump water through siphons like this.',
+      claims: ['bivalve-parts', 'giant-clam-filter-feeding'],
+    },
+    Pearl: {
+      what: 'A giant clam pearl: porcelain-like, not nacreous.',
+      tldr: 'Giant clam pearls have no nacre, so they lack the rainbow sheen of oyster pearls. They are built of crossed aragonite lamellae that show a ‘flame structure’ and sometimes a silky shimmer, and most seem to turn as they grow.',
+      claims: ['giant-clam-pearl-kind', 'giant-clam-pearl-rotation'],
+    },
+    'Blister pearl': {
+      what: 'A pearl that grew fixed to the shell.',
+      tldr: 'A blister pearl grows against the inside of the shell and is joined to it. The Pearl of Lao Tzu, 24 cm across and 6.4 kg, is one: it was cut from a giant clam’s shell.',
+      claims: ['giant-clam-pearl-sizes', 'giant-clam-pearl-lao-tzu'],
+    },
+  },
+  'fuzzy-chiton': {
+    Foot: {
+      what: 'The broad muscular foot underneath.',
+      tldr: 'Most of a chiton’s underside is a broad muscular foot. It creeps on it and, with the girdle, clings to rock very powerfully, like a limpet; a row of small gills runs along each side of it.',
+      claims: ['chiton-parts', 'fuzzy-chiton-clinging'],
+    },
+  },
+  'tusk-shell': {
+    Foot: {
+      what: 'The digging foot at the wide end.',
+      tldr: 'The muscular foot comes out of the wide end, down in the sediment. To dig, it pushes the foot out, spreads its tip to anchor it, then pulls the shell along after it.',
+      claims: ['tusk-shell-burrowing', 'scaphopod-parts'],
+    },
+    Mantle: {
+      what: 'The mantle lining the tube.',
+      tldr: 'The mantle forms a tube inside the shell. With no gills, the tusk shell breathes through it: cilia move water along the mantle, whose surface takes up oxygen.',
+      claims: ['scaphopod-parts', 'tusk-shell-breathing'],
+    },
+  },
+  monoplacophoran: {
+    Foot: {
+      what: 'The round foot under the cap.',
+      tldr: 'Under the cap is a round, muscular foot. Five pairs of gills sit in the groove beside it, and its muscles and kidneys are repeated in series, which surprised zoologists when Neopilina was described.',
+      claims: ['neopilina-serial-organs', 'monoplacophoran-parts'],
+    },
+    'Larval shell': {
+      what: 'A tiny coiled shell at the tip.',
+      tldr: 'One of the first specimens still carried a tiny coiled larval shell at the tip of its cap. Beyond that, how Neopilina develops and how long it lives are unknown.',
+      claims: ['neopilina-unknowns'],
+    },
+  },
   'queen-conch': {
     Foot: {
       what: 'A large, powerful foot.',
