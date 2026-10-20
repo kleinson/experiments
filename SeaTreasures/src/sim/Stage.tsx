@@ -511,10 +511,21 @@ export default function Stage({
           target: built.view.target,
         }
       const view = built.close ?? built.view
-      // With a seabed around it, step back so the specimen sits in its setting.
-      const room = scenery?.ground && !built.close ? 2 : 1
-      const perPx =
-        Math.max(view.height / free.height, view.width / free.width) * room
+      const specimenPerPx = Math.max(
+        view.height / free.height,
+        view.width / free.width,
+      )
+      // A reef is hundreds of millimetres across even beside a tiny shell. Fit
+      // the minimum habitat patch, not only the animal, or all scenery lands
+      // outside the orthographic camera. Zoom still goes back to the specimen.
+      const contextPerPx =
+        scenery?.ground && !built.close
+          ? Math.max(
+              (layout(built) * 2.2) / free.width,
+              (layout(built) * 1.4) / free.height,
+            )
+          : 0
+      const perPx = Math.max(specimenPerPx, contextPerPx)
       return { perPx, magnified: Boolean(built.close), target: view.target }
     }
 
@@ -1337,10 +1348,10 @@ export default function Stage({
             ? {
                 from:
                   camera.position.distanceTo(controls.target) +
-                  built.extent * 3,
+                  layout(built) * 0.8,
                 to:
                   camera.position.distanceTo(controls.target) +
-                  built.extent * 14,
+                  layout(built) * 7,
               }
             : null,
       })
