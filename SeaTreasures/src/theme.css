@@ -73,6 +73,8 @@
   --cp-accent-hover: var(--chart-2);
   --cp-accent-soft: color-mix(in oklch, var(--primary) 12%, transparent);
   --cp-accent-fg: var(--primary-foreground);
+  --brand: var(--primary);
+  --brand-foreground: var(--primary-foreground);
   --cp-success: oklch(0.62 0.17 145);
   --cp-danger: var(--destructive);
   --cp-warning: var(--chart-1);
@@ -129,6 +131,8 @@ html[data-theme='dark'] {
   --cp-accent-hover: var(--chart-2);
   --cp-accent-soft: color-mix(in oklch, var(--primary) 14%, transparent);
   --cp-accent-fg: var(--primary-foreground);
+  --brand: var(--primary);
+  --brand-foreground: var(--primary-foreground);
   --cp-danger: var(--destructive);
   --cp-warning: var(--chart-1);
   --cp-link: var(--chart-2);

@@ -1426,6 +1426,116 @@ html[data-theme='dark'] .sim-view::after {
   position: relative;
   width: min(330px, 100%);
 }
+
+/* Dashboard chrome: quiet, opaque surfaces keep the simulation readable without
+   turning the surrounding UI into another visual layer. */
+.sim .ocean {
+  --float-shadow:
+    0 0 0 1px color-mix(in oklch, var(--border) 92%, transparent),
+    0 2px 4px color-mix(in oklch, var(--foreground) 10%, transparent);
+}
+.sim .ocean .float-title,
+.sim .ocean .filter-bar .filter-pill,
+.sim .ocean .float-actions,
+.sim .ocean .life-panel,
+.sim .ocean .float-bottom,
+.sim .ocean .depth-card,
+.sim .ocean .part-card,
+.sim .ocean .take-apart {
+  border: 1px solid var(--border) !important;
+  background: var(--card) !important;
+  box-shadow: var(--float-shadow) !important;
+  backdrop-filter: none !important;
+}
+.sim .ocean .filter-bar .filter-pill {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.sim .ocean .action-button,
+.sim .ocean .play {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+.sim .ocean .tool-toggle[data-state='on'],
+.sim .ocean [data-state='on'] {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+.sim .ocean .float-title {
+  padding: 14px 16px;
+}
+.sim .ocean .float-title h1,
+.sim .ocean .life-panel h2 {
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+.sim .ocean .life-panel {
+  border-radius: var(--radius);
+}
+.sim .ocean .life-panel > [data-radix-scroll-area-viewport] {
+  border-radius: inherit;
+}
+.sim .ocean .panel-label,
+.sim .ocean .float-title .panel-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--muted-foreground);
+}
+.sim .ocean .clock {
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.sim .ocean .fact p {
+  color: var(--card-foreground);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.sim .ocean .fact details,
+.sim .ocean .model-note {
+  color: var(--muted-foreground);
+}
+.sim .ocean .durations {
+  margin-top: 8px;
+  padding-top: 16px;
+}
+.sim .ocean .durations dt,
+.sim .ocean .durations dd {
+  font-size: 12px;
+}
+.sim .ocean .float-bottom {
+  padding: 12px 14px;
+}
+.sim .ocean .float-bottom [data-slot='separator'] {
+  background: var(--border);
+}
+.sim .ocean .phase-ticks button {
+  font-size: 12px;
+  font-weight: 500;
+}
+.sim .ocean .phase-ticks button[aria-current='step'] {
+  font-weight: 700;
+}
+.sim .ocean .history {
+  gap: 10px;
+}
+.sim .ocean .history-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--muted);
+  box-shadow: none;
+}
+.sim .ocean .history-card h3 {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.sim .ocean .history-card p,
+.sim .ocean .history-card a {
+  font-family: var(--font-sans);
+}
 @media (max-height: 860px) {
   .ocean .depth-card .fact + .fact {
     display: none;
