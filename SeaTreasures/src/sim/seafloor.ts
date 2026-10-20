@@ -176,8 +176,13 @@ export function buildSeafloor(
     if (!tall) return true
     const along = x * TOWARD_VIEWER.x + z * TOWARD_VIEWER.y
     const across = Math.abs(x * TOWARD_VIEWER.y - z * TOWARD_VIEWER.x)
-    if (along > -E * 1.2 - wide && across < E * 2.4 + wide) return false
-    return Math.hypot(x, z) >= E * 2 + wide
+    // Never place a large colony between the specimen and the default camera:
+    // at true scale it can surround the camera and turn into a flat clipped shape.
+    if (along > E * 0.35) return false
+    // Keep a narrow sightline around the specimen, but leave the nearer reef
+    // visible in the stepped-back camera framing.
+    if (along > -E * 0.8 - wide && across < E * 1.2 + wide) return false
+    return Math.hypot(x, z) >= E * 1.25 + wide * 0.25
   }
   /** Somewhere on the seabed between `near` and `far`; tall things keep `wide` clear of the line of sight. */
   const spot = (near: number, far: number, tall: boolean, wide = 0) => {
@@ -411,6 +416,8 @@ export function buildSeafloor(
       4 * weight('deep') * (setting.scene === 'seabed' ? 1 : 0),
   )
   if (corals) {
+    const compactScene = E <= 400
+    const maxColony = compactScene ? 360 : 1200
     // Bommies: a few low rocky mounds the corals grow on, so the reef reads as patches.
     const mounds: Vector3[] = []
     const moundCount = Math.max(2, Math.round(corals / 7))
@@ -431,8 +438,9 @@ export function buildSeafloor(
       )
     }
     for (let i = 0; i < corals; i++) {
-      // Real sizes: coral heads from about 30 cm to over a metre across.
-      const scale = between(300, 1200)
+      // Real sizes: colonies start around 30 cm. In a tiny animal's context
+      // frame, cap the largest colony so the camera cannot land inside it.
+      const scale = between(220, Math.min(maxColony, Math.max(300, E * 1.5)))
       let at: Vector3 | null = null
       const mound = mounds.length ? pick(mounds) : null
       if (mound && random() > 0.25) {
@@ -441,7 +449,11 @@ export function buildSeafloor(
           const r = between(150, 1100)
           const x = mound.x + Math.cos(a) * r
           const z = mound.z + Math.sin(a) * r
-          if (allowed(x, z, true, scale * 0.5))
+          const along = x * TOWARD_VIEWER.x + z * TOWARD_VIEWER.y
+          if (
+            allowed(x, z, true, scale * 0.5) &&
+            (!compactScene || along < -E * 1.2)
+          )
             at = new Vector3(
               x,
               groundHeight(x, z) + (r < 600 ? 160 * (1 - r / 600) : 0),
@@ -449,8 +461,19 @@ export function buildSeafloor(
             )
         }
       }
-      at ??= spot(E * 1.15, E * 7, true, scale * 0.6)
+      at ??= spot(E * 1.5, E * 7, true, scale * 0.6)
       if (at) coral(at, scale)
+    }
+    // Keep a pair of low heads inside the stepped-back context frame. The
+    // larger reef scatter is intentionally farther out, but these anchors
+    // prevent a shallow reef from reading as an empty sand flat.
+    for (const side of [-1, 1]) {
+      const x = side * E * 0.78
+      const z = -E * 0.85
+      coral(
+        new Vector3(x, groundHeight(x, z), z),
+        Math.min(360, Math.max(220, E * 0.3)),
+      )
     }
   }
 
