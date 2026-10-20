@@ -93,6 +93,7 @@ import {
 } from './seabed.ts'
 import type { Bed, Setting } from './seabed.ts'
 import { drawThumbs } from './thumbs.ts'
+import { localForm } from './forms.ts'
 import { formatDepth } from './depth.ts'
 import { reefLabels } from './places.ts'
 import type { Thumbs } from './thumbs.ts'
@@ -103,7 +104,13 @@ import { allSpecies, getSpecies, speciesData } from './species.ts'
 import type { Species } from './species.ts'
 import type { Measure, Pulse, StageEvent } from './Stage.tsx'
 import { looks } from './looks.ts'
-import { originsFor, ranges, regionFor } from './ranges.ts'
+import {
+  originsFor,
+  placesWithShells,
+  ranges,
+  regionFor,
+  shellsAt,
+} from './ranges.ts'
 import { WhereFound } from './WhereFound.tsx'
 
 const Stage = lazy(() => import('./Stage.tsx'))
@@ -618,25 +625,118 @@ const nightNote: Record<string, { text: string; claim: string }> = {
   },
 }
 
+const speciesIds = allSpecies.map((item) => item.id)
+/** Every place where any of the shells has been recorded. */
+const everyPlace = placesWithShells(speciesIds)
+
 const groupLabel: Record<string, string> = {
   gastropod: 'Sea snail',
   cephalopod: 'Cephalopod',
 }
 
-/** The floating shell menu: each species as its empty shell and its living animal. */
+type Here = ReturnType<typeof shellsAt>[number]
+
+const levelWords: Record<string, string> = {
+  often: 'often recorded',
+  recorded: 'recorded',
+  isolated: 'isolated records',
+}
+
+/** One shell in the menu: a studio picture of the shell, its underside and the living animal. */
+function ShellCard({
+  item,
+  thumbs,
+  chosen,
+  here,
+  bestAt,
+  onChoose,
+}: {
+  item: Species
+  thumbs?: Thumbs
+  chosen: boolean
+  here: Here | null
+  bestAt: string
+  onChoose: () => void
+}) {
+  return (
+    <Button
+      variant="outline"
+      aria-pressed={chosen}
+      onClick={onChoose}
+      style={swatch(item)}
+      className={cn(
+        'h-auto w-full flex-col items-stretch gap-1 overflow-hidden rounded-xl p-0 text-left whitespace-normal',
+        chosen && 'border-brand ring-1 ring-brand',
+        !here && 'opacity-80',
+      )}
+    >
+      <span
+        className="shell-studio relative grid h-36 place-items-center"
+        aria-hidden="true"
+      >
+        {thumbs ? (
+          <>
+            <img
+              src={thumbs.shell}
+              alt=""
+              className="h-full w-full object-contain py-2 pr-14 pl-2"
+            />
+            <span className="absolute top-1.5 right-1.5 bottom-1.5 flex flex-col justify-center gap-1.5">
+              <img src={thumbs.underside} alt="" className="shell-inset" />
+              <img src={thumbs.animal} alt="" className="shell-inset" />
+            </span>
+          </>
+        ) : (
+          <span className="swatch size-14" />
+        )}
+      </span>
+      <span className="grid gap-0.5 px-3 pt-1 pb-3">
+        <strong className="text-sm font-semibold">{item.commonName}</strong>
+        <i className="text-xs font-normal text-muted-foreground">
+          {item.scientificName}
+        </i>
+        <span className="mt-1 font-mono text-[11px] font-normal text-muted-foreground">
+          {here
+            ? `${here.count.n} record${here.count.n === 1 ? '' : 's'} here · ${levelWords[here.level] ?? ''}${here.outside ? ' · outside its documented range' : ''}`
+            : `Not recorded here · best at ${bestAt}`}
+        </span>
+        <span className="font-mono text-[11px] font-normal text-muted-foreground">
+          {groupLabel[item.group] ?? item.group} · about {item.lengthMm.drawn}{' '}
+          mm
+        </span>
+      </span>
+    </Button>
+  )
+}
+
+/** The floating shell menu: the shells found at this place first, then the rest. */
 function ShellMenu({
   species,
+  placeName: place,
+  here,
   thumbs,
   onChoose,
   onOpen,
 }: {
   species: Species
+  placeName: string
+  here: Here[]
   thumbs: Record<string, Thumbs>
   onChoose: (id: string) => void
   onOpen: () => void
 }) {
   const [open, setOpen] = useState(false)
   const current = thumbs[species.id]
+  const local = here.map((item) => item.speciesId)
+  const elsewhere = allSpecies.filter((item) => !local.includes(item.id))
+  const pick = (id: string) => {
+    onChoose(id)
+    setOpen(false)
+  }
+  const regionOf = (id: string) => {
+    const best = originsFor(id)[0]
+    return best?.region.name ?? ''
+  }
   return (
     <Popover
       open={open}
@@ -662,6 +762,12 @@ function ShellMenu({
             <span className="swatch size-8" aria-hidden="true" />
           )}
           <span aria-hidden="true">Shells</span>
+          <span
+            className="rounded-full bg-muted px-1.5 font-mono text-[10px] font-normal"
+            aria-hidden="true"
+          >
+            {local.length}
+          </span>
           <ChevronDown aria-hidden="true" />
         </Button>
       </PopoverTrigger>
@@ -670,68 +776,61 @@ function ShellMenu({
         sideOffset={8}
         aria-label="Choose a shell"
         id="shell-tray"
-        className="w-[min(640px,calc(100vw-2rem))] gap-3 rounded-2xl p-3"
+        className="w-[min(680px,calc(100vw-2rem))] gap-3 rounded-2xl bg-[var(--cp-surface)] p-3 shadow-xl"
       >
-        <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
-          Choose a shell · shell and animal
-        </p>
-        <ScrollArea className="max-h-[min(62dvh,560px)]">
-          <ul className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2">
-            {allSpecies.map((item) => {
-              const pictures = thumbs[item.id]
-              const chosen = item.id === species.id
+        <div className="grid gap-0.5">
+          <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+            Found at {place}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {local.length} of these {allSpecies.length} shells have been
+            recorded here (GBIF specimens and observations). Pick another place
+            to see what turns up there.
+          </p>
+        </div>
+        <div className="-mr-1 max-h-[min(64dvh,600px)] overflow-y-auto overscroll-contain pr-1">
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(196px,1fr))] gap-2">
+            {here.map((item) => {
+              const shown = localForm(
+                getSpecies(item.speciesId),
+                item.region.id,
+              ).species
               return (
-                <li key={item.id}>
-                  <Button
-                    variant="outline"
-                    aria-pressed={chosen}
-                    onClick={() => {
-                      onChoose(item.id)
-                      setOpen(false)
-                    }}
-                    style={swatch(item)}
-                    className={cn(
-                      'h-auto w-full flex-col items-stretch gap-0.5 rounded-xl p-2 text-left whitespace-normal',
-                      chosen && 'border-brand ring-1 ring-brand',
-                    )}
-                  >
-                    <span
-                      className="tray-pictures mb-1.5 grid h-20 grid-cols-2 gap-0.5 rounded-lg bg-[color-mix(in_srgb,var(--cp-link)_10%,var(--cp-bg-elevated))]"
-                      aria-hidden="true"
-                    >
-                      {pictures ? (
-                        <>
-                          <img
-                            src={pictures.shell}
-                            alt=""
-                            className="size-full object-contain"
-                          />
-                          <img
-                            src={pictures.animal}
-                            alt=""
-                            className="size-full object-contain"
-                          />
-                        </>
-                      ) : (
-                        <span className="swatch col-span-2 m-auto" />
-                      )}
-                    </span>
-                    <strong className="text-sm font-semibold">
-                      {item.commonName}
-                    </strong>
-                    <i className="text-xs font-normal text-muted-foreground">
-                      {item.scientificName}
-                    </i>
-                    <span className="font-mono text-[11px] font-normal text-muted-foreground">
-                      {groupLabel[item.group] ?? item.group} · drawn at{' '}
-                      {item.lengthMm.drawn} mm
-                    </span>
-                  </Button>
+                <li key={item.speciesId}>
+                  <ShellCard
+                    item={shown}
+                    thumbs={thumbs[item.speciesId]}
+                    chosen={item.speciesId === species.id}
+                    here={item}
+                    bestAt=""
+                    onChoose={() => pick(item.speciesId)}
+                  />
                 </li>
               )
             })}
           </ul>
-        </ScrollArea>
+          {elsewhere.length > 0 && (
+            <>
+              <p className="mt-4 mb-2 font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+                Not recorded at {place}
+              </p>
+              <ul className="grid grid-cols-[repeat(auto-fill,minmax(196px,1fr))] gap-2">
+                {elsewhere.map((item) => (
+                  <li key={item.id}>
+                    <ShellCard
+                      item={item}
+                      thumbs={thumbs[item.id]}
+                      chosen={item.id === species.id}
+                      here={null}
+                      bestAt={regionOf(item.id)}
+                      onChoose={() => pick(item.id)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
         <Separator />
         <div className="text-xs text-muted-foreground">
           <Fact claim="mollusca-diversity">
@@ -751,15 +850,28 @@ export function Simulator() {
       ? requested!
       : allSpecies[0]!.id
   })
-  const species = getSpecies(speciesId)
-  const [originId, setOriginId] = useState(() => firstOrigin(species))
-  const origins = originsFor(species.id)
+  const baseSpecies = getSpecies(speciesId)
+  const [originId, setOriginId] = useState(() => {
+    const requested = new URLSearchParams(location.search).get('place')
+    return requested &&
+      originsFor(baseSpecies.id).some((place) => place.region.id === requested)
+      ? requested
+      : firstOrigin(baseSpecies)
+  })
+  const origins = originsFor(baseSpecies.id)
   const origin = {
     id: origins.some((place) => place.region.id === originId)
       ? originId
-      : firstOrigin(species),
-    name: placeName(species, originId),
+      : firstOrigin(baseSpecies),
+    name: placeName(baseSpecies, originId),
   }
+  // The species as found here: its local form where the sources describe one.
+  const form = useMemo(
+    () => localForm(baseSpecies, origin.id),
+    [baseSpecies, origin.id],
+  )
+  const species = form.species
+  const shellsHere = useMemo(() => shellsAt(origin.id, speciesIds), [origin.id])
   const habitat =
     species.origins.find((item) => item.id === origin.id) ?? species.origins[0]!
   const [bedChoice, setBedChoice] = useState<Bed | null>(null)
@@ -994,15 +1106,39 @@ export function Simulator() {
     }
   }
 
-  function chooseSpecies(id: string) {
+  /** Picks a shell. It stays at this place if it was recorded here; otherwise it moves to its best place. */
+  function chooseSpecies(id: string, placeId = origin.id) {
     const next = getSpecies(id)
+    const stays = originsFor(id).some((place) => place.region.id === placeId)
+    const place = stays ? placeId : firstOrigin(next)
+    const shown = localForm(next, place).species
     setDepthChoice(null)
     setSpeciesId(id)
-    setOriginId(firstOrigin(next))
+    setOriginId(place)
     setDeathId(next.deaths[0]?.id ?? '')
-    setAnnouncement(`${next.commonName}, ${next.scientificName}.`)
+    setAnnouncement(
+      `${shown.commonName}, ${shown.scientificName}${stays ? '' : `, at ${placeName(next, place)}`}.`,
+    )
+    remember(id, place)
+  }
+
+  /** Picks a place. If this shell was never recorded there, the best-recorded shell there takes over. */
+  function choosePlace(placeId: string) {
+    setDepthChoice(null)
+    if (originsFor(speciesId).some((place) => place.region.id === placeId)) {
+      setOriginId(placeId)
+      setAnnouncement(`Place: ${placeName(baseSpecies, placeId)}.`)
+      remember(speciesId, placeId)
+      return
+    }
+    const best = shellsAt(placeId, speciesIds)[0]
+    if (best) chooseSpecies(best.speciesId, placeId)
+  }
+
+  function remember(id: string, placeId: string) {
     const url = new URL(location.href)
     url.searchParams.set('species', id)
+    url.searchParams.set('place', placeId)
     history.replaceState(null, '', url)
   }
 
@@ -1176,29 +1312,25 @@ export function Simulator() {
                 <div className="flex flex-wrap items-center gap-2">
                   <ShellMenu
                     species={species}
+                    placeName={origin.name}
+                    here={shellsHere}
                     thumbs={thumbs}
-                    onChoose={chooseSpecies}
+                    onChoose={(id) => chooseSpecies(id)}
                     onOpen={() => setMenuOpened(true)}
                   />
-                  <Select
-                    value={origin.id}
-                    onValueChange={(id) => {
-                      setOriginId(id)
-                      setDepthChoice(null)
-                    }}
-                  >
+                  <Select value={origin.id} onValueChange={choosePlace}>
                     <SelectTrigger
                       id="origin"
                       aria-label="Place"
                       data-value={origin.id}
-                      className="h-10 max-w-[15rem] rounded-full bg-background pl-3"
+                      className="h-10 max-w-[16rem] rounded-full bg-background pl-3"
                     >
                       <MapPin className="text-muted-foreground" />
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent position="popper" className="max-h-[60dvh]">
                       {Object.entries(ranges.oceans).map(([ocean, label]) => {
-                        const here = origins.filter(
+                        const here = everyPlace.filter(
                           (place) => place.region.ocean === ocean,
                         )
                         return here.length ? (
@@ -1211,9 +1343,8 @@ export function Simulator() {
                               >
                                 {place.region.name}
                                 <span className="text-muted-foreground">
-                                  {place.count.n} record
-                                  {place.count.n === 1 ? '' : 's'}
-                                  {place.outside ? ' · outside range' : ''}
+                                  {place.shells.length} shell
+                                  {place.shells.length === 1 ? '' : 's'}
                                 </span>
                               </SelectItem>
                             ))}
@@ -1677,10 +1808,7 @@ export function Simulator() {
         <WhereFound
           species={species}
           originId={origin.id}
-          onOrigin={(id) => {
-            setOriginId(id)
-            setAnnouncement(`Origin: ${placeName(species, id)}.`)
-          }}
+          onOrigin={choosePlace}
           fact={(claim, children) => <Fact claim={claim}>{children}</Fact>}
         />
       </div>

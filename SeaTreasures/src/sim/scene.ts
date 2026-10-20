@@ -425,7 +425,9 @@ const framing = new Map<
 >()
 /** The adult shell in its life pose, measured once per species. */
 function adultBox(species: Species) {
-  const cached = framing.get(species.id)
+  // Keyed by size too: a local form can be drawn at another length.
+  const frameKey = `${species.id}:${species.lengthMm.drawn}`
+  const cached = framing.get(frameKey)
   if (cached) return cached
   const own = track()
   const plain = own.material(new MeshStandardMaterial())
@@ -441,7 +443,7 @@ function adultBox(species: Species) {
     length: Math.max(size.x, size.y, size.z),
     depth: size.z,
   }
-  framing.set(species.id, result)
+  framing.set(frameKey, result)
   return result
 }
 

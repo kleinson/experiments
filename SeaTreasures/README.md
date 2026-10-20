@@ -84,6 +84,21 @@ located records [GBIF](https://www.gbif.org/) holds there: museum specimens and
 observations, leaving out fossils and automated tag detections. Picking a place
 sets the shell's origin.
 
+**The place picks the shells.** The place menu lists every sea and island with
+any recorded shell, with how many of the five are found there. Switching place
+keeps the current shell if it has been recorded there, and otherwise switches
+to the best-recorded shell at the new place (Mauritius → the Bahamas turns a
+money cowrie into a queen conch). Picking a shell that was never recorded at
+the current place moves to where it is best recorded. The shell menu is split
+into “Found at …” with record counts, and “Not recorded at …” with where each
+is best found. Both choices are kept in the address (`?species=…&place=…`).
+
+**Local forms.** Where a sourced local form exists it replaces the species at
+that place: at Hawaii the tiger cowrie becomes the Hawaiian tiger cowrie,
+_Cypraea tigris schilderiana_ C. N. Cate, 1961, drawn larger (100 mm, up to
+153 mm) as its sources record (`src/sim/forms.ts`). Its pattern is not changed,
+because no source here tells the forms apart by pattern.
+
 - **Records are not abundance.** They show where people have looked, collected
   and photographed. A place with none may simply be unsurveyed.
 - **Outliers are flagged.** Where a species' native range is sourced, records
@@ -147,7 +162,10 @@ is focused into moving caustics on everything facing up, red light fades
 first, and the far seabed dissolves into the water colour; a small school of
 generic reef fish and suspended particles drift past. The scenery is an
 illustration, not a survey of what lives at that place, and says so. The
-shell menu shows every species as its empty shell and its living animal.
+shell menu shows every species as a studio picture (`src/sim/thumbs.ts`): the
+realistic materials photographed on a warm table under soft daylight with a
+reflected studio room and a contact shadow, plus small views of its underside
+and of the living animal.
 
 **Every place looks like itself.** Each of the 46 recorded places has a
 sourced profile (`src/sim/places.ts`, claims in `data/research/places.json`):
@@ -324,6 +342,8 @@ offline use.
 | `src/sim/species.ts`     | Typed, validated species data                                 |
 | `src/sim/ranges.ts`      | GBIF records per sea and island, levels and outliers          |
 | `src/sim/WhereFound.tsx` | World map and place list; picking a place sets the origin     |
+| `src/sim/forms.ts`       | Sourced local forms, such as the Hawaiian tiger cowrie        |
+| `src/sim/thumbs.ts`      | Studio pictures of each shell, its underside and its animal   |
 | `src/sim/bodies.ts`      | Soft bodies: skins, head-foot, tapered limbs, papillae        |
 | `src/lab/`               | Shell lab: the six-parameter morphospace model and its viewer |
 | `src/anatomy/`           | Tiger cowrie field plates, surface painter and vendored kit   |

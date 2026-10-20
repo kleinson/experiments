@@ -14,12 +14,14 @@ import {
   DirectionalLight,
   HemisphereLight,
   Mesh,
+  MeshStandardMaterial,
   NoToneMapping,
   Object3D,
   OrthographicCamera,
   PCFShadowMap,
   Plane,
   PlaneGeometry,
+  PMREMGenerator,
   Quaternion,
   Raycaster,
   Scene,
@@ -31,6 +33,7 @@ import {
   WebGLRenderer,
 } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { InkPass, inkify, LIGHTS } from './ink.ts'
 import type { Look } from './ink.ts'
 import { labelsIn } from './labels.ts'
@@ -273,6 +276,9 @@ export default function Stage({
     container.prepend(renderer.domElement)
 
     const scene = new Scene()
+    // Soft reflections for the realistic shells (glossy cowries, pearly nautilus); none in the drawing.
+    const pmrem = new PMREMGenerator(renderer)
+    const studio = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
     const ambient = new AmbientLight(0xffffff, LIGHTS.drawn.ambient)
     const sky = new HemisphereLight(0xffffff, 0x8a7f74, 0)
     const key = new DirectionalLight(0xffffff, LIGHTS.drawn.key)
@@ -542,6 +548,15 @@ export default function Stage({
       built = buildScene(species, frame, { cut, xray })
       undoInk = inkify(built.group)
       submerge(built.group, true)
+      // Only the specimen reflects the soft studio light, so shells look glossy without lighting up the sea.
+      built.group.traverse((object) => {
+        if (!(object instanceof Mesh)) return
+        for (const material of [object.material].flat())
+          if (material instanceof MeshStandardMaterial) {
+            material.envMap = studio
+            material.envMapIntensity = 0.35
+          }
+      })
       scene.add(built.group)
       const extent = built.extent
       // The shadow falls on paper just under whatever is shown, so swimmers and larvae keep theirs close.
@@ -1341,6 +1356,8 @@ export default function Stage({
       undoInk?.()
       if (built) built.dispose()
       ink.dispose()
+      studio.dispose()
+      pmrem.dispose()
       paper.geometry.dispose()
       paper.material.dispose()
       inkProbe.remove()

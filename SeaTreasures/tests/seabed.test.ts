@@ -3,6 +3,8 @@ import assert from 'node:assert/strict'
 import manifest from '../data/claims.json' with { type: 'json' }
 import { beds, seabedFor } from '../src/sim/seabed.ts'
 import { placeLook, reefOf } from '../src/sim/places.ts'
+import { localForm } from '../src/sim/forms.ts'
+import { shellsAt } from '../src/sim/ranges.ts'
 import { depthFor } from '../src/sim/depth.ts'
 import { allSpecies, getSpecies } from '../src/sim/species.ts'
 import { ranges } from '../src/sim/ranges.ts'
@@ -98,4 +100,27 @@ test('every region has a sourced place profile and every species a sourced depth
     seabedFor(getSpecies('queen-conch'), 'bahamas', 'beach').depthM,
     0,
   )
+})
+
+test('each place has its own shells, and Hawaii its own tiger cowrie', () => {
+  const ids = allSpecies.map((species) => species.id)
+  const bahamas = shellsAt('bahamas', ids).map((item) => item.speciesId)
+  assert.equal(bahamas[0], 'queen-conch')
+  assert.ok(!bahamas.includes('money-cowrie'))
+  const hawaii = shellsAt('hawaiian-islands', ids).map((item) => item.speciesId)
+  assert.deepEqual([...hawaii].sort(), [
+    'money-cowrie',
+    'textile-cone',
+    'tiger-cowrie',
+  ])
+  // Records outside the documented range come last.
+  const last = shellsAt('bahamas', ids).at(-1)!
+  assert.equal(last.speciesId, 'tiger-cowrie')
+  assert.equal(last.outside, true)
+  const tiger = getSpecies('tiger-cowrie')
+  const local = localForm(tiger, 'hawaiian-islands')
+  assert.equal(local.species.scientificName, 'Cypraea tigris schilderiana')
+  assert.equal(local.species.lengthMm.max, 153)
+  assert.ok(manifest.claims.some((claim) => claim.id === local.claim))
+  assert.equal(localForm(tiger, 'red-sea').species, tiger)
 })
