@@ -1,3 +1,4 @@
+import photoColours from '../../data/place-colours.json' with { type: 'json' }
 import type { Rgb } from './patterns.ts'
 
 /**
@@ -50,6 +51,8 @@ export type PlaceLook = {
   /** Water colour in shallow, clear daylight, and how clear it is (1 = very clear). */
   water: Rgb
   clarity: number
+  /** The water's colour cast at about 8 m, per channel 0–1, measured from photos. */
+  cast?: [number, number, number]
   /** A school of fish: colour and how many. */
   fish: { colour: Rgb; count: number; stripe?: Rgb }
 }
@@ -397,9 +400,38 @@ const overrides: Record<string, Partial<Omit<PlaceLook, 'reef'>>> = {
   },
 }
 
+/**
+ * Water and sand matched to underwater photographs of each place (see
+ * scripts/place-photos.py): the water is the colour that, darkened by depth as
+ * the app does, looks like the photos' open water at about 8 m.
+ */
+type PhotoColours = Record<
+  string,
+  {
+    water: number[]
+    sand: number[]
+    cast: number[]
+    source: string
+    photos: unknown[]
+  }
+>
+export const matchedColours = photoColours as PhotoColours
+
 export function placeLook(regionId: string): PlaceLook {
   const reef = reefOf[regionId] ?? 'indo-pacific'
-  return { reef, ...profiles[reef], ...overrides[regionId] }
+  const matched = matchedColours[regionId]
+  return {
+    reef,
+    ...profiles[reef],
+    ...overrides[regionId],
+    ...(matched
+      ? {
+          water: matched.water as Rgb,
+          sand: matched.sand as Rgb,
+          cast: matched.cast as [number, number, number],
+        }
+      : {}),
+  }
 }
 
 export const reefLabels: Record<Reef, string> = {

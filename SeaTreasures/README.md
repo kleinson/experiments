@@ -84,6 +84,22 @@ located records [GBIF](https://www.gbif.org/) holds there: museum specimens and
 observations, leaving out fossils and automated tag detections. Picking a place
 sets the shell's origin.
 
+**Filters that narrow each other.** The shell, place and habitat pills float
+together at the top. Each narrows the others: a habitat lists only the places
+with shells that live in it and shows how many fit here; a habitat no shell
+lives in cannot be picked; the shell menu puts the shells that fit first and
+says why the others are left out. Picking a habitat the current shell does not
+live in switches to the best-recorded shell here that does, or to the best
+place for one; picking a shell that does not fit clears the habitat. A shell's
+habitats are read from its sourced habitat text (`src/sim/filters.ts`).
+
+**One life, one place.** The life stages run on into each other: eggs hatch one
+by one as the timeline plays to the end of the egg stage; late in the larval
+stage the larva swims less, tucks its velum in and sinks towards the bottom; a
+settled youngster sets off slowly; a dying animal slows to a halt where it is,
+and its empty shell stays there, turned the same way, until the waves take it
+to the beach.
+
 **The place picks the shells.** The place menu lists every sea and island with
 any recorded shell, with how many of the five are found there. Switching place
 keeps the current shell if it has been recorded there, and otherwise switches
@@ -176,6 +192,18 @@ and other volcanic islands, elkhorn coral, sea fans and turtle grass in the
 Caribbean, pink sand at Bermuda, rocky shores with brown algae in the Gulf of
 California, and Neptune grass in the Mediterranean.
 
+**Colours from real photographs.** Each place's water, the colour cast it puts
+on everything in it, and its sand are matched to underwater photographs taken
+there (`scripts/place-photos.py`). The script searches Wikimedia Commons for
+underwater photos of every sea and island, skips photos lit by a flash or taken
+out of the water (and a hand-checked list of boats, aquariums and satellite
+maps), and measures the open water, the whole frame and pale sand in the rest.
+It writes only colour statistics, with each place's photos, authors and
+licences, to `data/place-colours.json`; no photo is copied into the project.
+Water is converted to the clear, shallow colour the app darkens with depth, so
+at about 8 m a reef looks like the photographs, bluer and darker below. Places
+with few usable photos borrow from places with the same kind of reef.
+
 **Depth.** Each animal is drawn at a depth from its sources (`src/sim/depth.ts`):
 tiger cowries at 10–40 m, money cowries in tide pools, the textile cone in the
 shallows, queen conch under about 30 m, and the nautilus several hundred
@@ -211,6 +239,21 @@ in `data/research/movement.json`):
 - **Death and after:** the animal no longer moves; currents, waves and hermit
   crabs move the shell.
 
+**See-through sand.** When an animal lies buried (a textile cone by day, a
+young queen conch), a soft window opens in the sand over it, with damp
+sediment beneath, so the buried shell, foot and head can still be seen and
+followed. The window is placed along the line of sight, so it shows what lies
+under the sand from wherever you look, and it fades as the animal comes out.
+
+**The larva.** The velum is drawn as two thin, wing-like lobes on a short head
+rising from the shell's opening, each rimmed with a band of long cilia and a
+band of short cilia inside it; the cilia beat in waves around the rim
+(`src/sim/velum.ts`). Its label explains what the velum is, why the larva has it and
+how it works (claims `term-velum-why`, `term-velum-how`). The larva drifts on
+its own and holds still while you point at a label or read one; tap the water
+to steer it, or tap the larva (or "Tuck in the velum") to see it pull the velum
+into its shell.
+
 A travelling animal follows a loose figure of eight with the camera, light and
 shadow following, so the seabed slides past. The pace is sped up to be
 watchable. It stops while it hides in its shell, while it is taken apart or a
@@ -236,11 +279,14 @@ on a nautilus; foot, mantle, siphon, eye stalks, proboscis, operculum, hood,
 tentacles and funnel on the animals; egg capsules, the velum and the larval
 shell early in life; and drill holes or a hermit crab later. Parts inside the
 shell appear only when it is cut open or seen through. Tapping a label opens a card
-right beside it saying what the part is and what the animal uses it for (the
-operculum as a trapdoor and, for the conch, an anchor for leaping; the siphon
-for breathing and tasting the water; the siphuncle for emptying chambers),
-with its evidence (`src/sim/glossary.ts`, claims in
-`data/research/part-functions.json`). Part names come
+right beside it with a TL;DR: what the part is, why the animal has it and how
+it works, together in two or three sentences (the operculum as a trapdoor and,
+for the conch, a vaulting pole; the siphon for breathing and tasting the water;
+the siphuncle for emptying chambers to control buoyancy). Every sentence rests
+on the claims listed under its evidence, and where no source says why or how,
+the card does not guess (`src/sim/glossary.ts`, claims in
+`data/research/part-functions.json`); a test keeps each TL;DR to two or three
+sentences. Part names come
 from the Gastropod shell, Veliger, Nautilus and Septum articles, recorded as
 claims in `data/research/figure-terms.json`.
 
@@ -354,30 +400,33 @@ offline use.
 
 ## Map of the implementation
 
-| Location                 | Purpose                                                       |
-| ------------------------ | ------------------------------------------------------------- |
-| `src/sim/Simulator.tsx`  | The one-screen simulator: species, timeline, facts and shelf  |
-| `src/sim/Stage.tsx`      | The 3D stage: camera, true size, taps, motion and labels      |
-| `src/sim/ink.ts`         | Drawn and realistic looks, ink outlines and the blend         |
-| `src/sim/labels.ts`      | Named points on parts, and collecting them for the figure     |
-| `src/sim/glossary.ts`    | What each label means, and the claim it rests on              |
-| `src/sim/scene.ts`       | Builds each frame: shell, animal, eggs, larva, crab, labels   |
-| `src/sim/coil.ts`        | Raup coiling model and accretionary growth                    |
-| `src/sim/patterns.ts`    | Seeded pattern generators and weathering                      |
-| `src/sim/life.ts`        | The eight-part life timeline and its sourced clock            |
-| `src/sim/species.ts`     | Typed, validated species data                                 |
-| `src/sim/ranges.ts`      | GBIF records per sea and island, levels and outliers          |
-| `src/sim/WhereFound.tsx` | World map and place list; picking a place sets the origin     |
-| `src/sim/crawl.ts`       | How each animal moves at each stage, day and night, and where |
-| `src/sim/forms.ts`       | Sourced local forms, such as the Hawaiian tiger cowrie        |
-| `src/sim/thumbs.ts`      | Studio pictures of each shell, its underside and its animal   |
-| `src/sim/bodies.ts`      | Soft bodies: skins, head-foot, tapered limbs, papillae        |
-| `src/lab/`               | Shell lab: the six-parameter morphospace model and its viewer |
-| `src/anatomy/`           | Tiger cowrie field plates, surface painter and vendored kit   |
-| `data/`                  | Claims, research fragments, species and cowrie experience     |
-| `ios/`                   | Native SwiftUI project and portable Swift package             |
-| `tests/`, `e2e/`         | Unit and production-browser tests                             |
-| `scripts/`               | Species and GBIF range builds, native sync, icons, offline    |
+| Location                  | Purpose                                                       |
+| ------------------------- | ------------------------------------------------------------- |
+| `src/sim/Simulator.tsx`   | The one-screen simulator: species, timeline, facts and shelf  |
+| `src/sim/Stage.tsx`       | The 3D stage: camera, true size, taps, motion and labels      |
+| `src/sim/ink.ts`          | Drawn and realistic looks, ink outlines and the blend         |
+| `src/sim/labels.ts`       | Named points on parts, and collecting them for the figure     |
+| `src/sim/glossary.ts`     | Each label's TL;DR (what, why, how) and the claims behind it  |
+| `src/sim/scene.ts`        | Builds each frame: shell, animal, eggs, larva, crab, labels   |
+| `src/sim/coil.ts`         | Raup coiling model and accretionary growth                    |
+| `src/sim/patterns.ts`     | Seeded pattern generators and weathering                      |
+| `src/sim/life.ts`         | The eight-part life timeline and its sourced clock            |
+| `src/sim/species.ts`      | Typed, validated species data                                 |
+| `src/sim/ranges.ts`       | GBIF records per sea and island, levels and outliers          |
+| `src/sim/WhereFound.tsx`  | World map and place list; picking a place sets the origin     |
+| `src/sim/velum.ts`        | The veliger's velum: lobes, ciliated bands and beating cilia  |
+| `scripts/place-photos.py` | Matches place colours to underwater photos (Commons)          |
+| `src/sim/filters.ts`      | Which shells live in which habitats; the filters' choices     |
+| `src/sim/crawl.ts`        | How each animal moves at each stage, day and night, and where |
+| `src/sim/forms.ts`        | Sourced local forms, such as the Hawaiian tiger cowrie        |
+| `src/sim/thumbs.ts`       | Studio pictures of each shell, its underside and its animal   |
+| `src/sim/bodies.ts`       | Soft bodies: skins, head-foot, tapered limbs, papillae        |
+| `src/lab/`                | Shell lab: the six-parameter morphospace model and its viewer |
+| `src/anatomy/`            | Tiger cowrie field plates, surface painter and vendored kit   |
+| `data/`                   | Claims, research fragments, species and cowrie experience     |
+| `ios/`                    | Native SwiftUI project and portable Swift package             |
+| `tests/`, `e2e/`          | Unit and production-browser tests                             |
+| `scripts/`                | Species and GBIF range builds, native sync, icons, offline    |
 
 ## Next steps
 

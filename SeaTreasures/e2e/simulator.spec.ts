@@ -163,8 +163,10 @@ test('labels name the parts and each opens a sourced explanation', async ({
     await expect(parts.getByRole('button', { name })).toBeVisible()
   await parts.getByRole('button', { name: 'Operculum' }).click()
   const card = page.getByRole('region', { name: 'Operculum' })
-  await expect(card).toContainText('What it’s for')
-  await expect(card).toContainText('vault the shell forward')
+  // One short TL;DR: what it is, why and how, with its evidence.
+  await expect(card).toContainText('TL;DR')
+  await expect(card).toContainText('vaulting pole to throw the shell forward')
+  await expect(card).toContainText('Evidence · 3 claims')
   // The card opens right beside the label that was tapped.
   const tag = (await parts
     .getByRole('button', { name: 'Operculum' })
@@ -182,6 +184,7 @@ test('labels name the parts and each opens a sourced explanation', async ({
     'href',
     /^https:/,
   )
+  await page.getByRole('button', { name: 'Close Operculum' }).click()
   await expect(parts.getByRole('button', { name: 'Columella' })).toBeHidden()
   await page.getByRole('button', { name: 'Cut open' }).click()
   await expect(parts.getByRole('button', { name: 'Columella' })).toBeVisible()
@@ -228,10 +231,10 @@ test('the ocean floor changes with the species, the place and the reader', async
   await choose(page, '#origin', 'hawaiian-islands')
   await expect(page.locator('.setting-note')).toContainText('volcanic rock')
   before = await canvas.screenshot()
-  await choose(page, '#seabed', 'kelp')
-  await expect(ocean).toHaveAttribute('data-bed', 'kelp')
-  await expect(page.locator('.setting-note')).toContainText(
-    'not where this species lives',
+  await choose(page, '#seabed', 'rubble')
+  await expect(ocean).toHaveAttribute('data-bed', 'rubble')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Hawaiian tiger cowrie',
   )
   await expect
     .poll(async () => (await canvas.screenshot()).equals(before))
@@ -240,6 +243,55 @@ test('the ocean floor changes with the species, the place and the reader', async
   await expect(ocean).toHaveAttribute('data-scene', 'beach')
   await phase(page, 'Larva')
   await expect(ocean).toHaveAttribute('data-scene', 'open-water')
+})
+
+test('the shell, place and habitat pills filter one another', async ({
+  page,
+}) => {
+  await page.goto('./?species=tiger-cowrie&place=philippines')
+  const filters = page.getByRole('group', { name: 'Filters' })
+  await expect(filters.getByRole('button', { name: 'Shells' })).toContainText(
+    'Tiger cowrie',
+  )
+  // No shell here lives among kelp, so that habitat cannot be picked.
+  await page.locator('#seabed').click()
+  await expect(
+    page.locator('[role=option][data-value="kelp"]'),
+  ).toHaveAttribute('aria-disabled', 'true')
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('listbox')).toHaveCount(0)
+  // Seagrass: the tiger cowrie does not live there, so the seagrass shell takes over, where it is found.
+  await choose(page, '#seabed', 'seagrass')
+  const ocean = page.getByRole('region', { name: 'Ocean floor' })
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Queen conch',
+  )
+  await expect(ocean).toHaveAttribute('data-bed', 'seagrass')
+  await expect(page).not.toHaveURL(/place=philippines/)
+  // Places narrow to those with seagrass shells.
+  await page.locator('#origin').click()
+  await expect(page.getByRole('listbox')).toContainText(
+    'Places with seagrass meadow shells',
+  )
+  await expect(page.locator('[role=option][data-value="red-sea"]')).toHaveCount(
+    0,
+  )
+  await expect(page.locator('[role=option][data-value="bahamas"]')).toHaveCount(
+    1,
+  )
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('listbox')).toHaveCount(0)
+  // The shell menu sorts by the filter, and says why the rest are left out.
+  await page.getByRole('button', { name: 'Shells', exact: true }).click()
+  const tray = page.locator('#shell-tray')
+  await expect(tray).toContainText('in seagrass meadow')
+  await expect(tray).toContainText('Not a seagrass meadow shell')
+  // Picking a shell that does not live there clears the habitat filter.
+  await tray.getByRole('button', { name: /Chambered nautilus/ }).click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Chambered nautilus',
+  )
+  await expect(page.locator('#seabed')).toHaveAttribute('data-value', 'habitat')
 })
 
 test('switching place switches the shells to those found there', async ({
@@ -611,6 +663,8 @@ test.describe('with motion', () => {
   test('each animal moves as its sources say, by day and at night', async ({
     page,
   }) => {
+    // Opening the shell menu draws its studio pictures, slow in a software-rendered browser.
+    test.setTimeout(150_000)
     await page.goto('./?species=textile-cone')
     const canvas = page.locator('[data-sim-canvas]')
     const moves = page.getByRole('region', { name: 'How it moves' })
@@ -619,13 +673,51 @@ test.describe('with motion', () => {
       timeout: 25_000,
     })
     await expect(moves).toContainText('Buried by day')
+    // The sand over it turns see-through, so it can still be seen and followed.
+    await expect(canvas).toHaveAttribute('data-sand', 'open')
     await moves.getByRole('button', { name: 'Watch it at night' }).click()
     await expect(canvas).toHaveAttribute('data-crawl', 'moving')
+    await expect(canvas).not.toHaveAttribute('data-sand')
     await expect(moves).toContainText('Crawling at night')
     await expect(moves).toContainText('waves of muscle')
-    // The conch vaults rather than crawls, day or night.
+    // The conch lunges rather than crawls, day or night.
     await chooseShell(page, 'Queen conch')
-    await expect(moves).toContainText('it vaults')
+    await expect(moves).toContainText('short lunges')
     await expect(canvas).toHaveAttribute('data-crawl', 'moving')
+  })
+})
+
+test.describe('a swimming larva', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  test('does not chase the pointer, explains its velum and tucks it in', async ({
+    page,
+  }) => {
+    await page.goto('./?species=textile-cone')
+    await phase(page, 'Larva')
+    const parts = page.getByRole('list', { name: 'Labelled parts' })
+    const velum = parts.getByRole('button', { name: 'Velum' })
+    await expect(velum).toBeVisible()
+    await expect(
+      parts.getByRole('button', { name: 'Ciliated band' }),
+    ).toBeVisible()
+    // Moving the pointer over the water no longer drags the larva (and its labels) away.
+    const before = (await velum.boundingBox())!
+    await page.mouse.move(80, 600)
+    await page.mouse.move(1100, 200)
+    await page.waitForTimeout(300)
+    const after = (await velum.boundingBox())!
+    expect(Math.hypot(after.x - before.x, after.y - before.y)).toBeLessThan(60)
+    // Pointing at a label holds the larva still, so it can be tapped.
+    await page.mouse.move(after.x + after.width / 2, after.y + after.height / 2)
+    await velum.click()
+    const card = page.getByRole('region', { name: 'Velum' })
+    await expect(card).toContainText('wing-like lobes')
+    await expect(card).toContainText('swim and feed while it drifts')
+    await expect(card).toContainText('passed along a groove to the mouth')
+    await page.getByRole('button', { name: 'Close Velum' }).click()
+    // It pulls the velum into its shell (also by tapping the larva itself).
+    await page.getByRole('button', { name: 'Tuck in the velum' }).click()
+    await expect(announced(page)).toContainText('velum into its shell')
   })
 })

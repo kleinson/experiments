@@ -4,7 +4,7 @@ import type { Species } from './species.ts'
 /**
  * How the animal moves at each stage of its life, from its sources:
  * - `crawl`: a snail creeping on waves of muscle along its foot.
- * - `vault`: the queen conch, which hops rather than crawls.
+ * - `vault`: the queen conch, which moves in lunges (hops) rather than crawls.
  * - `swim`: a nautilus jetting backwards, shell first.
  * - `hover`: a nautilus resting in the water by day.
  * - `hidden`: resting out of sight by day, as a tiger cowrie does.
@@ -61,8 +61,8 @@ export function activity(
     if (species.group === 'cephalopod') return still()
     return still([
       {
-        text: 'It swims by beating the cilia on its velum, and pulls the velum in to sink.',
-        claim: 'term-veliger-velum',
+        text: 'It swims by beating the cilia on its velum, and can pull the velum into its shell for protection.',
+        claim: 'term-velum-why',
       },
       ...(cowrie
         ? [
@@ -111,7 +111,7 @@ export function activity(
         ])
       return doing('vault', [
         {
-          text: 'It does not crawl: it vaults. The pointed operculum digs into the sand and the foot throws the shell up and forward, leaving no continuous trail.',
+          text: 'It moves in short lunges rather than a smooth crawl: the pointed operculum digs into the sand and the foot throws the shell forward, leaving no continuous trail. In life each lunge is a quick hop; here it is slowed right down.',
           claim: 'move-conch-hops',
         },
       ])
@@ -181,8 +181,8 @@ export const travels = (mode: Mode) =>
  * faster than life (snails cover millimetres a minute) so it can be seen.
  */
 const SPEED = { crawl: 0.03, vault: 0.04, swim: 0.035 }
-/** A conch's vault, then a long rest, in seconds. */
-const VAULT = { beat: 4, push: 0.9 }
+/** A conch's lunge, then a long rest, in seconds. Slowed right down: in life each is a quick hop. */
+const VAULT = { beat: 4.5, push: 1.6 }
 
 /** How far along its route the animal has come after `seconds` of moving, in body lengths. */
 export function travelled(mode: Mode, seconds: number) {
@@ -194,12 +194,8 @@ export function travelled(mode: Mode, seconds: number) {
   return (beats + into * into * (3 - 2 * into)) * perBeat
 }
 
-/** How high a vault lifts the shell off the sand at `seconds`, in body lengths: barely. */
-export function lift(mode: Mode, seconds: number) {
-  if (mode !== 'vault') return 0
-  const into = (seconds % VAULT.beat) / VAULT.push
-  return into < 1 ? Math.sin(into * Math.PI) * 0.03 : 0
-}
+/** The shell stays on the sand: no animal here is shown leaving the bottom. */
+export const lift = (_mode: Mode, _seconds: number) => 0
 
 /** How much of its height is under the sand. */
 export const sunk = (mode: Mode) => (mode === 'buried' ? 0.45 : 0)

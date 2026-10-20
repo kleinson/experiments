@@ -7,7 +7,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: 2,
   // The ocean fills the window and headless browsers draw it in software: give each test room.
-  timeout: 75_000,
+  timeout: 120_000,
   expect: { timeout: 10_000 },
   reporter: 'list',
   use: {

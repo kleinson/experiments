@@ -11,3 +11,4 @@ playwright-report/
 DerivedData/
 xcuserdata/
 *.xcuserstate
+.cache/

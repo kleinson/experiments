@@ -124,3 +124,24 @@ test('each place has its own shells, and Hawaii its own tiger cowrie', () => {
   assert.ok(manifest.claims.some((claim) => claim.id === local.claim))
   assert.equal(localForm(tiger, 'red-sea').species, tiger)
 })
+
+test('every place with shells has water and sand matched to underwater photos', async () => {
+  const { matchedColours } = await import('../src/sim/places.ts')
+  const { placesWithShells } = await import('../src/sim/ranges.ts')
+  for (const { region } of placesWithShells(allSpecies.map((s) => s.id))) {
+    const matched = matchedColours[region.id]
+    assert.ok(matched, `${region.id} has no photo-matched colours`)
+    for (const c of [...matched.water, ...matched.sand])
+      assert.ok(Number.isInteger(c) && c >= 0 && c <= 255)
+    // Water is blue-green, never warmer than it is blue.
+    assert.ok(matched.water[2] > matched.water[0], region.id)
+    // The cast keeps blue or green strongest, and red absorbed most.
+    assert.ok(Math.max(...matched.cast) === 1, region.id)
+    assert.ok(matched.cast[0] <= Math.max(matched.cast[1]!, matched.cast[2]!))
+    // Every photo can be traced to its page, author and licence.
+    for (const photo of matched.photos as { page: string; license: string }[]) {
+      assert.match(photo.page, /^https:\/\/commons\.wikimedia\.org\//)
+      assert.ok(photo.license)
+    }
+  }
+})

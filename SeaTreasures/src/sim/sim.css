@@ -1030,11 +1030,49 @@ html[data-theme='dark'] .sim-view::after {
   z-index: 5;
 }
 
-/* Title, shell menu, place and seabed: top left, with the view toolbar under it. */
+/* The filters: shell, place and habitat, three separate floating pills, front and centre. */
+.filter-bar {
+  z-index: 9;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 32px);
+  pointer-events: none;
+}
+.filter-bar > * {
+  pointer-events: auto;
+}
+.filter-bar .filter-pill {
+  flex: none;
+  height: 44px;
+  border-color: transparent;
+  background: var(--cp-panel-strong);
+  box-shadow: var(--float-shadow);
+  backdrop-filter: blur(12px);
+}
+.filter-bar .filter-pill:hover {
+  background: var(--cp-surface);
+}
+.filter-bar > button:not(.filter-pill) {
+  background: var(--cp-panel-strong);
+  box-shadow: var(--float-shadow);
+}
+/* When the window is too narrow to centre it between the panels, it leads the left column. */
+@media (max-width: 1360px) {
+  .filter-bar {
+    left: 16px;
+    transform: none;
+  }
+}
+
+/* Title and setting: top left, under the filters, with the view toolbar under it. */
 .float-left {
   position: absolute;
   z-index: 7;
-  top: 16px;
+  top: 76px;
   left: 16px;
   width: min(430px, calc(100% - 32px));
   display: flex;
@@ -1282,12 +1320,24 @@ html[data-theme='dark'] .sim-view::after {
     letter-spacing: 0.06em;
   }
   .float-left {
-    top: 10px;
+    top: 66px;
     left: 10px;
     width: calc(100% - 20px);
   }
+  .filter-bar {
+    top: 6px;
+    left: 0;
+    right: 0;
+    max-width: none;
+    padding: 4px 10px 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .float-left > .float-title {
+    width: 100%;
+  }
   .title-row {
-    padding-right: 96px;
+    padding-right: 172px;
   }
   /* On a phone the setting note is read below, in the life panel's place list. */
   .ocean .setting-note,
@@ -1298,7 +1348,7 @@ html[data-theme='dark'] .sim-view::after {
     display: none;
   }
   .float-actions {
-    top: 14px;
+    top: 70px;
     right: 14px;
   }
   .float-bottom {

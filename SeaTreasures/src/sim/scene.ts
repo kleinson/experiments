@@ -33,6 +33,8 @@ import {
 } from './coil.ts'
 import { cap, footGeometry, limb, papillae, skinMaterials } from './bodies.ts'
 import { marker, markMesh } from './labels.ts'
+import { buildVelum } from './velum.ts'
+import type { Velum } from './velum.ts'
 import type { LifeFrame } from './life.ts'
 import { looks } from './looks.ts'
 import { coilGeometry, lipGeometry, septumGeometry, toThree } from './meshes.ts'
@@ -77,6 +79,8 @@ export type Built = {
   bob: number
   /** Height of the sea floor or sand. */
   floor: number
+  /** A swimming larva's velum: shrinks into the shell when it withdraws, and its cilia beat. */
+  velum: Velum | null
   dispose: () => void
 }
 
@@ -992,6 +996,7 @@ export function buildScene(
   const eggs: Mesh[] = []
   let close: Built['close'] = null
   let bob = 0
+  let larva: Velum | null = null
   const floor = 0
 
   if (frame.size > 0) {
@@ -1328,55 +1333,46 @@ export function buildScene(
 
     if (frame.larva > 0 && !swims) {
       // A larva is too small for the adult's part names: name the whole first shell instead.
+      specimen.updateMatrixWorld(true)
       const named: Object3D[] = []
+      let mouth: Vector3 | null = null
       specimen.traverse((part) => {
-        if (part.userData.label) named.push(part)
+        if (!part.userData.label) return
+        named.push(part)
+        if (!mouth && /aperture/i.test(String(part.userData.label)))
+          mouth = part.getWorldPosition(new Vector3())
       })
       named.forEach((part) => part.removeFromParent())
-      specimen.add(marker('Larval shell', seated.getCenter(new Vector3())))
-      const velum = own.material(
-        new MeshPhysicalMaterial({
-          color: rgb([232, 216, 196]),
-          roughness: 0.5,
-          transparent: true,
-          opacity: 0.8,
-          side: DoubleSide,
-          sheen: 1,
-        }),
-      )
-      const lobe = Math.max(height, box.max.x - box.min.x) * 0.7
-      for (const sign of [-1, 1]) {
-        const disc = new Mesh(own.geometry(new CircleGeometry(lobe, 32)), velum)
-        disc.position.set(
-          sign * lobe * 0.75,
-          floor + lift + height * 1.15 + lobe * 0.2,
-          0,
-        )
-        disc.rotation.set(-Math.PI / 2.4, 0, sign * 0.4)
-        if (sign > 0) markMesh(disc, 'Velum')
-        specimen.add(disc)
+      // A swimming veliger hangs under its velum: turn the shell so its opening faces up.
+      const middle = new Box3().setFromObject(specimen).getCenter(new Vector3())
+      const out = mouth
+        ? (mouth as Vector3).clone().sub(middle)
+        : new Vector3(0, 1, 0)
+      if (out.lengthSq() < 1e-9) out.set(0, 1, 0)
+      const upright = new Quaternion().setFromUnitVectors(out.normalize(), UP)
+      for (const child of [...specimen.children]) {
+        child.position.sub(middle).applyQuaternion(upright).add(middle)
+        child.quaternion.premultiply(upright)
       }
-      const rimMaterial = own.material(
-        new MeshStandardMaterial({ color: rgb([200, 160, 130]) }),
+      specimen.updateMatrixWorld(true)
+      const hung = new Box3().setFromObject(specimen)
+      const hungSize = hung.getSize(new Vector3())
+      specimen.add(marker('Larval shell', hung.getCenter(new Vector3())))
+      const opening = mouth
+        ? (mouth as Vector3)
+            .clone()
+            .sub(middle)
+            .applyQuaternion(upright)
+            .add(middle)
+        : new Vector3(middle.x, hung.max.y, middle.z)
+      opening.y = Math.max(opening.y, hung.max.y - hungSize.y * 0.2)
+      const velum = buildVelum(
+        Math.max(hungSize.x, hungSize.y, hungSize.z),
+        own,
       )
-      for (const sign of [-1, 1]) {
-        const points: Vector3[] = []
-        for (let k = 0; k <= 24; k++) {
-          const a = (k / 24) * TAU
-          points.push(
-            new Vector3(
-              sign * lobe * 0.75 + Math.cos(a) * lobe,
-              floor +
-                lift +
-                height * 1.15 +
-                lobe * 0.2 +
-                Math.sin(a) * lobe * 0.25,
-              Math.sin(a) * lobe * 0.95,
-            ),
-          )
-        }
-        specimen.add(tube(points, lobe * 0.03, own, rimMaterial))
-      }
+      velum.group.position.copy(opening)
+      specimen.add(velum.group)
+      larva = velum
       specimen.updateMatrixWorld(true)
       const larvaBox = new Box3().setFromObject(specimen)
       const larvaSize = larvaBox.getSize(new Vector3())
@@ -1480,6 +1476,7 @@ export function buildScene(
     extent: adult.length,
     bob,
     floor,
+    velum: larva,
     dispose: own.dispose,
   }
 }
