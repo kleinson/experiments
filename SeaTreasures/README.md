@@ -167,6 +167,11 @@ fade, and below about 60 m there is no coral or seagrass. Dark mode is a night
 dive: black water, a diver's torch, no fish, and a note where the animal's
 night habits are sourced.
 
+**Zoom.** The scroll wheel, two-finger trackpad scroll, trackpad pinch (and
+Safari's pinch gestures), touch pinch, the + and − keys and the zoom buttons
+all zoom towards the point under the cursor. Zoomed all the way out, scrolling
+carries on down the page; Home or “Reset view” goes back to the whole animal.
+
 **Attached to its shell.** A crawling snail is posed with its opening down on
 its foot; the body runs out of the opening onto the foot, and the camera
 cannot swing under the sea floor.

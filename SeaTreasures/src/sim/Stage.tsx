@@ -73,6 +73,8 @@ export type Pulse = {
     | 'iso'
     | 'reset'
     | 'focus'
+    | 'zoom-in'
+    | 'zoom-out'
   at: number
   /** For `focus`: the label of the part to zoom to. */
   part?: string
@@ -354,7 +356,7 @@ export default function Stage({
       controls.maxPolarAngle = grounded ? Math.PI / 2 - 0.06 : Math.PI - 0.05
     }
     controls.minZoom = 0.3
-    controls.maxZoom = 6
+    controls.maxZoom = 14
     const home = () => {
       const target = controls.target.clone()
       // Over a seabed the view sits low, a diver's eye, so the floor runs back into open water.
@@ -965,7 +967,7 @@ export default function Stage({
     const scheme = matchMedia('(prefers-color-scheme: dark)')
     scheme.addEventListener('change', visibility)
     let reported = ''
-    controls.addEventListener('change', () => {
+    const report = () => {
       if (!latest.current.actual) {
         const size = frameSize()
         const pxPerMm = camera.zoom / size.perPx
@@ -976,6 +978,9 @@ export default function Stage({
           measure({ pxPerMm, magnified: size.magnified })
         }
       }
+    }
+    controls.addEventListener('change', () => {
+      report()
       request()
     })
 
@@ -1057,6 +1062,12 @@ export default function Stage({
         motion.tumble = now()
         emit({ type: 'tumble' })
         request()
+      },
+      'zoom-in'() {
+        zoomBy(1.4)
+      },
+      'zoom-out'() {
+        zoomBy(1 / 1.4)
       },
       front() {
         // Straight from the side, like a plate in a field guide.
@@ -1152,6 +1163,93 @@ export default function Stage({
     renderer.domElement.addEventListener('pointermove', pointermove)
     renderer.domElement.addEventListener('pointercancel', pointercancel)
 
+    /** The point on the plane through the target, facing the camera, under a screen position. */
+    const pointUnder = (clientX: number, clientY: number) => {
+      const rect = renderer.domElement.getBoundingClientRect()
+      pointer.set(
+        ((clientX - rect.left) / rect.width) * 2 - 1,
+        -((clientY - rect.top) / rect.height) * 2 + 1,
+      )
+      raycaster.setFromCamera(pointer, camera)
+      const plane = new Plane().setFromNormalAndCoplanarPoint(
+        camera.getWorldDirection(new Vector3()).negate(),
+        controls.target,
+      )
+      return raycaster.ray.intersectPlane(plane, new Vector3())
+    }
+
+    /**
+     * Zooms by `factor` keeping the point under the cursor fixed on screen (or the middle of the
+     * free area when there is no cursor). Returns false at a zoom limit, or in actual size.
+     */
+    const zoomBy = (factor: number, clientX?: number, clientY?: number) => {
+      if (latest.current.actual || !Number.isFinite(factor)) return false
+      const next = Math.min(
+        controls.maxZoom,
+        Math.max(controls.minZoom, camera.zoom * factor),
+      )
+      if (Math.abs(next - camera.zoom) < 1e-4) return false
+      const rect = renderer.domElement.getBoundingClientRect()
+      const x =
+        clientX ??
+        rect.left + safe.left + (rect.width - safe.left - safe.right) / 2
+      const y =
+        clientY ??
+        rect.top + safe.top + (rect.height - safe.top - safe.bottom) / 2
+      const before = pointUnder(x, y)
+      camera.zoom = next
+      frame()
+      const after = pointUnder(x, y)
+      if (before && after) {
+        const shift = before.sub(after)
+        camera.position.add(shift)
+        controls.target.add(shift)
+      }
+      controls.update()
+      report()
+      request()
+      return true
+    }
+
+    // Mouse wheel, two-finger trackpad scroll and trackpad pinch (which browsers send as a wheel
+    // event with ctrlKey) all zoom. Captured on the stage so it works over the labels too.
+    const wheel = (event: WheelEvent) => {
+      if (latest.current.actual) return
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 400 : 1
+      const delta = event.deltaY * unit
+      const speed = event.ctrlKey ? 0.01 : 0.0015
+      const factor = Math.exp(-Math.max(-300, Math.min(300, delta)) * speed)
+      const zoomed = zoomBy(factor, event.clientX, event.clientY)
+      // Zoomed all the way out, scrolling on carries on down the page to the map and lab.
+      if (zoomed || delta < 0 || event.ctrlKey) {
+        event.preventDefault()
+        event.stopPropagation()
+      } else event.stopPropagation()
+    }
+    container.addEventListener('wheel', wheel, {
+      capture: true,
+      passive: false,
+    })
+
+    // Safari sends trackpad pinches as gesture events instead of wheel events.
+    type Gesture = Event & { scale: number; clientX: number; clientY: number }
+    let gestureFrom = 1
+    const gesturestart = (event: Event) => {
+      event.preventDefault()
+      gestureFrom = camera.zoom
+    }
+    const gesturechange = (event: Event) => {
+      event.preventDefault()
+      const gesture = event as Gesture
+      zoomBy(
+        (gestureFrom * gesture.scale) / camera.zoom,
+        gesture.clientX,
+        gesture.clientY,
+      )
+    }
+    container.addEventListener('gesturestart', gesturestart)
+    container.addEventListener('gesturechange', gesturechange)
+
     const keydown = (event: KeyboardEvent) => {
       if (
         event.target !== container ||
@@ -1161,7 +1259,9 @@ export default function Stage({
       )
         return
       const step = 0.18
-      if (event.key === 'Home') home()
+      if (event.key === 'Home') actions.reset()
+      else if (event.key === '+' || event.key === '=') zoomBy(1.25)
+      else if (event.key === '-' || event.key === '_') zoomBy(0.8)
       else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
         const offset = camera.position.clone().sub(controls.target)
         offset.applyAxisAngle(
@@ -1220,6 +1320,9 @@ export default function Stage({
       sight.disconnect()
       document.removeEventListener('visibilitychange', visibility)
       container.removeEventListener('keydown', keydown)
+      container.removeEventListener('wheel', wheel, { capture: true })
+      container.removeEventListener('gesturestart', gesturestart)
+      container.removeEventListener('gesturechange', gesturechange)
       renderer.domElement.removeEventListener('pointerdown', pointerdown)
       renderer.domElement.removeEventListener('pointerup', pointerup)
       renderer.domElement.removeEventListener('pointermove', pointermove)
@@ -1253,7 +1356,7 @@ export default function Stage({
       ref={host}
       tabIndex={0}
       role="group"
-      aria-label="Shell view. Drag or use the arrow keys to turn it; Home resets the view. Tap to interact."
+      aria-label="Shell view. Drag or use the arrow keys to turn it; scroll, pinch or press plus and minus to zoom; Home resets the view. Tap to interact."
       aria-describedby="sim-summary"
       data-phase={frame.phase}
     >
