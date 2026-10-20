@@ -770,7 +770,7 @@ function settingNote(setting: Setting, choice: Bed | null, phase: PhaseId) {
 
 /** One floating filter pill: its own panel, above the water. */
 const PILL =
-  'filter-pill h-11 rounded-full border-0 bg-card/95 text-foreground shadow-[0_0_0_1px_var(--cp-border),0_10px_28px_color-mix(in_srgb,var(--cp-text)_14%,transparent)] backdrop-blur-md hover:bg-card dark:bg-card/95 dark:hover:bg-card'
+  'filter-pill h-12 rounded-full border-0 bg-card/95 px-4 text-foreground shadow-[0_0_0_1px_var(--cp-border),0_10px_28px_color-mix(in_srgb,var(--cp-text)_14%,transparent)] backdrop-blur-md hover:bg-card dark:bg-card/95 dark:hover:bg-card'
 
 const PANEL =
   'pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md'

@@ -305,11 +305,8 @@ html[data-theme='dark'] .sim-view::after {
   letter-spacing: -0.03em;
 }
 .clock {
-  margin: 6px 0 16px;
-  font:
-    12px Consolas,
-    'Courier New',
-    monospace;
+  margin: 8px 0 18px;
+  font: 500 13px/1.4 var(--font-sans);
   color: var(--cp-accent);
 }
 .clock.unknown {
@@ -326,13 +323,23 @@ html[data-theme='dark'] .sim-view::after {
   line-height: 1.6;
 }
 .fact details {
-  margin-top: 4px;
+  margin-top: 6px;
   font-size: 12px;
   color: var(--cp-text-soft);
 }
 .fact summary {
   cursor: pointer;
-  min-height: 24px;
+  min-height: 28px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.fact details[open] {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--cp-border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--cp-surface-soft) 72%, transparent);
 }
 .fact details p,
 .fact details li {
@@ -1150,11 +1157,11 @@ html[data-theme='dark'] .sim-view::after {
 }
 .setting-note {
   display: grid;
-  gap: 4px;
+  gap: 16px;
 }
 .setting-note .fact p {
-  font-size: 17px;
-  line-height: 1.65;
+  font-size: 16px;
+  line-height: 1.6;
 }
 .setting-note strong {
   font-weight: 600;
@@ -1442,6 +1449,7 @@ html[data-theme='dark'] .sim-view::after {
   background: color-mix(in srgb, var(--card) 95%, transparent) !important;
   box-shadow: var(--float-shadow) !important;
   backdrop-filter: blur(12px) !important;
+  border-radius: 18px;
 }
 .sim .ocean .action-hint,
 .sim .ocean .view-badge,
@@ -1470,12 +1478,12 @@ html[data-theme='dark'] .sim-view::after {
   color: var(--primary-foreground);
 }
 .sim .ocean .float-title {
-  padding: 24px 26px;
+  padding: 28px;
 }
 .sim .ocean .float-title h1,
 .sim .ocean .life-panel h2 {
-  font-weight: 600;
-  letter-spacing: -0.035em;
+  font-weight: 650;
+  letter-spacing: -0.04em;
 }
 .sim .ocean .life-panel {
   border-radius: var(--radius);
@@ -1492,24 +1500,27 @@ html[data-theme='dark'] .sim-view::after {
 }
 .sim .ocean .clock {
   color: var(--muted-foreground);
-  font-size: 12px;
+  font-size: 13px;
 }
 .sim .ocean .fact p {
   color: var(--card-foreground);
-  font-family: var(--font-serif);
-  font-size: 16px;
-  line-height: 1.7;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.65;
 }
 .sim .ocean .setting-note .fact p {
-  font-size: 17px;
+  font-size: 16px;
 }
 .sim .ocean .part-card .fact p {
-  font-size: 18px;
-  line-height: 1.7;
+  font-size: 17px;
+  line-height: 1.65;
 }
 .sim .ocean .sim-taxon,
 .sim .ocean .model-note,
 .sim .ocean .history-card p {
+  font-family: var(--font-sans);
+}
+.sim .ocean .sim-taxon i {
   font-family: var(--font-serif);
 }
 .sim .ocean .fact details,
