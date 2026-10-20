@@ -193,10 +193,9 @@ carries on down the page; Home or “Reset view” goes back to the whole animal
 **On the move.** While it lives, the animal slowly makes its way over the
 sea floor in a loose figure of eight, turned the way it is going, with the
 camera, light and shadow following so the seabed slides past
-(`src/sim/crawl.ts`). Each moves as its sources say: cowries and cones glide
-on their muscular foot, the queen conch leaps by digging its operculum into
-the sand and throwing the shell forward, and the nautilus swims backwards,
-shell first, by jet propulsion. The pace is sped up to be watchable. It rests
+(`src/sim/crawl.ts`). Snails creep slowly and steadily on their muscular
+foot; the nautilus drifts backwards, shell first, as it swims by jet
+propulsion. The pace is sped up to be watchable. It rests
 while it hides in its shell, while it is taken apart or a part is being read,
 and stays still with reduced motion.
 

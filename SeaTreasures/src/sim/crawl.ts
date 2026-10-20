@@ -1,57 +1,29 @@
 import type { Species } from './species.ts'
 
 /**
- * How each animal gets about on the sea floor, from its sources:
- * cowries and cones glide on a muscular foot, the queen conch leaps by
- * digging its operculum into the sand and throwing the shell forward, and
- * the nautilus swims backwards by jet propulsion.
+ * How each animal gets about on the sea floor: snails creep slowly and
+ * steadily on their muscular foot, and the nautilus drifts backwards, shell
+ * first, as it does when it swims by jet propulsion.
  */
-export type Gait = 'glide' | 'leap' | 'jet'
+export type Gait = 'crawl' | 'swim'
 
 export const gaitClaim: Record<Gait, string> = {
-  glide: 'cowrie-animal-anatomy',
-  leap: 'part-conch-leap',
-  jet: 'nautilus-buoyancy',
+  crawl: 'mollusca-body-plan',
+  swim: 'nautilus-buoyancy',
 }
 
-export function gaitFor(species: Pick<Species, 'id' | 'group'>): Gait {
-  if (species.group === 'cephalopod') return 'jet'
-  if (species.id === 'queen-conch') return 'leap'
-  return 'glide'
+export function gaitFor(species: Pick<Species, 'group'>): Gait {
+  return species.group === 'cephalopod' ? 'swim' : 'crawl'
 }
 
 /**
- * Speed along the route in body lengths per second. Far faster than life
- * (snails cover millimetres a minute), slowed only enough to watch.
+ * Speed along the route in body lengths per second: a slow, steady creep,
+ * still faster than life (snails cover millimetres a minute) so it can be seen.
  */
-const SPEED: Record<Gait, number> = { glide: 0.05, leap: 0.06, jet: 0.07 }
-/** A leap or jet stroke, then a rest, in seconds. */
-const STROKE: Record<Gait, { beat: number; push: number }> = {
-  glide: { beat: 1, push: 1 },
-  leap: { beat: 2.6, push: 0.55 },
-  jet: { beat: 1.8, push: 0.7 },
-}
+const SPEED: Record<Gait, number> = { crawl: 0.03, swim: 0.035 }
 
-/**
- * How far along its route the animal has come after `seconds` of moving,
- * in body lengths. A glide is steady; a leap or jet comes in strokes.
- */
-export function travelled(gait: Gait, seconds: number) {
-  const { beat, push } = STROKE[gait]
-  const perBeat = SPEED[gait] * beat
-  const beats = Math.floor(seconds / beat)
-  const into = Math.min(1, (seconds - beats * beat) / push)
-  const stroke = gait === 'glide' ? into : into * into * (3 - 2 * into)
-  return (beats + stroke) * perBeat
-}
-
-/** Height of a leap above the sand at `seconds`, in body lengths. */
-export function hop(gait: Gait, seconds: number) {
-  if (gait !== 'leap') return 0
-  const { beat, push } = STROKE.leap
-  const into = (seconds % beat) / push
-  return into < 1 ? Math.sin(into * Math.PI) * 0.07 : 0
-}
+/** How far along its route the animal has come after `seconds` of moving, in body lengths. */
+export const travelled = (gait: Gait, seconds: number) => SPEED[gait] * seconds
 
 /**
  * A slow figure of eight over the flat sand around where the animal was

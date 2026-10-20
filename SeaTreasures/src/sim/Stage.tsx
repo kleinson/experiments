@@ -34,7 +34,7 @@ import {
 } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
-import { along, gaitFor, hop, travelled } from './crawl.ts'
+import { along, gaitFor, travelled } from './crawl.ts'
 import { InkPass, inkify, LIGHTS } from './ink.ts'
 import type { Look } from './ink.ts'
 import { labelsIn } from './labels.ts'
@@ -666,7 +666,7 @@ export default function Stage({
       moved.set(0, 0, 0)
       if (crawl.active) {
         const body = built.extent * Math.max(frame.size, 0.05)
-        const place = along(travelled(gait, crawl.seconds), gait === 'jet')
+        const place = along(travelled(gait, crawl.seconds), gait === 'swim')
         turn.setFromAxisAngle(UP, place.heading)
         // Turn about the middle of what is shown, then carry it along the route.
         pivot.copy((built.close ?? built.view).target).setY(0)
@@ -676,7 +676,6 @@ export default function Stage({
           .applyQuaternion(turn)
           .add(pivot)
           .add(moved.set(place.x * body, 0, place.z * body))
-        specimen.position.y += hop(gait, crawl.seconds) * body
       } else if (living) specimen.quaternion.identity()
       const delta = moved.clone().sub(crawl.applied)
       if (delta.lengthSq() > 0) {
