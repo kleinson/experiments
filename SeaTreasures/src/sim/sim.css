@@ -1418,3 +1418,36 @@ html[data-theme='dark'] .sim-view::after {
     display: none;
   }
 }
+
+/* Shell menu: each shell on a pale studio table, like a specimen photograph. */
+.shell-studio {
+  background:
+    radial-gradient(
+      ellipse 70% 60% at 50% 45%,
+      var(--cp-bg-elevated),
+      transparent 80%
+    ),
+    linear-gradient(
+      180deg,
+      var(--cp-bg),
+      color-mix(in srgb, var(--cp-bg) 88%, var(--cp-border-strong))
+    );
+  border-bottom: 1px solid var(--cp-border);
+}
+html[data-theme='dark'] .shell-studio {
+  background:
+    radial-gradient(
+      ellipse 70% 60% at 50% 45%,
+      var(--cp-border-strong),
+      transparent 75%
+    ),
+    linear-gradient(180deg, var(--cp-surface-soft), var(--cp-surface));
+}
+.shell-inset {
+  width: 48px;
+  height: 38px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--cp-surface) 85%, transparent);
+  box-shadow: 0 0 0 1px var(--cp-border);
+}

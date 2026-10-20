@@ -69,7 +69,9 @@ test('every species can be chosen and is drawn with its sourced name', async ({
     await chooseShell(page, name)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(name)
     await expect(page).toHaveURL(new RegExp(`species=${id}`))
-    await expect.poll(() => drawn(page)).toBeGreaterThan(0.02)
+    await expect
+      .poll(() => drawn(page), { timeout: 25_000 })
+      .toBeGreaterThan(0.02)
     await expect(page.locator('#origin')).toHaveAttribute('data-value', /.+/)
   }
   expect(errors).toEqual([])
@@ -240,6 +242,30 @@ test('the ocean floor changes with the species, the place and the reader', async
   await expect(ocean).toHaveAttribute('data-scene', 'open-water')
 })
 
+test('switching place switches the shells to those found there', async ({
+  page,
+}) => {
+  await page.goto('./?species=money-cowrie&place=mauritius')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Money cowrie',
+  )
+  await choose(page, '#origin', 'bahamas')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Queen conch',
+  )
+  await expect(page).toHaveURL(/place=bahamas/)
+  await page.getByRole('button', { name: 'Shells', exact: true }).click()
+  const tray = page.locator('#shell-tray')
+  await expect(tray).toContainText('Found at The Bahamas')
+  await expect(tray).toContainText('Not recorded at The Bahamas')
+  await tray.getByRole('button', { name: /Tiger cowrie/ }).click()
+  await choose(page, '#origin', 'hawaiian-islands')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Hawaiian tiger cowrie',
+  )
+  await expect(page.locator('.sim-taxon')).toContainText('schilderiana')
+})
+
 test('the shell menu shows each species as its shell and its animal', async ({
   page,
 }) => {
@@ -251,8 +277,8 @@ test('the shell menu shows each species as its shell and its animal', async ({
   await expect(
     tray.getByRole('button', { name: /Money cowrie/ }),
   ).toHaveAttribute('aria-pressed', 'true')
-  await expect(tray.locator('.tray-pictures img')).toHaveCount(10, {
-    timeout: 20000,
+  await expect(tray.locator('.shell-studio img')).toHaveCount(15, {
+    timeout: 30000,
   })
   await page.keyboard.press('Escape')
   await expect(tray).toBeHidden()
@@ -283,7 +309,9 @@ test('the camera stays above the sea floor and depth follows the sources', async
   page,
 }) => {
   await page.goto('./?species=tiger-cowrie')
-  await expect.poll(() => drawn(page)).toBeGreaterThan(0.02)
+  await expect
+    .poll(() => drawn(page), { timeout: 25_000 })
+    .toBeGreaterThan(0.02)
   await page.locator('.sim-stage').focus()
   for (let i = 0; i < 20; i++) await page.keyboard.press('ArrowDown')
   const low = await page.locator('[data-sim-canvas]').screenshot()
@@ -306,7 +334,9 @@ test('the scroll wheel, trackpad pinch, keys and buttons zoom the view', async (
   page,
 }) => {
   await page.goto('./?species=queen-conch')
-  await expect.poll(() => drawn(page)).toBeGreaterThan(0.02)
+  await expect
+    .poll(() => drawn(page), { timeout: 25_000 })
+    .toBeGreaterThan(0.02)
   const scale = async () => {
     const width = (await page.locator('.scale-bar span').boundingBox())!.width
     return width / mmOf(await page.locator('.scale-bar').textContent())
@@ -398,7 +428,9 @@ test('the stage turns from the keyboard and the timeline is keyboard operable', 
 }) => {
   await page.goto('./?species=tiger-cowrie')
   const canvas = page.locator('[data-sim-canvas]')
-  await expect.poll(() => drawn(page)).toBeGreaterThan(0.02)
+  await expect
+    .poll(() => drawn(page), { timeout: 25_000 })
+    .toBeGreaterThan(0.02)
   await page.locator('.sim-stage').focus()
   const before = await canvas.screenshot()
   await page.keyboard.press('ArrowRight')

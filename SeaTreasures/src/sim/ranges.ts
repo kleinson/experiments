@@ -88,3 +88,25 @@ export function originsFor(speciesId: string) {
 
 export const totalFor = (speciesId: string) =>
   ranges.records[speciesId]?.total ?? null
+
+/** The shells recorded at a place, most records first; those outside their documented range last. */
+export function shellsAt(regionId: string, speciesIds: string[]) {
+  return speciesIds
+    .map((speciesId) => {
+      const place = placesFor(speciesId).find(
+        (item) => item.region.id === regionId,
+      )!
+      return { speciesId, ...place }
+    })
+    .filter((item) => item.count.n > 0)
+    .sort(
+      (a, b) => Number(a.outside) - Number(b.outside) || b.count.n - a.count.n,
+    )
+}
+
+/** Every place where at least one of the shells has been recorded, grouped by ocean. */
+export function placesWithShells(speciesIds: string[]) {
+  return ranges.regions
+    .map((region) => ({ region, shells: shellsAt(region.id, speciesIds) }))
+    .filter((item) => item.shells.length > 0)
+}
