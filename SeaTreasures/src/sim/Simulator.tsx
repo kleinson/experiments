@@ -410,56 +410,25 @@ function swatch(species: Species) {
   } as React.CSSProperties
 }
 
-/** The one thing to try in each part of the life: shown on the stage and as a button. */
-function actionFor(
-  phase: PhaseId,
-  species: Species,
-): { hint: string; button: string | null } {
+/** The primary interaction offered for each part of the lifecycle. */
+function actionButtonFor(phase: PhaseId, species: Species): string | null {
   switch (phase) {
     case 'egg':
-      return { hint: 'Tap the eggs to hatch them', button: 'Hatch them all' }
+      return 'Hatch them all'
     case 'larva':
-      return species.group !== 'gastropod'
-        ? {
-            hint:
-              species.group === 'cephalopod'
-                ? 'A small nautilus hatches already shelled'
-                : 'Tap the water to steer the larva',
-            button: 'Let it settle',
-          }
-        : {
-            hint: 'Tap the water to steer it, or the larva to tuck it in',
-            button: 'Let it settle',
-          }
+      return 'Let it settle'
     case 'growth':
-      return { hint: 'Press and hold the shell to grow it', button: 'Grow' }
+      return 'Grow'
     case 'adult':
-      return {
-        hint: 'Tap the animal: it pulls back into its shell',
-        button: 'Poke it',
-      }
+      return 'Poke it'
     case 'death':
-      return { hint: 'Choose how its life ends', button: null }
+      return null
     case 'remains':
-      return species.drifts
-        ? {
-            hint: 'Tap the shell: the empty chambers let it float',
-            button: 'Let it drift',
-          }
-        : {
-            hint: 'Tap the shell to call a hermit crab',
-            button: 'Call a hermit crab',
-          }
+      return species.drifts ? 'Let it drift' : 'Call a hermit crab'
     case 'beach':
-      return {
-        hint: 'Tap the shell to let a wave roll it',
-        button: 'Send a wave',
-      }
+      return 'Send a wave'
     case 'found':
-      return {
-        hint: 'Tap the featured shell to collect it, or a drawer shell to restart its life',
-        button: 'Pick it up',
-      }
+      return 'Pick it up'
   }
 }
 
@@ -1378,7 +1347,7 @@ export function Simulator() {
     () => seabedFor(species, origin.id, frame.phase, bedChoice, depthChoice),
     [species, origin.id, frame.phase, bedChoice, depthChoice],
   )
-  const action = actionFor(frame.phase, species)
+  const actionButton = actionButtonFor(frame.phase, species)
   const { index: phaseIndex, phase } = phaseAt(t)
   const clock = clockAt(frame, species)
   const bar = scaleBar(measure.pxPerMm)
@@ -1649,7 +1618,7 @@ export function Simulator() {
             {clock.label}
           </p>
         </div>
-        {action.button && (
+        {actionButton && (
           <Button
             size="lg"
             className="action-button h-11 justify-self-start rounded-full bg-brand px-5 text-brand-foreground hover:bg-brand/85"
@@ -1659,7 +1628,7 @@ export function Simulator() {
             <Hand />
             {frame.phase === 'growth' && growing
               ? 'Stop growing'
-              : action.button}
+              : actionButton}
           </Button>
         )}
         {frame.phase === 'egg' && <EggSite species={species} />}
@@ -1826,10 +1795,6 @@ export function Simulator() {
               onEvent={onStage}
             />
           </Suspense>
-          <div className="action-hint" aria-hidden="true">
-            <Hand aria-hidden="true" />
-            {action.hint}
-          </div>
           <div className="view-badge" aria-live="polite">
             {actual
               ? calibration.calibrated

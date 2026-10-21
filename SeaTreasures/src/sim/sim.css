@@ -710,30 +710,6 @@ html[data-theme='dark'] .sim-view::after {
   }
 }
 
-/* Interaction cues */
-.action-hint {
-  position: absolute;
-  z-index: 2;
-  top: 40px;
-  left: 20px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 40%;
-  font:
-    13px Consolas,
-    'Courier New',
-    monospace;
-  color: var(--cp-text);
-  pointer-events: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.action-hint .icon {
-  flex: none;
-  color: var(--cp-accent);
-}
 .take-apart {
   position: absolute;
   z-index: 3;
@@ -1533,20 +1509,6 @@ html[data-theme='dark'] .sim-view::after {
   text-transform: uppercase;
   color: var(--cp-text-muted);
 }
-.ocean .action-hint {
-  top: auto;
-  left: 50%;
-  bottom: 124px;
-  z-index: 4;
-  max-width: calc(100% - 820px);
-  min-width: 260px;
-  padding: 8px 16px;
-  border-radius: 100px;
-  background: var(--cp-panel-strong);
-  box-shadow: var(--float-shadow);
-  transform: translateX(calc(-50% - 100px));
-  justify-content: center;
-}
 .ocean .view-badge {
   top: auto;
   left: 16px;
@@ -1616,12 +1578,6 @@ html[data-theme='dark'] .sim-view::after {
     bottom: auto;
     transform: translateY(-100%);
   }
-  .ocean .action-hint {
-    top: calc(var(--stage) - 168px);
-    bottom: auto;
-    max-width: calc(100% - 32px);
-    transform: translateX(-50%);
-  }
   .ocean .view-badge,
   .ocean .scale-bar {
     top: auto;
@@ -1653,7 +1609,6 @@ html[data-theme='dark'] .sim-view::after {
     --safe-top: 250px;
     --safe-bottom: 210px;
   }
-  .ocean .action-hint,
   .ocean .view-badge {
     display: none;
   }
@@ -1764,7 +1719,6 @@ html[data-theme='dark'] .sim-view::after {
   box-shadow: none !important;
   backdrop-filter: none !important;
 }
-.sim .ocean .action-hint,
 .sim .ocean .view-badge,
 .sim .ocean .scale-bar,
 .sim .ocean .sim-labels li button {
