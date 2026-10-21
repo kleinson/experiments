@@ -1158,8 +1158,8 @@ html[data-theme='dark'] .sim-view::after {
 }
 .sim .sim-view.ocean {
   /* Room the floating panels take; the stage frames the specimen in the rest. */
-  --safe-left: 120px;
-  --safe-right: 400px;
+  --safe-left: 520px;
+  --safe-right: 120px;
   --safe-top: 160px;
   --safe-bottom: 176px;
   --float-shadow:
@@ -1253,6 +1253,81 @@ html[data-theme='dark'] .sim-view::after {
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
+}
+.info-panel[data-collapsed] {
+  width: min(360px, 100%);
+  max-height: none;
+  overflow: visible;
+}
+.info-panel-header {
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 16px 12px;
+  background: color-mix(in srgb, var(--card) 96%, transparent);
+  backdrop-filter: blur(12px);
+}
+.info-panel-header .sim-title {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.info-panel-header .sim-title h1 {
+  overflow: hidden;
+  font-size: 24px;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.info-panel-header .sim-title p {
+  overflow: hidden;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.info-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0 16px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 2px);
+  background: color-mix(in srgb, var(--muted) 78%, transparent);
+}
+.info-tabs button {
+  min-width: 0;
+  min-height: 44px;
+  display: grid;
+  place-content: center;
+  gap: 0;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+.info-tabs button[aria-selected='true'] {
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: var(--shadow-xs);
+}
+.info-tabs button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ring) 45%, transparent);
+  outline-offset: 1px;
+}
+.info-tabs small {
+  color: var(--muted-foreground);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .title-row {
   display: flex;
@@ -1497,12 +1572,6 @@ html[data-theme='dark'] .sim-view::after {
   }
 }
 
-@media (max-height: 760px) {
-  .ocean .setting-note {
-    display: none !important;
-  }
-}
-
 /* Narrower screens: the life panel moves under the ocean. */
 @media (max-width: 1000px) {
   .sim .sim-view.ocean {
@@ -1688,8 +1757,8 @@ html[data-theme='dark'] .sim-view::after {
   backdrop-filter: blur(12px) !important;
   border-radius: 18px;
 }
-.sim .ocean .info-panel > .float-title,
-.sim .ocean .info-panel > .life-panel {
+.sim .ocean .info-panel .float-title,
+.sim .ocean .info-panel .life-panel {
   border: 0 !important;
   border-radius: 0;
   background: transparent !important;
@@ -1795,6 +1864,10 @@ html[data-theme='dark'] .sim-view::after {
 }
 .sim .ocean .float-title h1,
 .sim .ocean .life-panel h2 {
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+.sim .ocean .info-panel-header h1 {
   font-weight: 650;
   letter-spacing: -0.04em;
 }

@@ -192,6 +192,32 @@ test('the lifecycle menu and timeline preview every life chapter', async ({
     .toBeGreaterThan(0)
 })
 
+test('the information panel switches tabs and collapses accessibly', async ({
+  page,
+}) => {
+  await page.goto('./?species=queen-conch')
+  const panel = page.locator('.info-panel')
+  const stageTab = page.getByRole('tab', { name: /Adult/ })
+  await expect(stageTab).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('tabpanel', { name: /Adult/ })).toContainText(
+    'How it moves',
+  )
+
+  const generalTab = page.getByRole('tab', { name: 'General' })
+  await generalTab.click()
+  await expect(page.getByRole('tabpanel', { name: 'General' })).toContainText(
+    'Aliger gigas',
+  )
+  await generalTab.press('ArrowRight')
+  await expect(stageTab).toHaveAttribute('aria-selected', 'true')
+
+  await page.getByRole('button', { name: 'Collapse information panel' }).click()
+  await expect(panel).toHaveAttribute('data-collapsed', 'true')
+  await expect(page.getByRole('tablist')).toBeHidden()
+  await page.getByRole('button', { name: 'Expand information panel' }).click()
+  await expect(stageTab).toBeVisible()
+})
+
 test('tapping eggs on the stage hatches them one by one', async ({ page }) => {
   await page.goto('./?species=chambered-nautilus')
   await phase(page, 'Egg')
@@ -423,21 +449,22 @@ test('the shell menu shows each species as its shell and its animal', async ({
   await expect(toggle).toBeFocused()
 })
 
-test('reset view and zoom to a part', async ({ page }) => {
+test('refocus subject and zoom to a part', async ({ page }) => {
   await page.goto('./?species=queen-conch')
   await phase(page, 'Adult')
   const canvas = page.locator('[data-sim-canvas]')
-  await page
+  const operculum = page
     .getByRole('list', { name: 'Labelled parts' })
     .getByRole('button', { name: 'Operculum' })
-    .click()
+  await operculum.dispatchEvent('pointerover')
+  await operculum.click()
   const before = await canvas.screenshot()
   await page.getByRole('button', { name: 'Zoom to operculum' }).click()
   await expect
     .poll(async () => (await canvas.screenshot()).equals(before))
     .toBe(false)
   const zoomed = await canvas.screenshot()
-  await page.getByRole('button', { name: 'Reset view' }).click()
+  await page.getByRole('button', { name: 'Refocus subject' }).click()
   await expect
     .poll(async () => (await canvas.screenshot()).equals(zoomed))
     .toBe(false)

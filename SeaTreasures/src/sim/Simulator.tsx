@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import type { ReactNode } from 'react'
+import type { KeyboardEvent, ReactNode } from 'react'
 import { getClaim, manifest, sourcesFor } from '../evidence.ts'
 import {
   CARD_MM,
@@ -29,15 +29,17 @@ import {
   ChevronDown,
   CircleDot,
   Eye,
+  Focus,
   Hand,
   Layers,
   MapPin,
   Maximize,
   Moon,
+  PanelLeftClose,
+  PanelLeftOpen,
   Pause,
   Play,
   Rotate3d,
-  RotateCcw,
   Ruler,
   ScanEye,
   Scissors,
@@ -1269,6 +1271,8 @@ export function Simulator() {
   // The menu's drawings are made the first time it opens, so they never slow the first view.
   const [menuOpened, setMenuOpened] = useState(false)
   const [lifeMenuOpen, setLifeMenuOpen] = useState(false)
+  const [infoTab, setInfoTab] = useState<'general' | 'stage'>('stage')
+  const [infoCollapsed, setInfoCollapsed] = useState(false)
   useEffect(
     () =>
       menuOpened
@@ -1614,6 +1618,14 @@ export function Simulator() {
       ? `Shell ${Math.round(species.lengthMm.drawn * frame.size * 10) / 10} millimetres long${actual ? ', shown at actual size' : ''}.`
       : 'No shell yet.'
   }${cut ? ' Cut open.' : ''}${xray ? ' See-through view.' : ''}`
+  const moveInfoTab = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+    event.preventDefault()
+    const next =
+      event.key === 'ArrowLeft' || event.key === 'Home' ? 'general' : 'stage'
+    setInfoTab(next)
+    requestAnimationFrame(() => document.getElementById(`${next}-tab`)?.focus())
+  }
 
   const lifeDetails = (
     <Card
@@ -2036,66 +2048,144 @@ export function Simulator() {
           </div>
 
           <div className="float-left">
-            <div className="info-panel pointer-events-auto">
-              <Card className="float-title gap-3 border-0 bg-transparent py-3.5 shadow-none">
-                <CardHeader className="px-4">
-                  <div className="title-row">
-                    <a className="brand" href={import.meta.env.BASE_URL}>
-                      <img
-                        src={`${import.meta.env.BASE_URL}shell-mark.svg`}
-                        alt=""
-                      />
-                      <span className="sr-only">SeaTreasures</span>
-                    </a>
-                    <div className="sim-title">
-                      <h1 ref={heading} tabIndex={-1}>
-                        {species.commonName}
-                      </h1>
-                      <div className="sim-taxon">
-                        <Fact claim={species.taxonClaim}>
-                          <i>{species.scientificName}</i> {species.authority}
-                        </Fact>
-                      </div>
-                    </div>
+            <div
+              className="info-panel pointer-events-auto"
+              data-collapsed={infoCollapsed || undefined}
+            >
+              <div className="info-panel-header">
+                <div className="title-row">
+                  <a className="brand" href={import.meta.env.BASE_URL}>
+                    <img
+                      src={`${import.meta.env.BASE_URL}shell-mark.svg`}
+                      alt=""
+                    />
+                    <span className="sr-only">SeaTreasures</span>
+                  </a>
+                  <div className="sim-title">
+                    <h1 ref={heading} tabIndex={-1}>
+                      {species.commonName}
+                    </h1>
+                    <p>{clock.label}</p>
                   </div>
-                </CardHeader>
-                <CardContent className="grid gap-3 px-4">
-                  <div className="setting-note" aria-live="polite">
-                    <Fact claim="seabed-setting-illustrative">
-                      <strong>{settingLabel(setting)}</strong>
-                      {settingNote(setting, bedChoice, frame.phase)}
-                    </Fact>
-                    {setting.scene === 'seabed' && (
-                      <Fact
-                        claim={
-                          matchedColours[origin.id]
-                            ? [setting.place.claim, 'place-colours-from-photos']
-                            : setting.place.claim
-                        }
-                      >
-                        <strong>{reefLabels[setting.place.reef]}</strong> ·{' '}
-                        {setting.place.note}
-                        {matchedColours[origin.id] &&
-                          ` Water and sand colours matched to ${matchedColours[origin.id]!.photos.length} underwater photos.`}
-                      </Fact>
-                    )}
-                    <Fact claim={habitat.claim}>
-                      {habitat.habitat}
-                      {habitat.depthM &&
-                        ` · ${habitat.depthM[0]}–${habitat.depthM[1]} m deep`}
-                    </Fact>
+                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
                     <Button
-                      asChild
-                      variant="link"
-                      className="where-link h-auto justify-self-start p-0 text-xs text-muted-foreground"
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full"
+                      aria-label={
+                        infoCollapsed
+                          ? 'Expand information panel'
+                          : 'Collapse information panel'
+                      }
+                      aria-expanded={!infoCollapsed}
+                      onClick={() =>
+                        setInfoCollapsed((collapsed) => !collapsed)
+                      }
                     >
-                      <a href="#where">See it on the map</a>
+                      {infoCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {infoCollapsed ? 'Expand panel' : 'Collapse panel'}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              {!infoCollapsed && (
+                <>
+                  <div
+                    className="info-tabs"
+                    role="tablist"
+                    aria-label="Specimen information"
+                  >
+                    <button
+                      type="button"
+                      role="tab"
+                      id="general-tab"
+                      aria-selected={infoTab === 'general'}
+                      aria-controls="general-panel"
+                      onClick={() => setInfoTab('general')}
+                      onKeyDown={moveInfoTab}
+                      tabIndex={infoTab === 'general' ? 0 : -1}
+                    >
+                      General
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      id="stage-tab"
+                      aria-selected={infoTab === 'stage'}
+                      aria-controls="stage-panel"
+                      onClick={() => setInfoTab('stage')}
+                      onKeyDown={moveInfoTab}
+                      tabIndex={infoTab === 'stage' ? 0 : -1}
+                    >
+                      <span>{phase.label}</span>
+                      <small>Life stage</small>
+                    </button>
                   </div>
-                </CardContent>
-              </Card>
-              <Separator />
-              {lifeDetails}
+                  {infoTab === 'general' ? (
+                    <Card
+                      id="general-panel"
+                      role="tabpanel"
+                      aria-labelledby="general-tab"
+                      className="float-title gap-3 border-0 bg-transparent py-3.5 shadow-none"
+                    >
+                      <CardContent className="grid gap-4 px-4">
+                        <div className="sim-taxon">
+                          <Fact claim={species.taxonClaim}>
+                            <i>{species.scientificName}</i> {species.authority}
+                          </Fact>
+                        </div>
+                        <div className="setting-note" aria-live="polite">
+                          <Fact claim="seabed-setting-illustrative">
+                            <strong>{settingLabel(setting)}</strong>
+                            {settingNote(setting, bedChoice, frame.phase)}
+                          </Fact>
+                          {setting.scene === 'seabed' && (
+                            <Fact
+                              claim={
+                                matchedColours[origin.id]
+                                  ? [
+                                      setting.place.claim,
+                                      'place-colours-from-photos',
+                                    ]
+                                  : setting.place.claim
+                              }
+                            >
+                              <strong>{reefLabels[setting.place.reef]}</strong>{' '}
+                              · {setting.place.note}
+                              {matchedColours[origin.id] &&
+                                ` Water and sand colours matched to ${matchedColours[origin.id]!.photos.length} underwater photos.`}
+                            </Fact>
+                          )}
+                          <Fact claim={habitat.claim}>
+                            {habitat.habitat}
+                            {habitat.depthM &&
+                              ` · ${habitat.depthM[0]}–${habitat.depthM[1]} m deep`}
+                          </Fact>
+                          <Button
+                            asChild
+                            variant="link"
+                            className="where-link h-auto justify-self-start p-0 text-xs text-muted-foreground"
+                          >
+                            <a href="#where">See it on the map</a>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div
+                      id="stage-panel"
+                      role="tabpanel"
+                      aria-labelledby="stage-tab"
+                    >
+                      {lifeDetails}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
             {pearlKind && pearlShown != null && (
               <PearlCard
@@ -2136,13 +2226,13 @@ export function Simulator() {
                   variant="ghost"
                   size="icon-lg"
                   className="rounded-full"
-                  aria-label="Reset view"
+                  aria-label="Refocus subject"
                   onClick={() => act('reset')}
                 >
-                  <RotateCcw />
+                  <Focus />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Reset view</TooltipContent>
+              <TooltipContent>Refocus and fit subject</TooltipContent>
             </Tooltip>
             <Popover>
               <PopoverTrigger asChild>
