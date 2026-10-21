@@ -454,7 +454,10 @@ function actionFor(
         button: 'Send a wave',
       }
     case 'found':
-      return { hint: 'Tap the shell to pick it up', button: 'Pick it up' }
+      return {
+        hint: 'Tap the featured shell to collect it, or a drawer shell to restart its life',
+        button: 'Pick it up',
+      }
   }
 }
 
@@ -590,6 +593,15 @@ function LifecycleGallery({
   )
 }
 
+function ToolCopy({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <span className="view-option-copy">
+      <strong>{title}</strong>
+      <small>{children}</small>
+    </span>
+  )
+}
+
 function PhaseStory({
   species,
   phase,
@@ -598,6 +610,7 @@ function PhaseStory({
   originName,
   shelf,
   onRemove,
+  onExplore,
   shelfError,
 }: {
   species: Species
@@ -607,6 +620,7 @@ function PhaseStory({
   originName: string
   shelf: Found[]
   onRemove: (index: number) => void
+  onExplore: (speciesId: string) => void
   shelfError: string | null
 }) {
   const { life } = species
@@ -747,6 +761,44 @@ function PhaseStory({
               </Fact>
             ),
           )}
+          <section
+            className="collection-explorer"
+            aria-labelledby="collection-explorer-title"
+          >
+            <div>
+              <p className="panel-label" id="collection-explorer-title">
+                Explore another drawer shell
+              </p>
+              <p className="model-note">
+                Every specimen in the cabinet is selectable. Choosing one starts
+                its life again at the egg chapter.
+              </p>
+            </div>
+            <div className="collection-explorer-grid">
+              {allSpecies.map((item) => (
+                <Button
+                  key={item.id}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onExplore(item.id)}
+                >
+                  {item.commonName}
+                </Button>
+              ))}
+            </div>
+            <p className="model-note">
+              The chambered nautilus also appears in this{' '}
+              <a
+                href="https://marinelivings.com/rarest-seashells-in-the-world/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                collector-oriented rare-shell guide
+              </a>
+              . Its other suggested shells need primary biological sources
+              before they become full life stories here.
+            </p>
+          </section>
           <div className="shelf">
             {shelfError && (
               <p className="notice error" role="alert">
@@ -1424,6 +1476,9 @@ export function Simulator() {
         setWaves((count) => count + 1)
         setAnnouncement('A wave rolls the shell. Sand and water wear it down.')
         break
+      case 'collection':
+        exploreSpecies(event.speciesId)
+        break
       case 'pickup':
         writeShelf(
           addToShelf(shelf, { speciesId: species.id, originId: origin.id }),
@@ -1478,6 +1533,14 @@ export function Simulator() {
       `${shown.commonName}, ${shown.scientificName}${stays ? '' : `, at ${placeName(next, place)}`}${bed && !keepsBed ? '. Habitat filter cleared' : ''}${bed && keepsBed ? `, in ${habitatName(bed)}` : ''}.`,
     )
     remember(id, place)
+  }
+
+  function exploreSpecies(id: string) {
+    const next = getSpecies(id)
+    setPlaying(false)
+    chooseSpecies(id)
+    setT(startOf('egg') + phases[0]!.share * 0.18)
+    setAnnouncement(`Starting the ${next.commonName} life again at the egg.`)
   }
 
   /**
@@ -1770,6 +1833,66 @@ export function Simulator() {
                 })}
               </SelectContent>
             </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(PILL, 'px-3.5')}
+                  aria-label={`Depth, about ${formatDepth(setting.depthM)}`}
+                  disabled={setting.scene === 'beach'}
+                >
+                  <Ruler className="text-muted-foreground" />
+                  <span>{formatDepth(setting.depthM)}</span>
+                  <ChevronDown className="text-muted-foreground" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="start"
+                sideOffset={8}
+                className="depth-menu grid w-80 gap-4 rounded-2xl p-4"
+                role="group"
+                aria-label="Depth"
+              >
+                <div>
+                  <h2 className="text-sm font-semibold">Depth</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Move the specimen through its documented depth range.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[10px] whitespace-nowrap text-muted-foreground">
+                    {formatDepth(setting.depth.reach[0])}
+                  </span>
+                  <Slider
+                    min={setting.depth.reach[0]}
+                    max={setting.depth.reach[1]}
+                    step={setting.depth.reach[1] > 100 ? 10 : 0.5}
+                    value={[setting.depthM]}
+                    onValueChange={([value]) => setDepthChoice(value ?? null)}
+                    thumbProps={{
+                      'aria-label': 'Depth',
+                      'aria-valuetext': `About ${formatDepth(setting.depthM)} deep`,
+                    }}
+                  />
+                  <span className="font-mono text-[10px] whitespace-nowrap text-muted-foreground">
+                    {formatDepth(setting.depth.reach[1])}
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  <Fact claim={setting.depth.claim}>
+                    {setting.depth.range
+                      ? `Recorded ${setting.depth.range[0]}–${setting.depth.range[1]} m · `
+                      : 'Depth in metres not established · '}
+                    {setting.depth.words}
+                  </Fact>
+                  {night && nightNote[species.id] && (
+                    <Fact claim={nightNote[species.id]!.claim}>
+                      {nightNote[species.id]!.text}
+                    </Fact>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
             <Popover open={lifeMenuOpen} onOpenChange={setLifeMenuOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -1880,54 +2003,6 @@ export function Simulator() {
                 onCut={setCut}
               />
             )}
-            {setting.scene !== 'beach' && pearlShown == null && (
-              <Card
-                className={`float depth-card ${PANEL} gap-1.5 px-4 py-3`}
-                role="group"
-                aria-label="Depth"
-              >
-                <div className="flex items-baseline justify-between gap-3">
-                  <span className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
-                    Depth{night ? ' · night dive' : ''}
-                  </span>
-                  <span className="depth-value font-mono text-sm">
-                    ≈ {formatDepth(setting.depthM)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-[10px] whitespace-nowrap text-muted-foreground">
-                    {formatDepth(setting.depth.reach[0])}
-                  </span>
-                  <Slider
-                    min={setting.depth.reach[0]}
-                    max={setting.depth.reach[1]}
-                    step={setting.depth.reach[1] > 100 ? 10 : 0.5}
-                    value={[setting.depthM]}
-                    onValueChange={([value]) => setDepthChoice(value ?? null)}
-                    thumbProps={{
-                      'aria-label': 'Depth',
-                      'aria-valuetext': `About ${formatDepth(setting.depthM)} deep`,
-                    }}
-                  />
-                  <span className="font-mono text-[10px] whitespace-nowrap text-muted-foreground">
-                    {formatDepth(setting.depth.reach[1])}
-                  </span>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  <Fact claim={setting.depth.claim}>
-                    {setting.depth.range
-                      ? `Recorded ${setting.depth.range[0]}–${setting.depth.range[1]} m · `
-                      : 'Depth in metres not established · '}
-                    {setting.depth.words}
-                  </Fact>
-                  {night && nightNote[species.id] && (
-                    <Fact claim={nightNote[species.id]!.claim}>
-                      {nightNote[species.id]!.text}
-                    </Fact>
-                  )}
-                </div>
-              </Card>
-            )}
           </div>
           <div className="float float-actions pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md flex items-center gap-1 rounded-full p-1">
             <div className="flex items-center" role="group" aria-label="Zoom">
@@ -1952,128 +2027,240 @@ export function Simulator() {
                 <ZoomOut />
               </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="lg"
-              className="rounded-full max-md:hidden"
-              onClick={() => act('reset')}
-            >
-              <RotateCcw />
-              Reset view
-            </Button>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="rounded-full"
-                  aria-label="View options"
-                >
-                  <Eye />
-                  <span className="max-md:sr-only">View</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                align="end"
-                className="view-menu grid w-60 gap-1 bg-popover/95 p-2 backdrop-blur-md"
-              >
-                <p className="px-2 pt-1 pb-1.5 text-xs font-medium text-muted-foreground">
-                  View
-                </p>
-                <Toggle
-                  size="lg"
-                  pressed={cut}
-                  onPressedChange={setCut}
-                  disabled={frame.size === 0}
-                  className="tool-toggle w-full justify-start"
-                >
-                  <Scissors />
-                  Cut open
-                </Toggle>
-                <Toggle
-                  size="lg"
-                  pressed={xray}
-                  onPressedChange={setXray}
-                  disabled={frame.size === 0}
-                  className="tool-toggle w-full justify-start"
-                >
-                  <ScanEye />
-                  See-through
-                </Toggle>
-                {pearlKind && (
-                  <Toggle
-                    size="lg"
-                    pressed={pearlShown != null}
-                    onPressedChange={(on) => setPearlStep(on ? 2 : null)}
-                    disabled={!pearlReady}
-                    title={
-                      pearlReady
-                        ? 'Look inside for a pearl and watch it grow'
-                        : 'A pearl grows inside the living clam'
-                    }
-                    className="tool-toggle w-full justify-start"
-                  >
-                    <CircleDot />
-                    Pearl
-                  </Toggle>
-                )}
-                <Toggle
-                  size="lg"
-                  pressed={labels}
-                  onPressedChange={setLabels}
-                  className="tool-toggle w-full justify-start"
-                >
-                  <Tag />
-                  Labels
-                </Toggle>
-                <Toggle
-                  size="lg"
-                  pressed={actual}
-                  onPressedChange={setActual}
-                  className="tool-toggle w-full justify-start"
-                >
-                  <Ruler />
-                  Actual size
-                </Toggle>
-                {actual && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="justify-start"
-                    onClick={() => setCalibrateOpen(true)}
-                  >
-                    Calibrate actual size
-                  </Button>
-                )}
-              </PopoverContent>
-            </Popover>
-            <Button
-              variant="ghost"
-              size="lg"
-              onClick={() => setSourcesOpen(true)}
-            >
-              <BookOpen />
-              <span className="max-md:sr-only">Sources</span>
-            </Button>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon-lg"
                   className="rounded-full"
-                  aria-label={
-                    theme === 'dark'
-                      ? 'Switch to light mode'
-                      : 'Switch to dark mode'
-                  }
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  aria-label="Reset view"
+                  onClick={() => act('reset')}
                 >
-                  {theme === 'dark' ? <Sun /> : <Moon />}
+                  <RotateCcw />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
-                {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-              </TooltipContent>
+              <TooltipContent>Reset view</TooltipContent>
+            </Tooltip>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  className="rounded-full"
+                  aria-label="View options"
+                >
+                  <Eye />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="end"
+                className="view-menu w-[min(23rem,calc(100vw-2rem))] bg-popover/97 p-3 backdrop-blur-md"
+              >
+                <section className="view-menu-section">
+                  <div className="view-menu-heading">
+                    <h2>Appearance</h2>
+                    <p>Change the rendering without changing the specimen.</p>
+                  </div>
+                  <div className="view-slider-option">
+                    <ToolCopy title="Drawing to realistic">
+                      Blend the scientific illustration with natural materials.
+                    </ToolCopy>
+                    <Slider
+                      min={0}
+                      max={100}
+                      value={[Math.round(look * 100)]}
+                      onValueChange={([value]) => setLook((value ?? 0) / 100)}
+                      thumbProps={{
+                        'aria-label': 'Drawing or realistic',
+                        'aria-valuetext':
+                          look < 0.15
+                            ? 'Educational drawing'
+                            : look > 0.85
+                              ? 'Realistic'
+                              : `${Math.round(look * 100)}% realistic`,
+                      }}
+                    />
+                  </div>
+                  <Toggle
+                    size="lg"
+                    pressed={labels}
+                    onPressedChange={setLabels}
+                    className="tool-toggle w-full justify-start"
+                  >
+                    <Tag />
+                    <ToolCopy title="Labels">
+                      Name the visible anatomical parts.
+                    </ToolCopy>
+                  </Toggle>
+                  <Toggle
+                    size="lg"
+                    pressed={theme === 'dark'}
+                    onPressedChange={(on) => setTheme(on ? 'dark' : 'light')}
+                    className="tool-toggle w-full justify-start"
+                  >
+                    {theme === 'dark' ? <Sun /> : <Moon />}
+                    <ToolCopy title="Dark mode">
+                      Dim the interface and switch the dive to night.
+                    </ToolCopy>
+                  </Toggle>
+                </section>
+                <Separator />
+                <section className="view-menu-section">
+                  <div className="view-menu-heading">
+                    <h2>Camera</h2>
+                    <p>Choose a fixed study angle or let the shell rotate.</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    className="tool-toggle w-full justify-start"
+                    onClick={() => {
+                      setTurntable(false)
+                      act('front')
+                    }}
+                  >
+                    <Eye />
+                    <ToolCopy title="Front view">
+                      Face the shell like a field-guide plate.
+                    </ToolCopy>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="lg"
+                    className="tool-toggle w-full justify-start"
+                    onClick={() => {
+                      setTurntable(false)
+                      act('iso')
+                    }}
+                  >
+                    <Layers />
+                    <ToolCopy title="Isometric">
+                      Return to the spatial study view.
+                    </ToolCopy>
+                  </Button>
+                  <Toggle
+                    size="lg"
+                    pressed={turntable}
+                    onPressedChange={setTurntable}
+                    disabled={reducedMotion}
+                    className="tool-toggle w-full justify-start"
+                  >
+                    <Rotate3d />
+                    <ToolCopy title="Turntable">
+                      Rotate slowly to inspect the whole form.
+                    </ToolCopy>
+                  </Toggle>
+                </section>
+                <Separator />
+                <section className="view-menu-section">
+                  <div className="view-menu-heading">
+                    <h2>Inside the shell</h2>
+                    <p>Reveal hidden structures in the current life chapter.</p>
+                  </div>
+                  <Toggle
+                    size="lg"
+                    pressed={cut}
+                    onPressedChange={setCut}
+                    disabled={frame.size === 0}
+                    className="tool-toggle w-full justify-start"
+                  >
+                    <Scissors />
+                    <ToolCopy title="Cut open">
+                      Remove one side to expose the interior.
+                    </ToolCopy>
+                  </Toggle>
+                  <Toggle
+                    size="lg"
+                    pressed={xray}
+                    onPressedChange={setXray}
+                    disabled={frame.size === 0}
+                    className="tool-toggle w-full justify-start"
+                  >
+                    <ScanEye />
+                    <ToolCopy title="See-through">
+                      Fade the shell wall without removing it.
+                    </ToolCopy>
+                  </Toggle>
+                  {pearlKind && (
+                    <Toggle
+                      size="lg"
+                      pressed={pearlShown != null}
+                      onPressedChange={(on) => setPearlStep(on ? 2 : null)}
+                      disabled={!pearlReady}
+                      className="tool-toggle w-full justify-start"
+                    >
+                      <CircleDot />
+                      <ToolCopy title="Pearl">
+                        Watch a pearl form inside the living clam.
+                      </ToolCopy>
+                    </Toggle>
+                  )}
+                  {frame.animal > 0 && frame.larva === 0 && (
+                    <div className="view-slider-option">
+                      <ToolCopy title="Take apart">
+                        Separate the body from the shell.
+                      </ToolCopy>
+                      <Slider
+                        min={0}
+                        max={100}
+                        value={[Math.round(apart * 100)]}
+                        onValueChange={([value]) =>
+                          setApart((value ?? 0) / 100)
+                        }
+                        thumbProps={{
+                          'aria-label': 'Take apart',
+                          'aria-valuetext':
+                            apart > 0.05
+                              ? `Body pulled ${Math.round(apart * 100)}% out of the shell`
+                              : 'Body inside the shell',
+                        }}
+                      />
+                    </div>
+                  )}
+                </section>
+                <Separator />
+                <section className="view-menu-section">
+                  <div className="view-menu-heading">
+                    <h2>Scale</h2>
+                    <p>Compare the model with the specimen’s measured size.</p>
+                  </div>
+                  <Toggle
+                    size="lg"
+                    pressed={actual}
+                    onPressedChange={setActual}
+                    className="tool-toggle w-full justify-start"
+                  >
+                    <Ruler />
+                    <ToolCopy title="Actual size">
+                      Draw the shell at calibrated screen scale.
+                    </ToolCopy>
+                  </Toggle>
+                  {actual && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start"
+                      onClick={() => setCalibrateOpen(true)}
+                    >
+                      Calibrate actual size
+                    </Button>
+                  )}
+                </section>
+              </PopoverContent>
+            </Popover>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-lg"
+                  className="rounded-full"
+                  aria-label="Sources"
+                  onClick={() => setSourcesOpen(true)}
+                >
+                  <BookOpen />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Sources</TooltipContent>
             </Tooltip>
           </div>
 
@@ -2131,6 +2318,7 @@ export function Simulator() {
                     originName={origin.name}
                     shelf={shelf}
                     shelfError={shelfError}
+                    onExplore={exploreSpecies}
                     onRemove={(index) =>
                       writeShelf(
                         shelf.filter((_, at) => at !== index),
@@ -2252,85 +2440,6 @@ export function Simulator() {
                 </ol>
               </div>
             </section>
-            <Separator />
-            <div className="figure-tools">
-              <div className="look-slider">
-                <span aria-hidden="true">Drawing</span>
-                <Slider
-                  className="w-36"
-                  min={0}
-                  max={100}
-                  value={[Math.round(look * 100)]}
-                  onValueChange={([value]) => setLook((value ?? 0) / 100)}
-                  thumbProps={{
-                    'aria-label': 'Drawing or realistic',
-                    'aria-valuetext':
-                      look < 0.15
-                        ? 'Educational drawing'
-                        : look > 0.85
-                          ? 'Realistic'
-                          : `${Math.round(look * 100)}% realistic`,
-                  }}
-                />
-                <span aria-hidden="true">Realistic</span>
-              </div>
-              <div
-                className="figure-views flex flex-wrap gap-1.5"
-                role="group"
-                aria-label="Turn"
-              >
-                <Button
-                  variant="outline"
-                  className="rounded-full"
-                  onClick={() => {
-                    setTurntable(false)
-                    act('front')
-                  }}
-                >
-                  Front view
-                </Button>
-                <Button
-                  variant="outline"
-                  className="rounded-full"
-                  onClick={() => {
-                    setTurntable(false)
-                    act('iso')
-                  }}
-                >
-                  Isometric
-                </Button>
-                <Toggle
-                  variant="outline"
-                  className="rounded-full data-[state=on]:bg-foreground data-[state=on]:text-background"
-                  pressed={turntable}
-                  onPressedChange={setTurntable}
-                  disabled={reducedMotion}
-                >
-                  <Rotate3d />
-                  Turntable
-                </Toggle>
-              </div>
-              {frame.animal > 0 && frame.larva === 0 && (
-                <div className="take-apart">
-                  <Layers aria-hidden="true" className="size-4" />
-                  <span aria-hidden="true">Take apart</span>
-                  <Slider
-                    className="w-36"
-                    min={0}
-                    max={100}
-                    value={[Math.round(apart * 100)]}
-                    onValueChange={([value]) => setApart((value ?? 0) / 100)}
-                    thumbProps={{
-                      'aria-label': 'Take apart',
-                      'aria-valuetext':
-                        apart > 0.05
-                          ? `Body pulled ${Math.round(apart * 100)}% out of the shell`
-                          : 'Body inside the shell',
-                    }}
-                  />
-                </div>
-              )}
-            </div>
           </Card>
           <p className="sr-only" id="sim-summary">
             {summary}

@@ -64,6 +64,7 @@ import type { WaterLight } from './water.ts'
 import type { Scenery } from './seafloor.ts'
 import { buildScene } from './scene.ts'
 import type { Built } from './scene.ts'
+import { allSpecies } from './species.ts'
 import type { Species } from './species.ts'
 
 export type Measure = {
@@ -82,6 +83,7 @@ export type StageEvent =
   | { type: 'shell' }
   | { type: 'tumble' }
   | { type: 'pickup' }
+  | { type: 'collection'; speciesId: string }
 
 /** Actions the page asks the stage to perform, so buttons and taps do the same thing. */
 export type Pulse = {
@@ -611,7 +613,10 @@ export default function Stage({
       ink.forget()
       scenery =
         setting.scene === 'collection'
-          ? buildDisplayCase(built.extent)
+          ? buildDisplayCase(
+              built.extent,
+              allSpecies.map((item) => item.id),
+            )
           : buildSeafloor(setting, layout(built), seedOf(key), built.extent)
       undoScenery = inkify(scenery.group)
       // The drawn look's sand needs the see-through window too.
@@ -1595,6 +1600,26 @@ export default function Stage({
         emit({ type: 'hold', on: true })
       }
     }
+    const collectionSpeciesAt = (event: PointerEvent) => {
+      if (!scenery || latest.current.frame.phase !== 'found') return null
+      const targets = scenery.group.children.filter(
+        (object) => typeof object.userData.collectionSpeciesId === 'string',
+      )
+      let selected: Object3D | null = pick(event, targets)?.object ?? null
+      while (
+        selected &&
+        typeof selected.userData.collectionSpeciesId !== 'string'
+      )
+        selected = selected.parent
+      return (
+        (selected?.userData.collectionSpeciesId as string | undefined) ?? null
+      )
+    }
+    const pointermove = (event: PointerEvent) => {
+      renderer.domElement.style.cursor = collectionSpeciesAt(event)
+        ? 'pointer'
+        : ''
+    }
     const pointerup = (event: PointerEvent) => {
       const wasHolding = holding
       release()
@@ -1604,7 +1629,11 @@ export default function Stage({
       down = null
       if (moved > 6 || !quick || wasHolding) return
       const { frame } = latest.current
-      if (frame.phase === 'egg') {
+      if (frame.phase === 'found') {
+        const speciesId = collectionSpeciesAt(event)
+        if (speciesId) emit({ type: 'collection', speciesId })
+        else if (pick(event, [built.specimen])) actions.pickup()
+      } else if (frame.phase === 'egg') {
         const hit = pick(event, built.eggs)
         let egg: Object3D | null = hit?.object ?? null
         while (egg && egg.userData.egg === undefined) egg = egg.parent
@@ -1616,7 +1645,6 @@ export default function Stage({
         if (frame.phase === 'adult') actions.poke()
         else if (frame.phase === 'remains') emit({ type: 'shell' })
         else if (frame.phase === 'beach') actions.tumble()
-        else if (frame.phase === 'found') actions.pickup()
       }
     }
     const pointercancel = () => {
@@ -1624,6 +1652,7 @@ export default function Stage({
       down = null
     }
     renderer.domElement.addEventListener('pointerdown', pointerdown)
+    renderer.domElement.addEventListener('pointermove', pointermove)
     renderer.domElement.addEventListener('pointerup', pointerup)
     renderer.domElement.addEventListener('pointercancel', pointercancel)
 
@@ -1788,6 +1817,7 @@ export default function Stage({
       container.removeEventListener('gesturestart', gesturestart)
       container.removeEventListener('gesturechange', gesturechange)
       renderer.domElement.removeEventListener('pointerdown', pointerdown)
+      renderer.domElement.removeEventListener('pointermove', pointermove)
       renderer.domElement.removeEventListener('pointerup', pointerup)
       renderer.domElement.removeEventListener('pointercancel', pointercancel)
       renderer.domElement.removeEventListener('webglcontextlost', lost)

@@ -190,17 +190,24 @@ test('the timeline covers a whole life in order and ends in a hand', () => {
 })
 
 test('the found display is a populated specimen drawer with a central showcase', () => {
-  const display = buildDisplayCase(100)
+  const display = buildDisplayCase(100, ['tiger-cowrie', 'chambered-nautilus'])
   const specimens: string[] = []
+  const selectable: string[] = []
   let meshes = 0
   let plinths = 0
   display.group.traverse((object) => {
     if (object.type === 'Mesh') meshes++
-    if (object.name.startsWith('collection-specimen-'))
+    if (object.name.startsWith('collection-specimen-')) {
       specimens.push(object.name)
+      selectable.push(object.userData.collectionSpeciesId as string)
+    }
     if (object.userData.displayPlinth) plinths++
   })
   assert.equal(specimens.length, 42)
+  assert.deepEqual(
+    new Set(selectable),
+    new Set(['tiger-cowrie', 'chambered-nautilus']),
+  )
   assert.ok(meshes >= 250, `the collection has ${meshes} crafted pieces`)
   assert.equal(plinths, 1)
   display.dispose()

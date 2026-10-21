@@ -1407,7 +1407,7 @@ html[data-theme='dark'] .sim-view::after {
 .sim .ocean .life-panel {
   top: 80px;
   right: 16px;
-  bottom: 176px;
+  bottom: 116px;
   width: 400px;
 }
 
@@ -1455,7 +1455,7 @@ html[data-theme='dark'] .sim-view::after {
 .ocean .action-hint {
   top: auto;
   left: 50%;
-  bottom: 184px;
+  bottom: 124px;
   z-index: 4;
   max-width: calc(100% - 820px);
   min-width: 260px;
@@ -1469,7 +1469,7 @@ html[data-theme='dark'] .sim-view::after {
 .ocean .view-badge {
   top: auto;
   left: 16px;
-  bottom: 206px;
+  bottom: 146px;
   z-index: 4;
   padding: 3px 8px;
   border-radius: 100px;
@@ -1477,7 +1477,7 @@ html[data-theme='dark'] .sim-view::after {
 }
 .ocean .scale-bar {
   left: 16px;
-  bottom: 168px;
+  bottom: 108px;
   z-index: 4;
   padding: 6px 10px;
   border-radius: 10px;
@@ -1487,7 +1487,7 @@ html[data-theme='dark'] .sim-view::after {
 /* Short screens: keep the title panel compact so it clears the timeline. */
 @media (max-height: 960px) {
   .ocean .float-left {
-    max-height: calc(100dvh - 268px);
+    max-height: calc(100dvh - 208px);
     padding-right: 4px;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -1501,9 +1501,6 @@ html[data-theme='dark'] .sim-view::after {
 @media (max-height: 760px) {
   .ocean .setting-note {
     display: none !important;
-  }
-  .ocean .depth-card {
-    display: none;
   }
 }
 
@@ -1718,6 +1715,74 @@ html[data-theme='dark'] .sim-view::after {
 .view-menu .tool-toggle[data-state='on'] {
   background: var(--primary);
   color: var(--primary-foreground);
+}
+.view-menu {
+  display: grid;
+  max-height: min(78dvh, 760px);
+  gap: 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.view-menu-section {
+  display: grid;
+  gap: 4px;
+}
+.view-menu-heading {
+  display: grid;
+  gap: 2px;
+  padding: 3px 8px 6px;
+}
+.view-menu-heading h2 {
+  font-size: 13px;
+  font-weight: 700;
+}
+.view-menu-heading p,
+.view-option-copy small {
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+.view-menu .tool-toggle {
+  min-height: 58px;
+  height: auto;
+  gap: 10px;
+  padding: 8px 10px;
+  white-space: normal;
+}
+.view-menu .tool-toggle > svg {
+  flex: none;
+}
+.view-option-copy {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+  text-align: left;
+}
+.view-option-copy strong {
+  font-size: 13px;
+  font-weight: 650;
+}
+.view-menu .tool-toggle[data-state='on'] .view-option-copy small {
+  color: color-mix(in srgb, currentColor 72%, transparent);
+}
+.view-slider-option {
+  display: grid;
+  gap: 10px;
+  min-height: 72px;
+  padding: 9px 10px 12px 44px;
+}
+.collection-explorer {
+  display: grid;
+  gap: 10px;
+}
+.collection-explorer-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.collection-explorer-grid button {
+  min-height: 44px;
 }
 .sim .ocean .float-title {
   padding: 28px;

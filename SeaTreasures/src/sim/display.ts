@@ -26,7 +26,10 @@ const felt = new Color(0.055, 0.08, 0.07)
  * bay is kept clear for the selected shell; the surrounding cubbies show the
  * breadth and variation of a real collection.
  */
-export function buildDisplayCase(extent: number): Scenery {
+export function buildDisplayCase(
+  extent: number,
+  speciesIds: readonly string[] = [],
+): Scenery {
   const group = new Group()
   group.name = 'found-display-case'
   const width = Math.max(1200, extent * 4)
@@ -202,6 +205,9 @@ export function buildDisplayCase(extent: number): Scenery {
   const addSpecimen = (index: number, x: number, y: number) => {
     const specimen = new Group()
     specimen.name = `collection-specimen-${index + 1}`
+    if (speciesIds.length)
+      specimen.userData.collectionSpeciesId =
+        speciesIds[index % speciesIds.length]
     specimen.position.set(x, y, depth * 0.27)
     specimen.rotation.z = ((index % 5) - 2) * 0.055
     const size = Math.min(cellWidth * 0.25, cellHeight * 0.22)

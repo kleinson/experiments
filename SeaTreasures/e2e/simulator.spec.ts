@@ -123,6 +123,22 @@ test('a whole life plays from egg to a shell in your hand', async ({
   await expect(shelf).toHaveCount(0)
 })
 
+test('a drawer specimen starts that shell lifecycle from the beginning', async ({
+  page,
+}) => {
+  await page.goto('./?species=tiger-cowrie')
+  await phase(page, 'Found')
+  const explorer = page.locator('.collection-explorer')
+  await explorer.getByRole('button', { name: 'Chambered nautilus' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Chambered nautilus', level: 1 }),
+  ).toBeVisible()
+  await expect(page.locator('#phase-title')).toHaveText('Egg')
+  await expect(announced(page)).toContainText(
+    'Starting the Chambered nautilus life again at the egg',
+  )
+})
+
 test('the lifecycle menu and timeline preview every life chapter', async ({
   page,
 }) => {
@@ -272,6 +288,7 @@ test('the drawing-to-realistic slider and the views change the figure', async ({
       .poll(async () => (await canvas.screenshot()).equals(before))
       .toBe(false)
   let before = await canvas.screenshot()
+  await openViewOptions(page)
   await page.getByRole('slider', { name: 'Drawing or realistic' }).focus()
   await page.keyboard.press('Home')
   await changedFrom(before)
@@ -442,13 +459,17 @@ test('the camera stays above the sea floor and depth follows the sources', async
   expect(
     (await page.locator('[data-sim-canvas]').screenshot()).equals(low),
   ).toBe(true)
+  await page.getByRole('button', { name: /Depth/ }).click()
   const depth = page.getByRole('group', { name: 'Depth' })
   await expect(depth).toContainText('Recorded 10–40 m')
   await page.getByRole('slider', { name: 'Depth', exact: true }).focus()
   await page.keyboard.press('End')
   await expect(depth).toContainText('40 m')
   await chooseShell(page, 'Chambered nautilus')
-  await expect(depth).toContainText('several hundred metres')
+  await page.getByRole('button', { name: /Depth/ }).click()
+  await expect(page.getByRole('group', { name: 'Depth' })).toContainText(
+    'several hundred metres',
+  )
 })
 
 test('the scroll wheel, trackpad pinch, keys and buttons zoom the view', async ({
@@ -500,7 +521,7 @@ test('actual size draws the shell at a millimetre scale and can be calibrated', 
         100,
     ) / 100
   expect(Math.abs((await ratio()) - 96 / 25.4)).toBeLessThan(0.05)
-  await page.getByRole('button', { name: 'Calibrate' }).click()
+  await page.getByRole('button', { name: 'Calibrate actual size' }).click()
   await page.getByRole('slider', { name: 'Card width on screen' }).fill('5')
   await page.getByRole('button', { name: 'Use this size' }).click()
   await expect(page.locator('.view-badge')).toHaveText('Actual size')
@@ -605,6 +626,18 @@ test('light and dark appearance both keep text readable', async ({ page }) => {
       expect(ratio, `${scheme} ${selector}`).toBeGreaterThan(4.5)
     }
   }
+})
+
+test('dark mode lives in View and changes the whole exhibit', async ({
+  page,
+}) => {
+  await page.goto('./?scoutTheme=light')
+  await openViewOptions(page)
+  await page.getByRole('button', { name: /^Dark mode\b/ }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+  await expect(
+    page.getByRole('button', { name: /^Dark mode\b/, pressed: true }),
+  ).toBeVisible()
 })
 
 for (const width of [320, 390]) {
@@ -786,6 +819,7 @@ test.describe('a swimming larva', () => {
     const after = (await velum.boundingBox())!
     expect(Math.hypot(after.x - before.x, after.y - before.y)).toBeLessThan(60)
     // Pointing at a label holds the larva still, so it can be tapped.
+    await velum.dispatchEvent('pointerover')
     await page.mouse.move(after.x + after.width / 2, after.y + after.height / 2)
     await velum.click()
     const card = page.getByRole('region', { name: 'Velum' })
@@ -802,12 +836,13 @@ test.describe('a swimming larva', () => {
 test('a pearl grows step by step inside the giant clam', async ({ page }) => {
   await page.goto('./?species=giant-clam')
   await openViewOptions(page)
-  const toggle = page.getByRole('button', { name: 'Pearl', exact: true })
+  const toggle = page.getByRole('button', { name: /^Pearl\b/ })
   await expect(toggle).toBeEnabled()
   await toggle.click()
+  await page.keyboard.press('Escape')
   const card = page.getByRole('group', { name: 'Pearl' })
   await expect(card).toContainText('First layers')
-  await expect(page.getByRole('group', { name: 'Depth' })).toBeHidden()
+  await expect(page.getByRole('button', { name: /Depth/ })).toBeVisible()
   const growth = page.getByRole('slider', { name: 'Pearl growth' })
   await growth.focus()
   await page.keyboard.press('Home')
@@ -822,18 +857,14 @@ test('a pearl grows step by step inside the giant clam', async ({ page }) => {
     page.getByRole('list', { name: 'Labelled parts' }),
   ).toContainText('Growth layers')
   await openViewOptions(page)
-  await page
-    .getByRole('button', { name: 'Pearl', exact: true, pressed: true })
-    .click()
+  await page.getByRole('button', { name: /^Pearl\b/, pressed: true }).click()
   await expect(card).toBeHidden()
 })
 
 test('species without pearls have no pearl tool', async ({ page }) => {
   await page.goto('./?species=queen-conch')
   await openViewOptions(page)
-  await expect(
-    page.getByRole('button', { name: 'Pearl', exact: true }),
-  ).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^Pearl\b/ })).toHaveCount(0)
 })
 
 test('the sun and surface show under water, not on the beach', async ({
