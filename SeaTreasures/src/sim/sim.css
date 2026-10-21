@@ -556,11 +556,13 @@ html[data-theme='dark'] .sim-view::after {
   display: flex;
 }
 .phase-ticks li {
+  position: relative;
   flex-basis: 0;
   min-width: 0;
   border-left: 1px solid var(--cp-border);
 }
 .phase-ticks button {
+  position: relative;
   width: 100%;
   min-height: 44px;
   padding: 4px 6px;
@@ -569,13 +571,78 @@ html[data-theme='dark'] .sim-view::after {
   text-align: left;
   font-size: 11px;
   color: var(--cp-text-soft);
-  white-space: nowrap;
+}
+.phase-label {
+  display: block;
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
 }
 .phase-ticks button[aria-current='step'] {
   color: var(--cp-accent);
   font-weight: 600;
+}
+.phase-preview {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  bottom: calc(100% + 12px);
+  width: 168px;
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 5px);
+  background: color-mix(in srgb, var(--popover) 97%, transparent);
+  color: var(--popover-foreground);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 6px) scale(0.97);
+  transform-origin: bottom center;
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+.phase-preview-picture {
+  display: grid;
+  aspect-ratio: 4 / 3;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--muted) 82%, transparent);
+}
+.phase-preview-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+.phase-preview-copy {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 6px;
+}
+.phase-preview-copy span {
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 500;
+}
+.phase-preview-copy strong {
+  font-size: 12px;
+  font-weight: 650;
+}
+@media (hover: hover) {
+  .phase-ticks button:hover .phase-preview {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+.phase-ticks button:focus-visible .phase-preview {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
 }
 .field-plates {
   margin: 8px 0 24px;
@@ -1132,12 +1199,11 @@ html[data-theme='dark'] .sim-view::after {
   z-index: 5;
 }
 
-/* The filters: shell, place and habitat, three separate floating pills, front and centre. */
+/* Filters lead the left column so the action group always has a clear lane. */
 .filter-bar {
   z-index: 9;
   top: 18px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 16px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1162,14 +1228,6 @@ html[data-theme='dark'] .sim-view::after {
   background: var(--cp-panel-strong);
   box-shadow: var(--float-shadow);
 }
-/* When the window is too narrow to centre it between the panels, it leads the left column. */
-@media (max-width: 1360px) {
-  .filter-bar {
-    left: 16px;
-    transform: none;
-  }
-}
-
 /* Title and setting: top left, under the filters, with the view toolbar under it. */
 .float-left {
   position: absolute;
@@ -1217,6 +1275,10 @@ html[data-theme='dark'] .sim-view::after {
   gap: 10px;
   padding-block: 2px 14px;
   border-bottom: 1px solid var(--border);
+}
+.life-popover .life-gallery {
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 .life-gallery-head {
   display: flex;
@@ -1351,9 +1413,11 @@ html[data-theme='dark'] .sim-view::after {
 
 /* The timeline and figure tools float along the bottom. */
 .float-bottom {
+  z-index: 10;
   left: 16px;
   right: 16px;
   bottom: 16px;
+  overflow: visible;
 }
 .ocean .timeline {
   position: static;
@@ -1422,13 +1486,12 @@ html[data-theme='dark'] .sim-view::after {
 
 /* Short screens: keep the title panel compact so it clears the timeline. */
 @media (max-height: 960px) {
-  .ocean .setting-note {
-    display: none !important;
-  }
-  .ocean .float-title {
-    max-height: calc(100dvh - 244px);
+  .ocean .float-left {
+    max-height: calc(100dvh - 268px);
+    padding-right: 4px;
     overflow-y: auto;
     overscroll-behavior: contain;
+    scrollbar-width: thin;
   }
   .float-title .sim-taxon .fact details {
     display: none !important;
@@ -1436,11 +1499,11 @@ html[data-theme='dark'] .sim-view::after {
 }
 
 @media (max-height: 760px) {
+  .ocean .setting-note {
+    display: none !important;
+  }
   .ocean .depth-card {
     display: none;
-  }
-  .ocean .float-title {
-    max-height: calc(100dvh - 272px);
   }
 }
 
@@ -1596,6 +1659,9 @@ html[data-theme='dark'] .sim-view::after {
   .phase-ticks button[aria-current='step'] {
     font-size: 11px;
     overflow: visible;
+  }
+  .phase-preview {
+    display: none;
   }
 }
 .sim .sim-view.ocean::after {

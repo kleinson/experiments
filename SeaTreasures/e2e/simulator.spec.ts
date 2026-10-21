@@ -123,10 +123,11 @@ test('a whole life plays from egg to a shell in your hand', async ({
   await expect(shelf).toHaveCount(0)
 })
 
-test('the species card shows a picture of every life chapter', async ({
+test('the lifecycle menu and timeline preview every life chapter', async ({
   page,
 }) => {
   await page.goto('./?species=tiger-cowrie')
+  await page.getByRole('button', { name: /Lifecycle, Adult/ }).click()
   const gallery = page.getByRole('region', { name: 'One whole life' })
   const chapters = gallery.getByRole('button')
   await expect(chapters).toHaveCount(8)
@@ -159,6 +160,20 @@ test('the species card shows a picture of every life chapter', async ({
     ).toBeVisible()
   await gallery.getByRole('button', { name: 'View Found stage' }).click()
   await expect(page.locator('#phase-title')).toHaveText('Found')
+  await expect(gallery).not.toBeVisible()
+
+  const larva = page.locator('.phase-ticks button', { hasText: 'Larva' })
+  await larva.hover()
+  const preview = larva.locator('.phase-preview')
+  await expect(preview).toBeVisible()
+  await expect(preview).toContainText('Larva')
+  await expect
+    .poll(() =>
+      preview
+        .locator('img')
+        .evaluate((picture: HTMLImageElement) => picture.naturalWidth),
+    )
+    .toBeGreaterThan(0)
 })
 
 test('tapping eggs on the stage hatches them one by one', async ({ page }) => {

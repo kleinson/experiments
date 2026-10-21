@@ -1216,6 +1216,7 @@ export function Simulator() {
   )
   // The menu's drawings are made the first time it opens, so they never slow the first view.
   const [menuOpened, setMenuOpened] = useState(false)
+  const [lifeMenuOpen, setLifeMenuOpen] = useState(false)
   useEffect(
     () =>
       menuOpened
@@ -1769,6 +1770,36 @@ export function Simulator() {
                 })}
               </SelectContent>
             </Select>
+            <Popover open={lifeMenuOpen} onOpenChange={setLifeMenuOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(PILL, 'px-3.5')}
+                  aria-label={`Lifecycle, ${phase.label}`}
+                >
+                  <Layers className="text-muted-foreground" />
+                  <span>Lifecycle</span>
+                  <ChevronDown className="text-muted-foreground" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="start"
+                sideOffset={8}
+                className="life-popover w-[min(35rem,calc(100vw-2rem))] rounded-2xl p-4"
+              >
+                <LifecycleGallery
+                  species={species}
+                  pictures={lifeThumbs[species.id] ?? null}
+                  current={frame.phase}
+                  onChoose={(id) => {
+                    const chapter = phases.find((item) => item.id === id)!
+                    setPlaying(false)
+                    setT(startOf(id) + chapter.share * 0.55)
+                    setLifeMenuOpen(false)
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
             {bedChoice && (
               <Button
                 variant="ghost"
@@ -1806,16 +1837,6 @@ export function Simulator() {
                 </div>
               </CardHeader>
               <CardContent className="grid gap-3 px-4">
-                <LifecycleGallery
-                  species={species}
-                  pictures={lifeThumbs[species.id] ?? null}
-                  current={frame.phase}
-                  onChoose={(id) => {
-                    const chapter = phases.find((item) => item.id === id)!
-                    setPlaying(false)
-                    setT(startOf(id) + chapter.share * 0.55)
-                  }}
-                />
                 <div className="setting-note" aria-live="polite">
                   <Fact claim="seabed-setting-illustrative">
                     <strong>{settingLabel(setting)}</strong>
@@ -2205,7 +2226,26 @@ export function Simulator() {
                           setT(startOf(item.id) + item.share * 0.5)
                         }}
                       >
-                        {item.label}
+                        <span className="phase-label">{item.label}</span>
+                        <span className="phase-preview" aria-hidden="true">
+                          <span className="phase-preview-picture">
+                            {lifeThumbs[species.id]?.[item.id] ? (
+                              <img
+                                src={lifeThumbs[species.id]![item.id]}
+                                alt=""
+                              />
+                            ) : (
+                              <span className="life-picture-loading" />
+                            )}
+                          </span>
+                          <span className="phase-preview-copy">
+                            <span>
+                              {String(index + 1).padStart(2, '0')} /{' '}
+                              {String(phases.length).padStart(2, '0')}
+                            </span>
+                            <strong>{item.label}</strong>
+                          </span>
+                        </span>
                       </button>
                     </li>
                   ))}
