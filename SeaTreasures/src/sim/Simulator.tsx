@@ -1615,6 +1615,105 @@ export function Simulator() {
       : 'No shell yet.'
   }${cut ? ' Cut open.' : ''}${xray ? ' See-through view.' : ''}`
 
+  const lifeDetails = (
+    <Card
+      className="life-panel gap-0 border-0 bg-transparent py-0 shadow-none"
+      aria-labelledby="phase-title"
+      role="complementary"
+    >
+      <div className="grid gap-5 p-5">
+        <div className="grid gap-1">
+          <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+            {String(phaseIndex + 1).padStart(2, '0')} /{' '}
+            {String(phases.length).padStart(2, '0')}
+          </p>
+          <h2
+            id="phase-title"
+            className="text-[26px] font-normal tracking-tight"
+          >
+            {phase.label}
+          </h2>
+          <p className={`clock${clock.known ? '' : ' unknown'}`}>
+            {clock.label}
+          </p>
+        </div>
+        {action.button && (
+          <Button
+            size="lg"
+            className="action-button h-11 justify-self-start rounded-full bg-brand px-5 text-brand-foreground hover:bg-brand/85"
+            onClick={runAction}
+            aria-pressed={frame.phase === 'growth' ? growing : undefined}
+          >
+            <Hand />
+            {frame.phase === 'growth' && growing
+              ? 'Stop growing'
+              : action.button}
+          </Button>
+        )}
+        {frame.phase === 'egg' && <EggSite species={species} />}
+        <HowItMoves
+          species={species}
+          phase={frame.phase}
+          night={night}
+          onNight={() => setTheme('dark')}
+          onTuck={() => act('tuck')}
+        />
+        <div className="phase-story">
+          <PhaseStory
+            species={species}
+            phase={frame.phase}
+            deathId={death?.id ?? ''}
+            onDeath={setDeathId}
+            originName={origin.name}
+            shelf={shelf}
+            shelfError={shelfError}
+            onExplore={exploreSpecies}
+            onRemove={(index) =>
+              writeShelf(
+                shelf.filter((_, at) => at !== index),
+                'Removed from your shelf.',
+              )
+            }
+          />
+        </div>
+        <Separator />
+        <dl className="durations">
+          <div>
+            <dt>Egg</dt>
+            <dd>{describeDuration(species.life.egg)}</dd>
+          </div>
+          <div>
+            <dt>Larva</dt>
+            <dd>{describeDuration(species.life.larva)}</dd>
+          </div>
+          <div>
+            <dt>To adult</dt>
+            <dd>{describeDuration(species.life.maturity)}</dd>
+          </div>
+          <div>
+            <dt>Lifespan</dt>
+            <dd>{describeDuration(species.life.lifespan)}</dd>
+          </div>
+          <div>
+            <dt>Adult size</dt>
+            <dd>
+              {species.lengthMm.typical
+                ? `${species.lengthMm.typical[0]}–${species.lengthMm.typical[1]} mm`
+                : 'Not established'}
+              {species.lengthMm.max
+                ? ` · up to ${species.lengthMm.max} mm`
+                : ''}
+            </dd>
+          </div>
+          <div>
+            <dt>Drawn at</dt>
+            <dd title={species.drawnNote}>{species.lengthMm.drawn} mm</dd>
+          </div>
+        </dl>
+      </div>
+    </Card>
+  )
+
   return (
     <div className="sim" data-phase={frame.phase}>
       <a className="skip-link" href="#timeline">
@@ -1937,63 +2036,67 @@ export function Simulator() {
           </div>
 
           <div className="float-left">
-            <Card className="float-title pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md gap-3 py-3.5">
-              <CardHeader className="px-4">
-                <div className="title-row">
-                  <a className="brand" href={import.meta.env.BASE_URL}>
-                    <img
-                      src={`${import.meta.env.BASE_URL}shell-mark.svg`}
-                      alt=""
-                    />
-                    <span className="sr-only">SeaTreasures</span>
-                  </a>
-                  <div className="sim-title">
-                    <h1 ref={heading} tabIndex={-1}>
-                      {species.commonName}
-                    </h1>
-                    <div className="sim-taxon">
-                      <Fact claim={species.taxonClaim}>
-                        <i>{species.scientificName}</i> {species.authority}
-                      </Fact>
+            <div className="info-panel pointer-events-auto">
+              <Card className="float-title gap-3 border-0 bg-transparent py-3.5 shadow-none">
+                <CardHeader className="px-4">
+                  <div className="title-row">
+                    <a className="brand" href={import.meta.env.BASE_URL}>
+                      <img
+                        src={`${import.meta.env.BASE_URL}shell-mark.svg`}
+                        alt=""
+                      />
+                      <span className="sr-only">SeaTreasures</span>
+                    </a>
+                    <div className="sim-title">
+                      <h1 ref={heading} tabIndex={-1}>
+                        {species.commonName}
+                      </h1>
+                      <div className="sim-taxon">
+                        <Fact claim={species.taxonClaim}>
+                          <i>{species.scientificName}</i> {species.authority}
+                        </Fact>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="grid gap-3 px-4">
-                <div className="setting-note" aria-live="polite">
-                  <Fact claim="seabed-setting-illustrative">
-                    <strong>{settingLabel(setting)}</strong>
-                    {settingNote(setting, bedChoice, frame.phase)}
-                  </Fact>
-                  {setting.scene === 'seabed' && (
-                    <Fact
-                      claim={
-                        matchedColours[origin.id]
-                          ? [setting.place.claim, 'place-colours-from-photos']
-                          : setting.place.claim
-                      }
-                    >
-                      <strong>{reefLabels[setting.place.reef]}</strong> ·{' '}
-                      {setting.place.note}
-                      {matchedColours[origin.id] &&
-                        ` Water and sand colours matched to ${matchedColours[origin.id]!.photos.length} underwater photos.`}
+                </CardHeader>
+                <CardContent className="grid gap-3 px-4">
+                  <div className="setting-note" aria-live="polite">
+                    <Fact claim="seabed-setting-illustrative">
+                      <strong>{settingLabel(setting)}</strong>
+                      {settingNote(setting, bedChoice, frame.phase)}
                     </Fact>
-                  )}
-                  <Fact claim={habitat.claim}>
-                    {habitat.habitat}
-                    {habitat.depthM &&
-                      ` · ${habitat.depthM[0]}–${habitat.depthM[1]} m deep`}
-                  </Fact>
-                  <Button
-                    asChild
-                    variant="link"
-                    className="where-link h-auto justify-self-start p-0 text-xs text-muted-foreground"
-                  >
-                    <a href="#where">See it on the map</a>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                    {setting.scene === 'seabed' && (
+                      <Fact
+                        claim={
+                          matchedColours[origin.id]
+                            ? [setting.place.claim, 'place-colours-from-photos']
+                            : setting.place.claim
+                        }
+                      >
+                        <strong>{reefLabels[setting.place.reef]}</strong> ·{' '}
+                        {setting.place.note}
+                        {matchedColours[origin.id] &&
+                          ` Water and sand colours matched to ${matchedColours[origin.id]!.photos.length} underwater photos.`}
+                      </Fact>
+                    )}
+                    <Fact claim={habitat.claim}>
+                      {habitat.habitat}
+                      {habitat.depthM &&
+                        ` · ${habitat.depthM[0]}–${habitat.depthM[1]} m deep`}
+                    </Fact>
+                    <Button
+                      asChild
+                      variant="link"
+                      className="where-link h-auto justify-self-start p-0 text-xs text-muted-foreground"
+                    >
+                      <a href="#where">See it on the map</a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              <Separator />
+              {lifeDetails}
+            </div>
             {pearlKind && pearlShown != null && (
               <PearlCard
                 kind={pearlKind}
@@ -2263,109 +2366,6 @@ export function Simulator() {
               <TooltipContent>Sources</TooltipContent>
             </Tooltip>
           </div>
-
-          <Card
-            className="float life-panel pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md gap-0 py-0"
-            aria-labelledby="phase-title"
-            role="complementary"
-          >
-            <ScrollArea className="min-h-0 flex-1">
-              <div className="grid gap-5 p-6">
-                <div className="grid gap-1">
-                  <p className="font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
-                    {String(phaseIndex + 1).padStart(2, '0')} /{' '}
-                    {String(phases.length).padStart(2, '0')}
-                  </p>
-                  <h2
-                    id="phase-title"
-                    className="text-[26px] font-normal tracking-tight"
-                  >
-                    {phase.label}
-                  </h2>
-                  <p className={`clock${clock.known ? '' : ' unknown'}`}>
-                    {clock.label}
-                  </p>
-                </div>
-                {action.button && (
-                  <Button
-                    size="lg"
-                    className="action-button h-11 justify-self-start rounded-full bg-brand px-5 text-brand-foreground hover:bg-brand/85"
-                    onClick={runAction}
-                    aria-pressed={
-                      frame.phase === 'growth' ? growing : undefined
-                    }
-                  >
-                    <Hand />
-                    {frame.phase === 'growth' && growing
-                      ? 'Stop growing'
-                      : action.button}
-                  </Button>
-                )}
-                {frame.phase === 'egg' && <EggSite species={species} />}
-                <HowItMoves
-                  species={species}
-                  phase={frame.phase}
-                  night={night}
-                  onNight={() => setTheme('dark')}
-                  onTuck={() => act('tuck')}
-                />
-                <div className="phase-story">
-                  <PhaseStory
-                    species={species}
-                    phase={frame.phase}
-                    deathId={death?.id ?? ''}
-                    onDeath={setDeathId}
-                    originName={origin.name}
-                    shelf={shelf}
-                    shelfError={shelfError}
-                    onExplore={exploreSpecies}
-                    onRemove={(index) =>
-                      writeShelf(
-                        shelf.filter((_, at) => at !== index),
-                        'Removed from your shelf.',
-                      )
-                    }
-                  />
-                </div>
-                <Separator />
-                <dl className="durations">
-                  <div>
-                    <dt>Egg</dt>
-                    <dd>{describeDuration(species.life.egg)}</dd>
-                  </div>
-                  <div>
-                    <dt>Larva</dt>
-                    <dd>{describeDuration(species.life.larva)}</dd>
-                  </div>
-                  <div>
-                    <dt>To adult</dt>
-                    <dd>{describeDuration(species.life.maturity)}</dd>
-                  </div>
-                  <div>
-                    <dt>Lifespan</dt>
-                    <dd>{describeDuration(species.life.lifespan)}</dd>
-                  </div>
-                  <div>
-                    <dt>Adult size</dt>
-                    <dd>
-                      {species.lengthMm.typical
-                        ? `${species.lengthMm.typical[0]}–${species.lengthMm.typical[1]} mm`
-                        : 'Not established'}
-                      {species.lengthMm.max
-                        ? ` · up to ${species.lengthMm.max} mm`
-                        : ''}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Drawn at</dt>
-                    <dd title={species.drawnNote}>
-                      {species.lengthMm.drawn} mm
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-            </ScrollArea>
-          </Card>
 
           <Card className="float float-bottom pointer-events-auto rounded-2xl border-0 bg-card/95 shadow-[0_0_0_1px_var(--cp-border),0_12px_32px_color-mix(in_srgb,var(--cp-text)_12%,transparent)] backdrop-blur-md gap-2 px-4 py-3">
             <section

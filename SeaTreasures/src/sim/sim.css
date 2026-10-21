@@ -1247,6 +1247,13 @@ html[data-theme='dark'] .sim-view::after {
 .float-left .float {
   position: relative;
 }
+.info-panel {
+  width: 100%;
+  max-height: calc(100dvh - 208px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
 .title-row {
   display: flex;
   align-items: center;
@@ -1403,12 +1410,11 @@ html[data-theme='dark'] .sim-view::after {
   right: 16px;
 }
 
-/* The life panel floats on the right. */
+/* Species, habitat and the current life chapter share one left-hand surface. */
 .sim .ocean .life-panel {
-  top: 80px;
-  right: 16px;
-  bottom: 116px;
-  width: 400px;
+  position: relative;
+  inset: auto;
+  width: auto;
 }
 
 /* The timeline and figure tools float along the bottom. */
@@ -1486,13 +1492,6 @@ html[data-theme='dark'] .sim-view::after {
 
 /* Short screens: keep the title panel compact so it clears the timeline. */
 @media (max-height: 960px) {
-  .ocean .float-left {
-    max-height: calc(100dvh - 208px);
-    padding-right: 4px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-  }
   .float-title .sim-taxon .fact details {
     display: none !important;
   }
@@ -1523,11 +1522,15 @@ html[data-theme='dark'] .sim-view::after {
     height: var(--stage);
   }
   .float-left {
+    position: static;
+    width: auto;
+    margin: 16px;
     flex-direction: column;
+    align-items: stretch;
   }
-  .setting-note .fact + .fact,
-  .setting-note .where-link {
-    display: none;
+  .info-panel {
+    max-height: none;
+    overflow: visible;
   }
   .sim .ocean .view-controls {
     flex-direction: row;
@@ -1564,7 +1567,7 @@ html[data-theme='dark'] .sim-view::after {
   .sim .ocean .life-panel {
     position: static;
     width: auto;
-    margin: 16px;
+    margin: 0;
     max-height: none;
     overflow: visible;
   }
@@ -1596,9 +1599,8 @@ html[data-theme='dark'] .sim-view::after {
     letter-spacing: 0.06em;
   }
   .float-left {
-    top: 66px;
-    left: 10px;
-    width: calc(100% - 20px);
+    width: auto;
+    margin: 12px;
   }
   .filter-bar {
     top: 6px;
@@ -1609,21 +1611,16 @@ html[data-theme='dark'] .sim-view::after {
     overflow-x: auto;
     scrollbar-width: none;
   }
-  .float-left > .float-title {
+  .info-panel > .float-title {
     width: 100%;
   }
   .title-row {
-    padding-right: 252px;
+    padding-right: 0;
   }
   .float-title .sim-title h1 {
     max-width: 9ch;
     font-size: clamp(28px, 8vw, 36px);
     line-height: 1.04;
-  }
-  /* On a phone the setting note is read below, in the life panel's place list. */
-  .ocean .setting-note,
-  .ocean .float-title [data-slot='separator'] {
-    display: none;
   }
   .title-row .brand {
     display: none;
@@ -1676,6 +1673,7 @@ html[data-theme='dark'] .sim-view::after {
     0 0 0 1px color-mix(in oklch, var(--border) 92%, transparent),
     0 2px 4px color-mix(in oklch, var(--foreground) 10%, transparent);
 }
+.sim .ocean .info-panel,
 .sim .ocean .float-title,
 .sim .ocean .filter-bar .filter-pill,
 .sim .ocean .float-actions,
@@ -1689,6 +1687,14 @@ html[data-theme='dark'] .sim-view::after {
   box-shadow: var(--float-shadow) !important;
   backdrop-filter: blur(12px) !important;
   border-radius: 18px;
+}
+.sim .ocean .info-panel > .float-title,
+.sim .ocean .info-panel > .life-panel {
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
 }
 .sim .ocean .action-hint,
 .sim .ocean .view-badge,
@@ -1793,10 +1799,11 @@ html[data-theme='dark'] .sim-view::after {
   letter-spacing: -0.04em;
 }
 .sim .ocean .life-panel {
-  border-radius: var(--radius);
+  border-radius: 0;
 }
-.sim .ocean .life-panel > [data-radix-scroll-area-viewport] {
-  border-radius: inherit;
+.sim .ocean .info-panel > [data-slot='separator'] {
+  width: calc(100% - 40px);
+  margin-inline: 20px;
 }
 .sim .ocean .panel-label,
 .sim .ocean .float-title .panel-label {
