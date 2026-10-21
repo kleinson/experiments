@@ -1738,9 +1738,8 @@ html[data-theme='dark'] .sim-view::after {
 /* Dashboard chrome: quiet, opaque surfaces keep the simulation readable without
    turning the surrounding UI into another visual layer. */
 .sim .ocean {
-  --float-shadow:
-    0 0 0 1px color-mix(in oklch, var(--border) 92%, transparent),
-    0 2px 4px color-mix(in oklch, var(--foreground) 10%, transparent);
+  --float-shadow: 0 2px 4px
+    color-mix(in oklch, var(--foreground) 10%, transparent);
 }
 .sim .ocean .info-panel,
 .sim .ocean .float-title,
@@ -1751,7 +1750,7 @@ html[data-theme='dark'] .sim-view::after {
 .sim .ocean .depth-card,
 .sim .ocean .part-card,
 .sim .ocean .take-apart {
-  border: 1px solid var(--border) !important;
+  border: 0 !important;
   background: color-mix(in srgb, var(--card) 95%, transparent) !important;
   box-shadow: var(--float-shadow) !important;
   backdrop-filter: blur(12px) !important;
