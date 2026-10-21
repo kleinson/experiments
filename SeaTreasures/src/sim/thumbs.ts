@@ -3,6 +3,7 @@ import {
   AmbientLight,
   Box3,
   DirectionalLight,
+  Group,
   HemisphereLight,
   Material,
   Matrix4,
@@ -20,6 +21,9 @@ import {
 } from 'three'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { frameAt, startOf } from './life.ts'
+import { phases } from './life.ts'
+import type { PhaseId } from './life.ts'
+import { buildDisplayCase } from './display.ts'
 import { buildScene } from './scene.ts'
 import type { Species } from './species.ts'
 
@@ -30,6 +34,9 @@ import type { Species } from './species.ts'
  * underside with the opening, and the living animal.
  */
 export type Thumbs = { shell: string; underside: string; animal: string }
+export type LifeThumbs = Record<PhaseId, string>
+
+const lifeCache = new Map<string, LifeThumbs>()
 
 const idle = (work: () => void) =>
   typeof window.requestIdleCallback === 'function'
@@ -110,7 +117,7 @@ export function drawThumbs(
   let renderer: WebGLRenderer
   try {
     renderer = new WebGLRenderer({
-      antialias: true,
+      antialias: false,
       alpha: true,
       preserveDrawingBuffer: true,
     })
@@ -239,6 +246,137 @@ export function drawThumbs(
     renderer.forceContextLoss()
   }
   idle(next)
+  return () => {
+    stopped = true
+    finish()
+  }
+}
+
+/**
+ * Makes one small studio picture for every chapter of a species' life. These
+ * are generated only for the selected species and cached, rather than adding
+ * eight renders to every shell in the menu.
+ */
+export function drawLifeThumbs(
+  species: Species,
+  ready: (thumbs: LifeThumbs) => void,
+) {
+  const cached = lifeCache.get(species.id)
+  if (cached) {
+    ready(cached)
+    return () => undefined
+  }
+
+  let stopped = false
+  let renderer: WebGLRenderer
+  try {
+    renderer = new WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true,
+    })
+  } catch {
+    return () => undefined
+  }
+  renderer.setPixelRatio(1)
+  renderer.setSize(144, 104)
+  renderer.outputColorSpace = SRGBColorSpace
+  renderer.toneMapping = ACESFilmicToneMapping
+  renderer.toneMappingExposure = 0.82
+  renderer.localClippingEnabled = true
+  renderer.setClearColor(0x000000, 0)
+
+  const scene = new Scene()
+  scene.add(new AmbientLight(0xffffff, 0.42))
+  scene.add(new HemisphereLight(0xffffff, 0xb8a58c, 0.72))
+  const key = new DirectionalLight(0xffffff, 1.9)
+  scene.add(key, key.target)
+  const fill = new DirectionalLight(0xffffff, 0.72)
+  scene.add(fill)
+  const camera = new OrthographicCamera(-1, 1, 1, -1, -5000, 5000)
+  const pictures = {} as LifeThumbs
+  const queue = [...phases]
+  const mark = species.deaths[0]?.mark ?? 'none'
+  let finished = false
+
+  const finish = () => {
+    if (finished) return
+    finished = true
+    key.dispose()
+    fill.dispose()
+    renderer.dispose()
+    renderer.forceContextLoss()
+  }
+
+  const draw = (phase: (typeof phases)[number]) => {
+    const frame = frameAt(startOf(phase.id) + phase.share * 0.55, species, mark)
+    const built = buildScene(species, frame, { cut: false, xray: false })
+    const presentation = new Group()
+    presentation.add(built.group)
+    const display = phase.id === 'found' ? buildDisplayCase(built.extent) : null
+    if (display) presentation.add(display.group)
+    scene.add(presentation)
+    presentation.updateMatrixWorld(true)
+    const subject =
+      phase.id === 'egg' || phase.id === 'found' ? presentation : built.specimen
+    const box = new Box3().setFromObject(subject)
+    const centre = box.getCenter(new Vector3())
+    const size = box.getSize(new Vector3())
+    const span = Math.max(size.x, size.y, size.z, 1)
+    presentation.position.y -= box.min.y
+    centre.y -= box.min.y
+    key.position.set(-span * 1.2, span * 3, span * 1.6)
+    key.target.position.copy(centre)
+    key.target.updateMatrixWorld()
+    fill.position.set(span * 2, span, -span)
+    camera.position
+      .copy(centre)
+      .addScaledVector(
+        phase.id === 'egg'
+          ? new Vector3(0.45, 1.45, 0.72).normalize()
+          : DIRECTIONS.animal,
+        span * 3,
+      )
+    camera.lookAt(centre)
+    camera.updateMatrixWorld()
+    presentation.updateMatrixWorld(true)
+    const outline = projectedOutline(subject, camera)
+    const cx = (outline.maxX + outline.minX) / 2
+    const cy = (outline.maxY + outline.minY) / 2
+    const half =
+      Math.max(
+        (outline.maxY - outline.minY) / 2,
+        ((outline.maxX - outline.minX) / 2) * (128 / 176),
+      ) * 1.18
+    camera.top = cy + half
+    camera.bottom = cy - half
+    camera.left = cx - half * (176 / 128)
+    camera.right = cx + half * (176 / 128)
+    camera.updateProjectionMatrix()
+    renderer.render(scene, camera)
+    pictures[phase.id] = renderer.domElement.toDataURL('image/png')
+    scene.remove(presentation)
+    display?.dispose()
+    built.dispose()
+  }
+
+  const next = () => {
+    if (stopped) return
+    const phase = queue.shift()
+    if (!phase) {
+      lifeCache.set(species.id, pictures)
+      ready(pictures)
+      finish()
+      return
+    }
+    try {
+      draw(phase)
+    } catch (error) {
+      console.warn(`The ${phase.label} picture could not be made.`, error)
+    }
+    window.setTimeout(next, 24)
+  }
+  window.setTimeout(next, 24)
   return () => {
     stopped = true
     finish()

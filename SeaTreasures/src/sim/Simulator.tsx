@@ -106,11 +106,11 @@ import {
   shellsPerBed,
 } from './filters.ts'
 import type { Mode } from './crawl.ts'
-import { drawThumbs } from './thumbs.ts'
+import { drawLifeThumbs, drawThumbs } from './thumbs.ts'
 import { localForm } from './forms.ts'
 import { formatDepth } from './depth.ts'
 import { matchedColours, reefLabels } from './places.ts'
-import type { Thumbs } from './thumbs.ts'
+import type { LifeThumbs, Thumbs } from './thumbs.ts'
 import type { PhaseId } from './life.ts'
 import { addToShelf, parseShelf, shelfKey } from './shelf.ts'
 import type { Found } from './shelf.ts'
@@ -534,6 +534,58 @@ function HowItMoves({
           Watch it at night
         </Button>
       )}
+    </section>
+  )
+}
+
+function LifecycleGallery({
+  species,
+  pictures,
+  current,
+  onChoose,
+}: {
+  species: Species
+  pictures: LifeThumbs | null
+  current: PhaseId
+  onChoose: (phase: PhaseId) => void
+}) {
+  return (
+    <section className="life-gallery" aria-labelledby="life-gallery-title">
+      <div className="life-gallery-head">
+        <p className="panel-label" id="life-gallery-title">
+          One whole life
+        </p>
+        <span>8 chapters</span>
+      </div>
+      <ol>
+        {phases.map((phase, index) => (
+          <li key={phase.id}>
+            <button
+              type="button"
+              aria-current={current === phase.id ? 'step' : undefined}
+              aria-label={`View ${phase.label} stage`}
+              onClick={() => onChoose(phase.id)}
+            >
+              <span className="life-picture" aria-hidden="true">
+                {pictures?.[phase.id] ? (
+                  <img src={pictures[phase.id]} alt="" />
+                ) : (
+                  <span className="life-picture-loading" />
+                )}
+              </span>
+              <span className="life-picture-label">
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                {phase.label}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ol>
+      <span className="sr-only" aria-live="polite">
+        {pictures
+          ? `Pictures ready for every stage of the ${species.commonName} life cycle.`
+          : `Drawing the ${species.commonName} life cycle pictures.`}
+      </span>
     </section>
   )
 }
@@ -1154,6 +1206,14 @@ export function Simulator() {
   const [bedChoice, setBedChoice] = useState<Bed | null>(null)
   const [depthChoice, setDepthChoice] = useState<number | null>(null)
   const [thumbs, setThumbs] = useState<Record<string, Thumbs>>({})
+  const [lifeThumbs, setLifeThumbs] = useState<Record<string, LifeThumbs>>({})
+  useEffect(
+    () =>
+      drawLifeThumbs(species, (pictures) =>
+        setLifeThumbs((all) => ({ ...all, [species.id]: pictures })),
+      ),
+    [species],
+  )
   // The menu's drawings are made the first time it opens, so they never slow the first view.
   const [menuOpened, setMenuOpened] = useState(false)
   useEffect(
@@ -1746,6 +1806,16 @@ export function Simulator() {
                 </div>
               </CardHeader>
               <CardContent className="grid gap-3 px-4">
+                <LifecycleGallery
+                  species={species}
+                  pictures={lifeThumbs[species.id] ?? null}
+                  current={frame.phase}
+                  onChoose={(id) => {
+                    const chapter = phases.find((item) => item.id === id)!
+                    setPlaying(false)
+                    setT(startOf(id) + chapter.share * 0.55)
+                  }}
+                />
                 <div className="setting-note" aria-live="polite">
                   <Fact claim="seabed-setting-illustrative">
                     <strong>{settingLabel(setting)}</strong>

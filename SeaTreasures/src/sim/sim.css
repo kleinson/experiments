@@ -638,6 +638,7 @@ html[data-theme='dark'] .sim-view::after {
 
 @media (prefers-reduced-motion: reduce) {
   .sim * {
+    animation: none !important;
     transition: none !important;
   }
 }
@@ -1211,6 +1212,106 @@ html[data-theme='dark'] .sim-view::after {
   font-size: 16px;
   color: var(--cp-text-muted);
 }
+.life-gallery {
+  display: grid;
+  gap: 10px;
+  padding-block: 2px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.life-gallery-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.life-gallery-head span {
+  color: var(--muted-foreground);
+  font-size: 11px;
+}
+.life-gallery ol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.life-gallery li {
+  min-width: 0;
+}
+.life-gallery button {
+  width: 100%;
+  min-height: 44px;
+  display: grid;
+  gap: 5px;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) + 2px);
+  color: var(--foreground);
+  text-align: left;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    transform 140ms ease;
+}
+.life-gallery button:hover {
+  border-color: var(--border);
+  background: var(--accent);
+}
+.life-gallery button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ring) 45%, transparent);
+  outline-offset: 2px;
+}
+.life-gallery button[aria-current='step'] {
+  border-color: var(--ring);
+  background: var(--accent);
+}
+.life-picture {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  place-items: center;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--muted) 82%, transparent);
+}
+.life-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 3px;
+}
+.life-picture-loading {
+  width: 42%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: var(--border);
+  animation: life-picture-pulse 1.2s ease-in-out infinite alternate;
+}
+.life-picture-label {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.life-picture-label > span {
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 500;
+}
+@keyframes life-picture-pulse {
+  to {
+    opacity: 0.35;
+    scale: 0.76;
+  }
+}
 .setting-note {
   display: grid;
   gap: 16px;
@@ -1320,13 +1421,26 @@ html[data-theme='dark'] .sim-view::after {
 }
 
 /* Short screens: keep the title panel compact so it clears the timeline. */
-@media (max-height: 860px) {
-  .setting-note .fact + .fact,
-  .setting-note .where-link {
-    display: none;
+@media (max-height: 960px) {
+  .ocean .setting-note {
+    display: none !important;
+  }
+  .ocean .float-title {
+    max-height: calc(100dvh - 244px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .float-title .sim-taxon .fact details {
+    display: none !important;
+  }
+}
+
+@media (max-height: 760px) {
+  .ocean .depth-card {
     display: none;
+  }
+  .ocean .float-title {
+    max-height: calc(100dvh - 272px);
   }
 }
 
@@ -1439,7 +1553,12 @@ html[data-theme='dark'] .sim-view::after {
     width: 100%;
   }
   .title-row {
-    padding-right: 172px;
+    padding-right: 252px;
+  }
+  .float-title .sim-title h1 {
+    max-width: 9ch;
+    font-size: clamp(28px, 8vw, 36px);
+    line-height: 1.04;
   }
   /* On a phone the setting note is read below, in the life panel's place list. */
   .ocean .setting-note,

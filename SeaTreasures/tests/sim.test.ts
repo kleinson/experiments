@@ -31,6 +31,7 @@ import {
   scaleBar,
 } from '../src/sim/calibration.ts'
 import { addToShelf, parseShelf, SHELF_LIMIT } from '../src/sim/shelf.ts'
+import { buildDisplayCase } from '../src/sim/display.ts'
 
 const coils = Object.entries(shapes).flatMap(([id, shape]) =>
   shape.kind === 'coil' ? [[id, shape.coil] as [string, Coil]] : [],
@@ -186,6 +187,23 @@ test('the timeline covers a whole life in order and ends in a hand', () => {
     frameAt(0.999, fake, 'none').wear >
       frameAt(startOf('beach'), fake, 'none').wear,
   )
+})
+
+test('the found display is a populated specimen drawer with a central showcase', () => {
+  const display = buildDisplayCase(100)
+  const specimens: string[] = []
+  let meshes = 0
+  let plinths = 0
+  display.group.traverse((object) => {
+    if (object.type === 'Mesh') meshes++
+    if (object.name.startsWith('collection-specimen-'))
+      specimens.push(object.name)
+    if (object.userData.displayPlinth) plinths++
+  })
+  assert.equal(specimens.length, 42)
+  assert.ok(meshes >= 250, `the collection has ${meshes} crafted pieces`)
+  assert.equal(plinths, 1)
+  display.dispose()
 })
 
 test('the clock only states sourced durations and says so when one is unknown', () => {
